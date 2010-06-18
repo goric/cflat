@@ -1,0 +1,8 @@
+class helloWorld
+{
+	void main() 
+	{
+		print("Hello"); 
+		printf(", {0}", "World"); 
+	}
+}

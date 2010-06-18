@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4EE5A38B-3D98-47CB-8746-B0D04130ED25}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AbstractSyntaxTree</RootNamespace>
+    <AssemblyName>AbstractSyntaxTree</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ASTAdd.cs" />
+    <Compile Include="ASTAnd.cs" />
+    <Compile Include="ASTAssign.cs" />
+    <Compile Include="ASTBase.cs" />
+    <Compile Include="ASTBinary.cs" />
+    <Compile Include="ASTBlock.cs" />
+    <Compile Include="ASTBoolean.cs" />
+    <Compile Include="ASTClassDefinition.cs" />
+    <Compile Include="ASTDeclaration.cs" />
+    <Compile Include="ASTDeclarationCtor.cs" />
+    <Compile Include="ASTDeclarationField.cs" />
+    <Compile Include="ASTDeclarationList.cs" />
+    <Compile Include="ASTDeclarationLocal.cs" />
+    <Compile Include="ASTDeclarationMethod.cs" />
+    <Compile Include="ASTDecrement.cs" />
+    <Compile Include="ASTDereferenceArray.cs" />
+    <Compile Include="ASTDereferenceField.cs" />
+    <Compile Include="ASTDivide.cs" />
+    <Compile Include="ASTEqual.cs" />
+    <Compile Include="ASTExponent.cs" />
+    <Compile Include="ASTExpression.cs" />
+    <Compile Include="ASTExpressionList.cs" />
+    <Compile Include="ASTFor.cs" />
+    <Compile Include="ASTForIn.cs" />
+    <Compile Include="ASTFormal.cs" />
+    <Compile Include="ASTFormalList.cs" />
+    <Compile Include="ASTGreater.cs" />
+    <Compile Include="ASTGreaterEqual.cs" />
+    <Compile Include="ASTIdentifier.cs" />
+    <Compile Include="ASTIfThen.cs" />
+    <Compile Include="ASTIfThenElse.cs" />
+    <Compile Include="ASTIncrement.cs" />
+    <Compile Include="ASTInstantiateArray.cs" />
+    <Compile Include="ASTInstantiateClass.cs" />
+    <Compile Include="ASTInteger.cs" />
+    <Compile Include="ASTInvoke.cs" />
+    <Compile Include="ASTModulo.cs" />
+    <Compile Include="ASTMultiply.cs" />
+    <Compile Include="ASTNegative.cs" />
+    <Compile Include="ASTNode.cs" />
+    <Compile Include="ASTNoop.cs" />
+    <Compile Include="ASTNot.cs" />
+    <Compile Include="ASTNotEqual.cs" />
+    <Compile Include="ASTOr.cs" />
+    <Compile Include="ASTReal.cs" />
+    <Compile Include="ASTReturn.cs" />
+    <Compile Include="ASTSelf.cs" />
+    <Compile Include="ASTSmaller.cs" />
+    <Compile Include="ASTSmallerEqual.cs" />
+    <Compile Include="ASTStatement.cs" />
+    <Compile Include="ASTStatementExpr.cs" />
+    <Compile Include="ASTStatementList.cs" />
+    <Compile Include="ASTString.cs" />
+    <Compile Include="ASTSubtract.cs" />
+    <Compile Include="ASTSubClassDefinition.cs" />
+    <Compile Include="ASTType.cs" />
+    <Compile Include="ASTTypeArray.cs" />
+    <Compile Include="ASTTypeBool.cs" />
+    <Compile Include="ASTTypeInt.cs" />
+    <Compile Include="ASTTypeName.cs" />
+    <Compile Include="ASTTypeReal.cs" />
+    <Compile Include="ASTTypeString.cs" />
+    <Compile Include="ASTTypeVoid.cs" />
+    <Compile Include="ASTWhile.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SourceLocation.cs" />
+    <Compile Include="Visitor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SemanticAnalysis\SemanticAnalysis.csproj">
+      <Project>{599A6891-14DF-425E-8D55-EFF9041D39C0}</Project>
+      <Name>SemanticAnalysis</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

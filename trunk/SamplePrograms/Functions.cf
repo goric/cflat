@@ -1,0 +1,21 @@
+class func
+{
+	void main()
+	{
+		print(factorial(5));
+	}
+
+	int factorial(int n)
+	{
+		int fact = 1;
+		int iterator = 1;
+
+		while(iterator <= n)
+		{
+			fact = fact * iterator;
+			iterator++;
+		}
+
+		return fact;
+	}
+}
