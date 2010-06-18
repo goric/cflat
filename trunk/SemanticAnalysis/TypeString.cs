@@ -5,16 +5,19 @@ using System.Text;
 
 namespace SemanticAnalysis
 {
-    public class TypeVoid : CFlatType
+    public class TypeString : CFlatType
     {
+        /// <summary>
+        /// Max string length - 65k?
+        /// </summary>
         public override int Size
         {
             get
             {
-                return 0;
+                return Int32.MaxValue;
             }
         }
 
-        public override string ToString() { return "void"; }
+        public override string ToString() { return "string"; }
     }
 }

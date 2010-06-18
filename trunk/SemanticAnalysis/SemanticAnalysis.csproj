@@ -43,12 +43,15 @@
     <Compile Include="ClassDescriptor.cs" />
     <Compile Include="CFlatType.cs" />
     <Compile Include="Descriptor.cs" />
+    <Compile Include="FirstPass.cs" />
     <Compile Include="MethodDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeBool.cs" />
     <Compile Include="TypeClass.cs" />
     <Compile Include="TypeFunction.cs" />
     <Compile Include="TypeInt.cs" />
+    <Compile Include="TypeReal.cs" />
+    <Compile Include="TypeString.cs" />
     <Compile Include="TypeVoid.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
