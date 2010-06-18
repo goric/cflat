@@ -1,0 +1,27 @@
+class fact
+{
+	int factorial(int n) 
+	{
+		return 0;
+	}
+}
+
+class derivedFact is fact 
+{
+	void main() 
+	{
+		int x = factorial(5);
+		int y = base.factorial(5);
+		int z = self.factorial(5);
+
+		printf("factorial: {0}, base: {1}, self: {2}", x, y, z);
+	}
+
+	int factorial(int n) 
+	{
+		if (n == 0)
+			return 1;
+		else
+			return n * factorial(n-1);
+	}
+}
