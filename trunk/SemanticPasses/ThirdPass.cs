@@ -5,13 +5,13 @@ using System.Text;
 
 namespace CFlat.SemanticPasses
 {
-    public class FirstPass
+    public class ThirdPass : SecondPass
     {
-        public bool Failed { get; protected set; }
 
-        public FirstPass()
+        public ThirdPass()
+            : base()
         {
-            Failed = false;
+
         }
     }
 }
