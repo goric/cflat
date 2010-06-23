@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AbstractSyntaxTree;
 
 namespace CFlat.SemanticPasses
 {
@@ -10,10 +11,12 @@ namespace CFlat.SemanticPasses
         private ActualBuilder _actuals;
         private FormalBuilder _formals;
 
-        public SecondPass()
-            : base()
+        public SecondPass(ASTNode treeNode)
+            : base(treeNode)
         {
 
         }
+
+        
     }
 }

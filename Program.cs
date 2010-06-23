@@ -37,6 +37,9 @@ namespace CFlat
 
             // call this to pretty print the AST
             Console.WriteLine(root.Print(0));
+
+            SemanticPasses.SemanticDriver.Analyze(root);
+            
         }
 
         private static void PrintUsage ()
