@@ -43,7 +43,6 @@
     <Compile Include="ClassDescriptor.cs" />
     <Compile Include="CFlatType.cs" />
     <Compile Include="Descriptor.cs" />
-    <Compile Include="FirstPass.cs" />
     <Compile Include="MethodDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeBool.cs" />

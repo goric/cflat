@@ -24,5 +24,7 @@ namespace SemanticAnalysis
         {
             return "CFlatType_Class<" + this.Type.ToString() + ">";
         }
+
+        
     }
 }
