@@ -22,5 +22,7 @@ namespace SemanticAnalysis
         {
             get { return true; }
         }
+
+        public string ClassName { get; set; }
     }
 }
