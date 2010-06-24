@@ -1,0 +1,24 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Collections;
+
+namespace SemanticAnalysis
+{
+    public class Scope
+    {
+        public Scope Parent { get; protected set; }
+
+        public string Name { get; protected set; }
+
+        public Dictionary<string, Descriptor> Descriptors { get; protected set; }
+
+        public Scope(string name, Scope parent)
+        {
+            Parent = parent;
+            Name = name;
+            Descriptors = new Dictionary<string, Descriptor>();
+        }
+    }
+}
