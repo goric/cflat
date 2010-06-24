@@ -24,7 +24,7 @@ namespace SemanticAnalysis
 
         public virtual int Size { get { return 0; } }
 
-        public virtual CFlatType BaseType { get { return this; } }
+        public virtual CFlatType BaseType { get { return this; } set; }
 
 
     }
