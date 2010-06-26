@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SamplePrograms", "SamplePro
 		SamplePrograms\Inheritance.cf = SamplePrograms\Inheritance.cf
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILCodeGen", "ILCodeGen\ILCodeGen.csproj", "{21837870-A376-4DF5-99E1-C2359C96143D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,16 @@ Global
 		{599A6891-14DF-425E-8D55-EFF9041D39C0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{599A6891-14DF-425E-8D55-EFF9041D39C0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{599A6891-14DF-425E-8D55-EFF9041D39C0}.Release|x86.ActiveCfg = Release|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{21837870-A376-4DF5-99E1-C2359C96143D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -65,6 +65,10 @@
       <Project>{4EE5A38B-3D98-47CB-8746-B0D04130ED25}</Project>
       <Name>AbstractSyntaxTree</Name>
     </ProjectReference>
+    <ProjectReference Include="ILCodeGen\ILCodeGen.csproj">
+      <Project>{21837870-A376-4DF5-99E1-C2359C96143D}</Project>
+      <Name>ILCodeGen</Name>
+    </ProjectReference>
     <ProjectReference Include="SemanticAnalysis\SemanticAnalysis.csproj">
       <Project>{599A6891-14DF-425E-8D55-EFF9041D39C0}</Project>
       <Name>SemanticAnalysis</Name>
