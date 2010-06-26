@@ -8,6 +8,8 @@ using System.Text;
 using LexicalAnalysis;
 using SyntaxAnalysis;
 using AbstractSyntaxTree;
+using ILCodeGen;
+
 
 namespace CFlat
 {
@@ -39,6 +41,10 @@ namespace CFlat
             Console.WriteLine(root.Print(0));
 
             SemanticPasses.SemanticDriver.Analyze(root);
+
+            ClassGenerator cg = new ClassGenerator();
+
+            cg.Generate(root);
             
         }
 
