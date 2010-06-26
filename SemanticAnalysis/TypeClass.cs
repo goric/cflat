@@ -24,5 +24,11 @@ namespace SemanticAnalysis
         }
 
         public string ClassName { get; set; }
+        public override CFlatType BaseType
+        {
+            get;
+            set;
+        }
+        
     }
 }
