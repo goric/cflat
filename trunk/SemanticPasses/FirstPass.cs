@@ -55,7 +55,7 @@ namespace CFlat.SemanticPasses
             ClassDescriptor prnt = _scopeMgr.GetType(n.Parent);
             //prnt should be null if it's not a type or isn't found.. check for error, then check the actual type
             if (prnt == null || !prnt.IsType) { Failed = true; Console.WriteLine("Could not find base type " + n.Parent + " for type " + n.Name); } 
-            cls.BaseType = prnt.Type;
+            //cls.BaseType = prnt.Type;
             if (cls.BaseType == null || !cls.IsClass) { Failed = true; Console.WriteLine("Could not find base type " + n.Parent + " for type " + n.Name); } 
             n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, prnt);        
         }
