@@ -8,7 +8,7 @@ namespace CFlat.SemanticPasses
 {
     public class ScopeManager
     {
-        public Scope CurrentScope { get; private set; }
+        public Scope CurrentScope { get; set; }
 
         public ScopeManager()
         {
