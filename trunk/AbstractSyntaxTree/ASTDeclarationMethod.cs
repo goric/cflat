@@ -9,6 +9,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTDeclarationMethod : ASTDeclaration
     {
+        public ASTModifierList Modifiers { get; set; }
         public ASTType ReturnType { get; set; }
         public String Name { get; set; }
         public ASTFormalList Formals { get; set; }
@@ -16,8 +17,9 @@ namespace AbstractSyntaxTree
         public Type Type { get; set; }
         public MethodDescriptor Descriptor { get; set; }
 
-        public ASTDeclarationMethod(ASTType returnType, String name, ASTFormalList formals, ASTStatementList body)
+        public ASTDeclarationMethod(ASTModifierList accessModifiers, ASTType returnType, String name, ASTFormalList formals, ASTStatementList body)
         {
+            Modifiers = accessModifiers;
             ReturnType = returnType;
             Name = name;
             Formals = formals;
@@ -26,9 +28,9 @@ namespace AbstractSyntaxTree
 
         public override String Print(int depth)
         {
-            return ReturnType.Print(depth) + " " + Name + "(" + Formals.Print(depth) + ")"
-                //	+ " : " + _tty.toString() 
-                    + "{" + NewLine(depth + 1) + Body.Print(depth + 1) + NewLine(depth) + "}";
+            return Modifiers.Print(depth) + " " + ReturnType.Print(depth) + " "
+                    + Name + "(" + Formals.Print(depth) + ")" + "{" + NewLine(depth + 1)
+                    + Body.Print(depth + 1) + NewLine(depth) + "}";
         }
 
         public override void Visit (Visitor v)

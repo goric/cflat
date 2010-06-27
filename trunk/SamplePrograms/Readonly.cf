@@ -1,0 +1,32 @@
+class holder
+{
+	public int x;
+}
+class foo
+{
+	void main()
+	{
+		holder h = new holder();
+		h.x = 10;
+
+		bar b = new bar();
+		b.change(holder, 5);
+		print(holder.x);
+
+		b.changeAgain(holder, 12);
+		print(holder.x);
+	}
+}
+class bar
+{
+	public void change(holder h, int n) 
+	{
+		h.x = n;
+	}
+
+	/* readonly can also be a method modifier.  That is the same as setting all parameters to readonly */
+	public void changeAgain(readonly holder h, int n)
+	{
+		h.x = n; /* semantic error, cannot modify a field on a readonly parameter */
+	}
+}

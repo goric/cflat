@@ -22,10 +22,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SemanticAnalysis", "Semanti
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SamplePrograms", "SamplePrograms", "{E7E1D822-17B3-4AF3-B41D-20E1ED331E03}"
 	ProjectSection(SolutionItems) = preProject
+		SamplePrograms\AccessModifiers.cf = SamplePrograms\AccessModifiers.cf
 		SamplePrograms\ForLoops.cf = SamplePrograms\ForLoops.cf
-		Functions.cf = Functions.cf
+		SamplePrograms\Functions.cf = SamplePrograms\Functions.cf
 		SamplePrograms\HelloWorld.cf = SamplePrograms\HelloWorld.cf
 		SamplePrograms\Inheritance.cf = SamplePrograms\Inheritance.cf
+		SamplePrograms\Necessary.cf = SamplePrograms\Necessary.cf
+		SamplePrograms\Readonly.cf = SamplePrograms\Readonly.cf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILCodeGen", "ILCodeGen\ILCodeGen.csproj", "{21837870-A376-4DF5-99E1-C2359C96143D}"

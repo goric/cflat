@@ -65,6 +65,11 @@ String		\"(\\.|[^"])*\"
 "return"			{ yylval.Token = new Token(Tokens.RETURN, yytext, yyline, yycol); return (int)Tokens.RETURN; }
 "true"		   		{ yylval.Token = new Token(Tokens.TRUE, yytext, yyline, yycol); return (int)Tokens.TRUE; }
 "false"		   		{ yylval.Token = new Token(Tokens.FALSE, yytext, yyline, yycol); return (int)Tokens.FALSE; }
+"private"			{ yylval.Token = new Token(Tokens.FALSE, yytext, yyline, yycol); return (int)Tokens.PRIVATE; }
+"public"			{ yylval.Token = new Token(Tokens.FALSE, yytext, yyline, yycol); return (int)Tokens.PUBLIC; }
+"necessary"			{ yylval.Token = new Token(Tokens.FALSE, yytext, yyline, yycol); return (int)Tokens.NECESSARY; }
+"readonly"			{ yylval.Token = new Token(Tokens.FALSE, yytext, yyline, yycol); return (int)Tokens.READONLY; }
+
 /*
 "-"{Integer}|"-"{Real}|"-"{Identifier}  { yyless(yyleng-1); yylval.Token = new Token(Tokens.UMINUS, yytext, yyline, yycol); return (int)Tokens.UMINUS;}
 */

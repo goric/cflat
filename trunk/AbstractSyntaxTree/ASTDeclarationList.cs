@@ -30,7 +30,7 @@ namespace AbstractSyntaxTree
             if (Tail.IsEmpty)
                 return Declaration.Print(depth);
             else
-                return Declaration.Print(depth) + ";" + NewLine(depth) + Tail.Print(depth);
+                return Declaration.Print(depth) + " " + NewLine(depth) + Tail.Print(depth);
         }
 
         public override void Visit (Visitor v)

@@ -17,7 +17,7 @@ namespace AbstractSyntaxTree
         
         public override String Print(int depth)
         {
-            return "return " + ReturnValue.Print(depth) + ";"; // + ":" + _tty.toString();
+            return "return " + ReturnValue.Print(depth);
         }
 
         public override void Visit (Visitor v)

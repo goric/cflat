@@ -1,0 +1,31 @@
+class access
+{
+	public void main()
+	{
+		/* this is fine */
+		fibonacci f = new fibonacci(10);
+		print(f.compute());
+
+		/* this is illegal, cannot set private member */
+		f.x = 10;
+		print(f.compute());
+	}
+}
+
+class fibonacci
+{
+	private int x;
+
+	public fibonacci(int n)
+	{
+		x = n;
+	}
+
+	public int compute()
+	{
+		if(x <= 1)
+			return 1;
+
+		return fib(x-1) + fib(x-2);
+	}
+}

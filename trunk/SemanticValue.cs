@@ -25,5 +25,6 @@ namespace CFlat
         public ASTExpressionList ExpressionList { get; set; }
         public ASTExpression Expression { get; set; }
         public ASTType Type { get; set; }
+        public ASTModifierList ModifierList { get; set; }
     }
 }

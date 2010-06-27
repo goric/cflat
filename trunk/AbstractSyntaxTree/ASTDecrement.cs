@@ -16,7 +16,7 @@ namespace AbstractSyntaxTree
 
         public override String Print (int depth)
         {
-            return Expression.Print(depth) + "--;";
+            return Expression.Print(depth) + "--";
         }
 
         public override void Visit (Visitor v)

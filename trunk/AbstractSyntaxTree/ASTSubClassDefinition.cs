@@ -25,9 +25,7 @@ namespace AbstractSyntaxTree
         public override String Print(int depth)
         {
             return "class " + Name + " is " + Parent + "{"
-                            + NewLine(depth + 1) + Decls.Print(depth + 1) + NewLine(depth) + "}"
-                //		                + " : " + _type.toString()
-                            ;
+                            + NewLine(depth + 1) + Decls.Print(depth + 1) + NewLine(depth) + "}";
         }
 
         public override void Visit (Visitor v)
