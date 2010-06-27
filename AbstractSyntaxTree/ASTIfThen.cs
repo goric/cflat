@@ -18,7 +18,7 @@ namespace AbstractSyntaxTree
         
         public override String Print(int depth)
         {
-            return "if " + Condition.Print(depth) + NewLine(depth) + "then " + NewLine(depth + 1) + Then.Print(depth + 1);
+            return "if (" + Condition.Print(depth) + ")" + NewLine(depth + 1) + Then.Print(depth + 1);
         }
 
         public override void Visit (Visitor v)

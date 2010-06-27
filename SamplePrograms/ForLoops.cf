@@ -2,7 +2,7 @@ class forLoop
 {
 	void main()
 	{
-		int x;
+		int x; /* we'll initialize locals to their default values */
 
 		for(int i = 0; i < 10; i++)
 			x++;

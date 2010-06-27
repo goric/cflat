@@ -28,7 +28,7 @@ namespace AbstractSyntaxTree
                 return "";
 
             if (Tail.IsEmpty)
-                return Statement.Print(depth);
+                return Statement.Print(depth) + ";";
             else
                 return Statement.Print(depth) + ";" + NewLine(depth) + Tail.Print(depth);
         }

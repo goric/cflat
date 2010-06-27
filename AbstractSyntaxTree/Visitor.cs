@@ -101,6 +101,8 @@ namespace AbstractSyntaxTree
             }
         }
 
+        public virtual void VisitModifierList (ASTModifierList n) { }
+
         #endregion
 
         #region Declarations

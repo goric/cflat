@@ -22,9 +22,7 @@ namespace AbstractSyntaxTree
         
         public override String Print(int depth)
         {
-            return "class " + Name + "{" + NewLine(depth + 1) + Declarations.Print(depth + 1) + NewLine(depth) + "}"
-                //			   + " : " + _type.toString()
-                   ;
+            return "class " + Name + "{" + NewLine(depth + 1) + Declarations.Print(depth + 1) + NewLine(depth) + "}";
         }
 
         public override void Visit (Visitor v)

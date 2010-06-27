@@ -11,7 +11,7 @@
 /* Terminals */
 %token<Token> SEMI RPAREN LBRACE RBRACE RBRACKET PBRACKET DOT DOTDOT COMMA IN BASE
 %token<Token> TINT TREAL TSTRING TBOOL TVOID WHILE FOR IF ELSE SELF CLASS EXTENDS NEW RETURN 
-%token<Token> TRUE FALSE
+%token<Token> TRUE FALSE READONLY NECESSARY PRIVATE PUBLIC
 %token<Token> LITERAL_INT LITERAL_REAL LITERAL_STRING IDENTIFIER
 
 /* Precedence rules */
@@ -32,6 +32,8 @@
 %type<ExpressionList> onePlusActuals actuals
 %type<Expression> expression lvalue literal
 %type<Type> type integralType
+%type<ModifierList> modifierList
+%type<Token> modifier formalModifier
 
 
 %%
@@ -56,13 +58,23 @@ declList		:					{ $$ = new ASTDeclarationList(); }
 				;
 	
 	
-decl			: type IDENTIFIER SEMI	{ $$ = new ASTDeclarationField($1, $2.Value); }
-				| type IDENTIFIER LPAREN formals RPAREN LBRACE statementList RBRACE 
-								{ $$ = new ASTDeclarationMethod($1, $2.Value, $4, $7); }
-				| IDENTIFIER LPAREN formals RPAREN LBRACE statementList RBRACE 
-								{ $$ = new ASTDeclarationCtor($1.Value, $3, $6); }
+decl			: modifierList type IDENTIFIER SEMI		{ $$ = new ASTDeclarationField($1, $2, $3.Value); }
+				| modifierList type IDENTIFIER LPAREN formals RPAREN LBRACE statementList RBRACE 
+								{ $$ = new ASTDeclarationMethod($1, $2, $3.Value, $5, $8); }
+				| modifierList IDENTIFIER LPAREN formals RPAREN LBRACE statementList RBRACE 
+								{ $$ = new ASTDeclarationCtor($1, $2.Value, $4, $7); }
 				;
 
+modifierList	:						{ $$ = new ASTModifierList(); }
+				| modifier modifierList { $$ = new ASTModifierList($1.Value, $2); }
+				;
+
+modifier		: PRIVATE		
+				| PUBLIC		
+				| NECESSARY		
+				| READONLY		
+				;
+				
 
 statementList	:							{ $$ = new ASTStatementList(); }
 				| statement statementList	{ $$ = new ASTStatementList($1, $2); }
@@ -95,9 +107,12 @@ formals			:					{ $$ = new ASTFormalList(); }
 onePlusFormals	: formal							{ $$ = new ASTFormalList($1, new ASTFormalList()); }
 				| formal COMMA onePlusFormals		{ $$ = new ASTFormalList($1, $3); }
 				;
-          
-
-formal			: type IDENTIFIER	{ $$ = new ASTFormal($1, $2.Value); }
+				
+formalModifier	: READONLY	
+				;
+				
+formal			: formalModifier type IDENTIFIER	{ $$ = new ASTFormal($1.Value, $2, $3.Value); }
+				| type IDENTIFIER					{ $$ = new ASTFormal($1, $2.Value); }
 				;          
 
 

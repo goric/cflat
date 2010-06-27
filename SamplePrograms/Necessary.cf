@@ -1,0 +1,22 @@
+class animal
+{
+	/* The necessary keyword denotes that any subclass *must* override this method.
+		This can be thought of as a proxy to an interface. */
+	necessary public void speak()
+	{
+		print("");
+	}
+}
+
+class cat is animal
+{
+	necessary public void speak()
+	{
+		print("meow");
+	}
+}
+
+class dog is animal
+{
+	/* semantic error - dog is a subclass of animal but does not implement speak() */
+}

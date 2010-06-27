@@ -22,7 +22,7 @@ namespace AbstractSyntaxTree
 
         public override string Print (int depth)
         {
-            return "for (" + TempVariable.Print(depth) + " in [" + Lower.Print(depth) + " .. " + Upper.Print(depth) + "]"
+            return "for (" + TempVariable.Print(depth) + " in [" + Lower.Print(depth) + " .. " + Upper.Print(depth) + "])"
                 + NewLine(depth + 1) + Body.Print(depth + 1);
         }
 
