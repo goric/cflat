@@ -45,6 +45,8 @@ namespace CFlat
             ClassGenerator cg = new ClassGenerator();
 
             cg.Generate(root);
+
+            cg.WriteAssembly();
             
         }
 
