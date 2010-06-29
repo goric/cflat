@@ -80,7 +80,8 @@ namespace ILCodeGen
 
         public void WriteAssembly()
         {
-            _asm.Save(_mod.Assembly.FullName);
+            //should really be a simpler way to get the simple assembly name...
+            _asm.Save(_mod.Assembly.FullName.Substring(0, _mod.Assembly.FullName.IndexOf(','));
         }
     }
 }
