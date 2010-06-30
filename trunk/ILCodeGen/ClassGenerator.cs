@@ -43,7 +43,7 @@ namespace ILCodeGen
             }
             
             //gen type            
-            _currentType = _mod.DefineType(n.Name, TypeAttributes.Class);
+            _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
             //gen/find main method - need to update for access modifiers
             MethodBuilder main = _currentType.DefineMethod("Main",
             MethodAttributes.Public | MethodAttributes.Static);
@@ -81,7 +81,7 @@ namespace ILCodeGen
         public void WriteAssembly()
         {
             //should really be a simpler way to get the simple assembly name...
-            _asm.Save(_mod.Assembly.FullName.Substring(0, _mod.Assembly.FullName.IndexOf(',')));
+            _asm.Save(_mod.Assembly.FullName.Substring(0, _mod.Assembly.FullName.IndexOf(',')) + ".exe");
         }
     }
 }
