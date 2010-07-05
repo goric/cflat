@@ -11,7 +11,7 @@ namespace AbstractSyntaxTree
     {
         public String Name { get; set; }
         public String Parent { get; set; }
-        public ASTDeclarationList Decls { get; set; }
+        public ASTDeclarationList Declarations { get; set; }
         public TypeClass Type { get; set; }
         public ClassDescriptor Descriptor { get; set; }
 
@@ -19,13 +19,13 @@ namespace AbstractSyntaxTree
         {
             Name = name;
             Parent = parent;
-            Decls = decls;
+            Declarations = decls;
         }
         
         public override String Print(int depth)
         {
             return "class " + Name + " is " + Parent + "{"
-                            + NewLine(depth + 1) + Decls.Print(depth + 1) + NewLine(depth) + "}";
+                            + NewLine(depth + 1) + Declarations.Print(depth + 1) + NewLine(depth) + "}";
         }
 
         public override void Visit (Visitor v)

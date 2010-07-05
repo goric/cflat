@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using SemanticAnalysis;
+
 namespace AbstractSyntaxTree
 {
     public class ASTNode
     {
+        public virtual CFlatType CFlatType { get; set; }
         protected String NewLine(int depth)
         {
             var s = new StringBuilder(Environment.NewLine);

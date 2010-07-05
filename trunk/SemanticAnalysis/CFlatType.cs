@@ -15,17 +15,12 @@ namespace SemanticAnalysis
         public virtual bool IsSupertype(TypeVoid checkType) { return false; }
         
         public virtual bool IsArray { get{ return false; } }
-
         public virtual bool IsInstance { get { return false; } }
-
         public virtual bool IsFunction { get { return false; } }
-
         public virtual bool IsClass { get { return false; } }
 
         public virtual int Size { get { return 0; } }
 
         public virtual CFlatType BaseType { get { return this; } set { /* do nothing */} }
-
-
     }
 }

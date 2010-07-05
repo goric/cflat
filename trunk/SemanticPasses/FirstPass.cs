@@ -7,11 +7,18 @@ using SemanticAnalysis;
 
 namespace CFlat.SemanticPasses
 {
+    /// <summary>
+    /// First semantic pass finds/validates all classes and saves their important information
+    /// in an instance of a ScopeManager.  The next passes will gather and analyze field/function
+    /// information and finally local information.
+    /// </summary>
     public class FirstPass : Visitor
     {
         public bool Failed { get; protected set; }
         private ASTNode _treeNode;
         protected ScopeManager _scopeMgr;
+        protected TypeClass _currentClass;
+        protected CFlatType _lastSeenType;
 
         public FirstPass(ASTNode treeNode)
         {
@@ -33,6 +40,17 @@ namespace CFlat.SemanticPasses
         {
             Failed = true;
         }
+
+        /// <summary>
+        /// Walk the subtree under the passed in node, by visiting the root of the subtree
+        /// which should visit its children and so on.  Returns the type of the tree root.
+        /// </summary>
+        public CFlatType CheckSubTree (ASTNode root)
+        {
+            _lastSeenType = null;
+            root.Visit(this);
+            return _lastSeenType;
+        }
         
         /// <summary>
         /// Visit a class node and add the descriptor to the current scope
@@ -40,8 +58,10 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitClassDefinition(ASTClassDefinition n)
         {
-            TypeClass cls = new TypeClass() { ClassName = n.Name };
-            n.ClassDesc = _scopeMgr.AddClass(cls.ClassName, cls, null);
+            TypeClass cls = new TypeClass(n.Name);
+            _currentClass = cls;
+            n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, null);
+            n.Type= cls;
         }
 
 
@@ -51,13 +71,16 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
-            TypeClass cls = new TypeClass() { ClassName = n.Name };
-            ClassDescriptor prnt = _scopeMgr.GetType(n.Parent);
+            ClassDescriptor prnt = (ClassDescriptor)_scopeMgr.GetType(n.Parent);
+            TypeClass cls = new TypeClass(n.Name, prnt);
+            _currentClass = cls;
+
             //prnt should be null if it's not a type or isn't found.. check for error, then check the actual type
             if (prnt == null || !prnt.IsType) { Failed = true; Console.WriteLine("Could not find base type " + n.Parent + " for type " + n.Name); } 
             //cls.BaseType = prnt.Type;
             if (cls.BaseType == null || !cls.IsClass) { Failed = true; Console.WriteLine("Could not find base type " + n.Parent + " for type " + n.Name); } 
-            n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, prnt);        
+            n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, prnt);
+            n.Type = cls;
         }
     }
 }
