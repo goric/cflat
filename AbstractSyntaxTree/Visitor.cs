@@ -7,12 +7,14 @@ namespace AbstractSyntaxTree
 {
     public abstract class Visitor
     {
+        public bool DebugMode { get; set; }
+
         public virtual void VisitNode(ASTNode n) { }
 
         #region Types
 
         public virtual void VisitType (ASTType n) { }
-        public virtual void VisitTypeArraySpec (ASTTypeArray n) { }
+        public virtual void VisitTypeArray (ASTTypeArray n) { }
         public virtual void VisitTypeBool (ASTTypeBool n) { }
         public virtual void VisitTypeString (ASTTypeString n) { }
         public virtual void VisitTypeInt (ASTTypeInt n) { }

@@ -9,7 +9,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTType : ASTNode
     {
-        protected CFlatType Type { get; set; }
+        public CFlatType Type { get; set; }
 
         public override void Visit (Visitor v)
         {

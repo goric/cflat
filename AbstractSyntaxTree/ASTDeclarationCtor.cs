@@ -13,7 +13,7 @@ namespace AbstractSyntaxTree
         public String Name { get; set; }
         public ASTFormalList Formals { get; set; }
         public ASTStatementList Body { get; set; }
-        public Type Type { get; set; }
+        public CFlatType Type { get; set; }
         public MethodDescriptor Descriptor { get; set; }
 
         public ASTDeclarationCtor (ASTModifierList accessModifiers, String name, ASTFormalList formals, ASTStatementList body)

@@ -21,7 +21,7 @@ namespace AbstractSyntaxTree
 
         public override void Visit (Visitor v)
         {
-            v.VisitTypeArraySpec(this);
+            v.VisitTypeArray(this);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace AbstractSyntaxTree
         public String Name { get; set; }
         public ASTDeclarationList Declarations { get; set; }
         public TypeClass Type { get; set; }
-        public ClassDescriptor ClassDesc { get; set; }
+        public ClassDescriptor Descriptor { get; set; }
 
         public ASTClassDefinition (String name, ASTDeclarationList decls)
         {

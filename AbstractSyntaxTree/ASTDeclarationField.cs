@@ -12,7 +12,7 @@ namespace AbstractSyntaxTree
         public ASTModifierList Modifiers { get; set; }
         public ASTType FieldType { get; set; }
         public String Name { get; set; }
-        public Type Type { get; set; }
+        public CFlatType Type { get; set; }
         public Descriptor Descriptor { get; set; }
 
         public ASTDeclarationField (ASTModifierList modifiers, ASTType type, String name)

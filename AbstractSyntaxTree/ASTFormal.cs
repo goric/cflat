@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using SemanticAnalysis;
+
 namespace AbstractSyntaxTree
 {
     public class ASTFormal : ASTNode
     {
         public string Modifier { get; set; }
         public ASTType Type { get; set; }
+        public CFlatType CFlatType { get; set; }
         public String Name { get; set; }
 
         public ASTFormal (ASTType type, String name)
