@@ -57,16 +57,6 @@ namespace ILCodeGen
             //gen type
             _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
             
-            //gen/find main method - need to update for access modifiers
-            //MethodBuilder main = _currentType.DefineMethod("Main",
-            //MethodAttributes.Public | MethodAttributes.Static);
-            //start CIL generation
-            //ILGenerator il = main.GetILGenerator();
-            //il.Emit(OpCodes.Ldstr, "Hi, CSCI6480");
-            //il.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
-            //    null, new Type[] { typeof(String) }, null));
-            //il.Emit(OpCodes.Ret);
-
             n.Declarations.Visit(this);
             
             _currentType.CreateType();
@@ -138,7 +128,20 @@ namespace ILCodeGen
             _tmpAttr = 0;
             
             n.Body.Visit(this);
+
+            //TEMPORARY - just so there's a method body
+            _gen.Emit(OpCodes.Ldstr, "Placeholder Text");
+            _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
+                null, new Type[] { typeof(String) }, null));
+
+            //bail
+            _gen.Emit(OpCodes.Ret);
         }
+
+        //public override void VisitReturn(ASTReturn n)
+        //{
+        //    _gen.Emit(OpCodes.Ret);
+        //}
 
         public override void VisitInteger(ASTInteger n)
         {
