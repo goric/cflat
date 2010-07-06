@@ -7,7 +7,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTBoolean : ASTExpression
     {
-        private bool Val;
+        public bool Val { get; protected set; }
 
         public ASTBoolean (bool value)
         {
