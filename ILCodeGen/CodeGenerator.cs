@@ -10,8 +10,8 @@ using System.Reflection;
 namespace ILCodeGen
 {
     /// <summary>
-    /// MES - just screwed this up, but don't want to lose what i have
-    /// checking in, though broken.   it does compile...
+    /// This class generates CIL by walking a syntax tree.  This assumes that semantic checking has already
+    /// been done.  Single Pass for now.
     /// </summary>
     public class CodeGenerator : Visitor
     {
@@ -53,7 +53,8 @@ namespace ILCodeGen
 
         public override void VisitClassDefinition(ASTClassDefinition n)
         {
-            //gen type            
+       
+            //gen type
             _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
             
             //gen/find main method - need to update for access modifiers
@@ -65,28 +66,68 @@ namespace ILCodeGen
             //il.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
             //    null, new Type[] { typeof(String) }, null));
             //il.Emit(OpCodes.Ret);
+
+            n.Declarations.Visit(this);
             
             _currentType.CreateType();
                                    
-            //_asm.SetEntryPoint(main);
-
+                      
         }
 
+        public override void VisitString(ASTString n)
+        {
+            //push string on stack
+            _gen.Emit(OpCodes.Ldstr, n.Value);
+        }
+
+        public override void VisitBoolean(ASTBoolean n)
+        {
+            //assume jump0?
+            if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
+        }
+
+        public override void VisitReal(ASTReal n)
+        {
+            //push real on stack
+            _gen.Emit(OpCodes.Ldc_R4, n.Value);
+        }
 
         public override void VisitModifierList(ASTModifierList n)
         {
             //bitwise OR what we have with the next modifier in the list
-            _tmpAttr = _tmpAttr | System.Reflection.MethodAttributes.Public;
+            //handled by this switch statement...
+            switch (n.Modifier)
+            {
+                case "public":
+                    _tmpAttr |= MethodAttributes.Public;
+                    break;
+                case "static":
+                    _tmpAttr |= MethodAttributes.Static;
+                    break;
+                case "private":
+                    _tmpAttr |= MethodAttributes.Private;
+                    break;
+                case "final":
+                    _tmpAttr |= MethodAttributes.Final;
+                    break;
+                case "abstract":
+                    _tmpAttr |= MethodAttributes.Abstract;
+                    break;
+                default:
+                    _tmpAttr |= MethodAttributes.Public | MethodAttributes.Static;
+                    break;
+            }
+            
         }
-
+        
         public override void VisitDeclMethod(ASTDeclarationMethod n)
         {
+            n.Modifiers.Visit(this);
 
             MethodBuilder meth = _currentType.DefineMethod(n.Name, _tmpAttr);
-
             //set il generator to this method
             _gen = meth.GetILGenerator();
-
+            
             //is this the entry point
             if (n.Name == MAIN_METHOD_NAME)
             {
@@ -95,6 +136,8 @@ namespace ILCodeGen
 
             //reset attrs
             _tmpAttr = 0;
+            
+            n.Body.Visit(this);
         }
 
         public override void VisitInteger(ASTInteger n)
@@ -105,18 +148,58 @@ namespace ILCodeGen
 
         public override void VisitAdd(ASTAdd n)
         {
-            //saw left alrady, should be on stack, push right on stack now?
+            SetupOperands(n);
             
             //pop 2 numbers, add, push result
             _gen.Emit(OpCodes.Add);
 
         }
 
+        public override void VisitSub(ASTSubtract n)
+        {
+            SetupOperands(n);
+
+            //pop 2, sub, push result
+            _gen.Emit(OpCodes.Sub);
+        }
+
+        public override void VisitMul(ASTMultiply n)
+        {
+            SetupOperands(n);
+
+            //pop, multiply, push result
+            _gen.Emit(OpCodes.Mul);
+        }
+
+        public override void VisitDiv(ASTDivide n)
+        {
+            SetupOperands(n);
+
+            //pop, divide, push result
+            _gen.Emit(OpCodes.Div);
+        }
+
+        public override void VisitStatementExpr(ASTStatementExpr n)
+        {
+            n.Expression.Visit(this);
+        }
+
         public void WriteAssembly()
         {
-            
             _asm.Save(_assemblyName + ".exe");
         }
+        
+        
+        private void SetupOperands(ASTBinary n)
+        {
+            //push L
+            n.Left.Visit(this);
+
+            //push R
+            n.Right.Visit(this);
+        }
+
+        
 
         
     }
