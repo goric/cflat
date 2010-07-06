@@ -42,7 +42,7 @@ namespace CFlat
 
             SemanticPasses.SemanticDriver.Analyze(root);
 
-            ClassGenerator cg = new ClassGenerator();
+            CodeGenerator cg = new CodeGenerator();
 
             cg.Generate(root);
 
