@@ -20,6 +20,8 @@ namespace ILCodeGen
         private AssemblyBuilder _asm;
         private ModuleBuilder _mod;
         private ILGenerator _gen;
+        private Type _lastWalkedType;
+        private Dictionary<string, int> _locals;
 
 
         private MethodAttributes _tmpAttr;
@@ -30,7 +32,7 @@ namespace ILCodeGen
             : base()
         {
             _assemblyName = assemblyName;
-            
+            _locals = new Dictionary<string, int>();
             Init();
         }
 
@@ -43,6 +45,7 @@ namespace ILCodeGen
             //Create Module
             string exeName = _assemblyName + ".exe";
             _mod = _asm.DefineDynamicModule(exeName, exeName);
+            
 
         }
 
@@ -62,24 +65,6 @@ namespace ILCodeGen
             _currentType.CreateType();
                                    
                       
-        }
-
-        public override void VisitString(ASTString n)
-        {
-            //push string on stack
-            _gen.Emit(OpCodes.Ldstr, n.Value);
-        }
-
-        public override void VisitBoolean(ASTBoolean n)
-        {
-            //assume jump0?
-            if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
-        }
-
-        public override void VisitReal(ASTReal n)
-        {
-            //push real on stack
-            _gen.Emit(OpCodes.Ldc_R4, n.Value);
         }
 
         public override void VisitModifierList(ASTModifierList n)
@@ -123,7 +108,7 @@ namespace ILCodeGen
             {
                 _asm.SetEntryPoint(meth);
             }
-
+            
             //reset attrs
             _tmpAttr = 0;
             
@@ -138,26 +123,64 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Ret);
         }
 
-        //public override void VisitReturn(ASTReturn n)
-        //{
-        //    _gen.Emit(OpCodes.Ret);
-        //}
+        public override void VisitDeclLocal(ASTDeclarationLocal n)
+        {
+            //Get type
+            n.Type.Visit(this);
 
+            LocalBuilder lb = _gen.DeclareLocal(_lastWalkedType);
+
+            if (_locals.ContainsKey(n.ID))
+                _locals[n.ID] = lb.LocalIndex;
+            else
+                _locals.Add(n.ID, lb.LocalIndex);        
+            
+            //store local here
+            _gen.Emit(OpCodes.Stloc, _locals[n.ID]);
+
+        }
+
+
+
+
+        public override void VisitTypeInt(ASTTypeInt n)
+        {
+            _lastWalkedType = typeof(System.Int32);
+        }
+
+        #region constants/primitives
         public override void VisitInteger(ASTInteger n)
         {
             //load integer
             _gen.Emit(OpCodes.Ldc_I4, n.Value);
         }
+        public override void VisitString(ASTString n)
+        {
+            //push string on stack
+            _gen.Emit(OpCodes.Ldstr, n.Value);
+        }
 
+        public override void VisitBoolean(ASTBoolean n)
+        {
+            //assume jump0?
+            if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
+        }
+
+        public override void VisitReal(ASTReal n)
+        {
+            //push real on stack
+            _gen.Emit(OpCodes.Ldc_R4, n.Value);
+        }
+        #endregion
+
+        #region Binary Operators
         public override void VisitAdd(ASTAdd n)
         {
             SetupOperands(n);
-            
+           
             //pop 2 numbers, add, push result
             _gen.Emit(OpCodes.Add);
-
         }
-
         public override void VisitSub(ASTSubtract n)
         {
             SetupOperands(n);
@@ -182,11 +205,51 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Div);
         }
 
+        public override void VisitAnd(ASTAnd n)
+        {
+            SetupOperands(n);
+
+            //what to do here?  Opcodes.And is bitwise, should have 2 bool at top of stack
+        }
+        public override void VisitOr(ASTOr n)
+        {
+            SetupOperands(n);
+        }
+
+        
+        #endregion
+
+
+        #region unary operators
+        public override void VisitNeg(ASTNegative n)
+        {
+           
+        }
+
+        public override void VisitNot(ASTNot n)
+        {
+            //evaluate expression
+            n.Expression.Visit(this);
+
+            //negate it
+            _gen.Emit(OpCodes.Not);
+        }
+
+        #endregion
+
+        public override void VisitAssign(ASTAssign n)
+        {
+            n.Expr.Visit(this);
+
+            n.LValue.Visit(this);
+
+        }
+        
         public override void VisitStatementExpr(ASTStatementExpr n)
         {
             n.Expression.Visit(this);
         }
-
+        
         public void WriteAssembly()
         {
             _asm.Save(_assemblyName + ".exe");
