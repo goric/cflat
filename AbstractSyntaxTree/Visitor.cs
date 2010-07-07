@@ -35,7 +35,7 @@ namespace AbstractSyntaxTree
         public virtual void VisitExpr (ASTExpression n) { }
         public virtual void VisitExprList (ASTExpressionList n)
         {
-            if (n.IsEmpty)
+            if (!n.IsEmpty)
             {
                 n.Expr.Visit(this);
                 n.Tail.Visit(this);
