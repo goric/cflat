@@ -188,6 +188,7 @@ namespace ILCodeGen
         }
         #endregion
         
+
         #region Binary Operators
         public override void VisitAdd(ASTAdd n)
         {
@@ -218,6 +219,14 @@ namespace ILCodeGen
 
             //pop, divide, push result
             _gen.Emit(OpCodes.Div);
+        }
+
+        public override void VisitMod(ASTModulo n)
+        {
+            SetupOperands(n);
+
+            //divide, push rem on stack
+            _gen.Emit(OpCodes.Rem);
         }
 
         public override void VisitAnd(ASTAnd n)
