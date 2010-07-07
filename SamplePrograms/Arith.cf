@@ -8,7 +8,7 @@ class arithmetic
 		Console.WriteLine(y);
 		x = y / 4;
 		Console.WriteLine(x);
-		int z = 1-2;
+		int z = 3*2-9;
 		Console.WriteLine(z);
 	}
 }
