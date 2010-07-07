@@ -114,11 +114,6 @@ namespace ILCodeGen
             
             n.Body.Visit(this);
 
-            //TEMPORARY - just so there's a method body
-            _gen.Emit(OpCodes.Ldstr, "Placeholder Text");
-            _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
-                null, new Type[] { typeof(String) }, null));
-
             //bail
             _gen.Emit(OpCodes.Ret);
         }
@@ -133,21 +128,33 @@ namespace ILCodeGen
             if (_locals.ContainsKey(n.ID))
                 _locals[n.ID] = lb.LocalIndex;
             else
-                _locals.Add(n.ID, lb.LocalIndex);        
-            
+                _locals.Add(n.ID, lb.LocalIndex);
+
+            n.InitialValue.Visit(this);
+
             //store local here
             _gen.Emit(OpCodes.Stloc, _locals[n.ID]);
 
         }
 
 
+        public override void VisitInvoke(ASTInvoke n)
+        {
+            //only console for now
+        //    _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
+        //        null, new Type[] { typeof(object) }, null));
+            //so... different types go on different stacks?
+            n.Actuals.Visit(this);
 
+            _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
+                null, new Type[] { typeof(int) }, null));
+        }
 
         public override void VisitTypeInt(ASTTypeInt n)
         {
             _lastWalkedType = typeof(System.Int32);
         }
-
+        
         #region constants/primitives
         public override void VisitInteger(ASTInteger n)
         {
@@ -173,6 +180,14 @@ namespace ILCodeGen
         }
         #endregion
 
+        #region deref
+        public override void VisitIdentifier(ASTIdentifier n)
+        {
+            if (_locals.ContainsKey(n.ID))
+                _gen.Emit(OpCodes.Ldloc, _locals[n.ID]);
+        }
+        #endregion
+        
         #region Binary Operators
         public override void VisitAdd(ASTAdd n)
         {
