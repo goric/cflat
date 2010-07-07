@@ -4,5 +4,11 @@ class arithmetic
 	{
 		int x = 1 + 1;
 		Console.WriteLine(x);
+		int y = 2 * 2;
+		Console.WriteLine(y);
+		x = y / 4;
+		Console.WriteLine(x);
+		int z = 1-2;
+		Console.WriteLine(z);
 	}
 }
