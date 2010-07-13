@@ -7,8 +7,8 @@ namespace AbstractSyntaxTree
 {
     public class ASTIfThen : ASTStatement
     {
-        protected ASTExpression Condition { get; set; }
-        protected ASTStatement Then { get; set; }
+        public ASTExpression Condition { get; set; }
+        public ASTStatement Then { get; set; }
 
         public ASTIfThen (ASTExpression condition, ASTStatement then)
         {
