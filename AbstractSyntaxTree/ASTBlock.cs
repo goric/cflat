@@ -7,7 +7,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTBlock : ASTStatement
     {
-        private ASTStatement Body { get; set; }
+        public ASTStatement Body { get; set; }
 
         public ASTBlock (ASTStatement body)
         {

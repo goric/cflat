@@ -21,6 +21,7 @@ namespace ILCodeGen
         private ModuleBuilder _mod;
         private ILGenerator _gen;
         private Type _lastWalkedType;
+        private string _lastWalkedIdentifier;
         private Dictionary<string, int> _locals;
 
 
@@ -169,6 +170,7 @@ namespace ILCodeGen
         public override void VisitIfThenElse(ASTIfThenElse n)
         {
             Label elseLabel = _gen.DefineLabel();
+            Label jumpOver = _gen.DefineLabel();
 
             //check condition
             n.Condition.Visit(this);
@@ -178,11 +180,14 @@ namespace ILCodeGen
 
             //walk if
             n.Then.Visit(this);
+            _gen.Emit(OpCodes.Br, jumpOver);
 
             //transfer control here, then walk else body
             _gen.MarkLabel(elseLabel);
             //walk else statments
             n.Else.Visit(this);
+
+            _gen.MarkLabel(jumpOver);
         }
 
         public override void VisitFor(ASTFor n)
@@ -240,9 +245,9 @@ namespace ILCodeGen
             //break label
             _gen.MarkLabel(exit);
         }
-        #endregion
 
         
+        #endregion        
 
         #region types
         public override void VisitTypeInt(ASTTypeInt n)
@@ -279,11 +284,15 @@ namespace ILCodeGen
         public override void VisitIdentifier(ASTIdentifier n)
         {
             if (_locals.ContainsKey(n.ID))
+            {
                 _gen.Emit(OpCodes.Ldloc, _locals[n.ID]);
+                _lastWalkedIdentifier = n.ID;
+            }
+            else //??
+                _lastWalkedIdentifier = "";
         }
         #endregion
         
-
         #region Binary Operators
         public override void VisitAdd(ASTAdd n)
         {
@@ -337,12 +346,16 @@ namespace ILCodeGen
 
         
         #endregion
-
-
+        
         #region unary operators
         public override void VisitNeg(ASTNegative n)
         {
-           
+            _gen.Emit(OpCodes.Ldc_I4_0);
+
+            n.Expression.Visit(this);
+
+            _gen.Emit(OpCodes.Sub);
+
         }
 
         public override void VisitNot(ASTNot n)
@@ -351,6 +364,99 @@ namespace ILCodeGen
             n.Expression.Visit(this);
 
             //negate it
+            _gen.Emit(OpCodes.Not);
+        }
+
+        public override void VisitIncrement(ASTIncrement n)
+        {
+            //get current value - should set the _lastWalked identifier
+            n.Expression.Visit(this);
+            
+            //put 1 on stack
+            _gen.Emit(OpCodes.Ldc_I4_1);
+
+            //add 1
+            _gen.Emit(OpCodes.Add);
+            
+            //store back in mem....
+            _gen.Emit(OpCodes.Stloc, _locals[_lastWalkedIdentifier]);
+            
+        }
+
+        public override void VisitDecrement(ASTDecrement n)
+        {
+            //get current value
+            n.Expression.Visit(this);
+
+            //put 1 on stack
+            _gen.Emit(OpCodes.Ldc_I4_1);
+
+            //sub 1
+            _gen.Emit(OpCodes.Sub);
+
+            //store back in mem....
+            _gen.Emit(OpCodes.Stloc, _locals[_lastWalkedIdentifier]);
+            
+        }
+        #endregion
+
+        #region relop
+        public override void VisitSmaller(ASTSmaller n)
+        {
+            //put results on stack
+            SetupOperands(n);
+
+            _gen.Emit(OpCodes.Clt);                        
+        }
+
+        public override void VisitGreater(ASTGreater n)
+        {
+            SetupOperands(n);
+
+            _gen.Emit(OpCodes.Cgt);
+        }
+
+        public override void VisitEqual(ASTEqual n)
+        {
+            SetupOperands(n);
+
+            _gen.Emit(OpCodes.Ceq);
+        }
+
+        public override void VisitSmallerEqual(ASTSmallerEqual n)
+        {
+            SetupOperands(n);
+            //check eq
+            _gen.Emit(OpCodes.Ceq);
+
+            SetupOperands(n);
+            //check lt
+            _gen.Emit(OpCodes.Clt);
+
+            //or them
+            _gen.Emit(OpCodes.Or);
+        }
+
+        public override void VisitGreaterEqual(ASTGreaterEqual n)
+        {
+            SetupOperands(n);
+            //check eq
+            _gen.Emit(OpCodes.Ceq);
+
+            SetupOperands(n);
+            //check gt
+            _gen.Emit(OpCodes.Cgt);
+
+            //or them
+            _gen.Emit(OpCodes.Or);
+        }
+
+        public override void VisitNotEqual(ASTNotEqual n)
+        {
+            SetupOperands(n);
+
+            //check eq and negate
+            _gen.Emit(OpCodes.Ceq);
             _gen.Emit(OpCodes.Not);
         }
 
@@ -368,13 +474,18 @@ namespace ILCodeGen
         {
             n.Expression.Visit(this);
         }
-        
+
+        public override void VisitBlock(ASTBlock n)
+        {
+            n.Body.Visit(this);
+        }
+
+ 
         public void WriteAssembly()
         {
             _asm.Save(_assemblyName + ".exe");
         }
-        
-        
+                
         private void SetupOperands(ASTBinary n)
         {
             //push L

@@ -7,7 +7,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTNegative : ASTExpression
     {
-        protected ASTExpression Expression { get; set; }
+        public ASTExpression Expression { get; set; }
         
         public ASTNegative (ASTExpression exp)
         {
