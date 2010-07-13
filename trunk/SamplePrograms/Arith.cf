@@ -10,5 +10,28 @@ class arithmetic
 		Console.WriteLine(x);
 		int z = 3*2-9;
 		Console.WriteLine(z);
+
+		int q = 2;
+		if(-q == -2)
+		{
+			Console.WriteLine(1);
+		}
+		else
+		{
+			Console.WriteLine(0);
+	    }
+
+		for(int i=0; i<10; i++)
+		{
+			Console.WriteLine(i%2);
+		}
+
+		int high = 10;
+
+		while(high > 0)
+		{
+			Console.WriteLine(high);
+			high--;
+		}
 	}
 }
