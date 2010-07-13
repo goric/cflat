@@ -185,6 +185,36 @@ namespace ILCodeGen
             n.Else.Visit(this);
         }
 
+        public override void VisitFor(ASTFor n)
+        {
+            //define labels
+            Label loop = _gen.DefineLabel();
+            Label exit = _gen.DefineLabel();
+
+            //evaluate initial expression
+            n.InitialExpr.Visit(this);
+
+            //loop label
+            _gen.MarkLabel(loop);
+
+            //check condition
+            n.Conditional.Visit(this);
+
+            //break on false
+            _gen.Emit(OpCodes.Brfalse, exit);
+
+            //emit body of loop
+            n.Body.Visit(this);
+
+            //evaluate looping expression
+            n.LoopExpr.Visit(this);
+
+            //unconditional loop branch
+            _gen.Emit(OpCodes.Br, loop);
+
+            //break label
+            _gen.MarkLabel(exit);
+        }
         #endregion
 
         
