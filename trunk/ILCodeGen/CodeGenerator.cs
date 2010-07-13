@@ -46,7 +46,6 @@ namespace ILCodeGen
             string exeName = _assemblyName + ".exe";
             _mod = _asm.DefineDynamicModule(exeName, exeName);
             
-
         }
 
         public void Generate(ASTNode n)
@@ -54,17 +53,16 @@ namespace ILCodeGen
             n.Visit(this);   
         }
 
+        #region Declare/Define
         public override void VisitClassDefinition(ASTClassDefinition n)
-        {
-       
+        {       
             //gen type
             _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
             
             n.Declarations.Visit(this);
             
             _currentType.CreateType();
-                                   
-                      
+                               
         }
 
         public override void VisitModifierList(ASTModifierList n)
@@ -136,8 +134,9 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Stloc, _locals[n.ID]);
 
         }
+        #endregion
 
-
+        #region control/invoke
         public override void VisitInvoke(ASTInvoke n)
         {
             //only console for now
@@ -150,11 +149,54 @@ namespace ILCodeGen
                 null, new Type[] { typeof(int) }, null));
         }
 
+        public override void VisitIfThen(ASTIfThen n)
+        {
+            Label skipLabel = _gen.DefineLabel();
+
+            //evaluate
+            n.Condition.Visit(this);
+
+            //skip on false
+            _gen.Emit(OpCodes.Brfalse, skipLabel);
+
+            //walk statements
+            n.Then.Visit(this);
+
+            //mark label
+            _gen.MarkLabel(skipLabel);
+        }
+
+        public override void VisitIfThenElse(ASTIfThenElse n)
+        {
+            Label elseLabel = _gen.DefineLabel();
+
+            //check condition
+            n.Condition.Visit(this);
+
+            //go to else on false
+            _gen.Emit(OpCodes.Brfalse, elseLabel);
+
+            //walk if
+            n.Then.Visit(this);
+
+            //transfer control here, then walk else body
+            _gen.MarkLabel(elseLabel);
+            //walk else statments
+            n.Else.Visit(this);
+        }
+
+        #endregion
+
+        
+
+        #region types
         public override void VisitTypeInt(ASTTypeInt n)
         {
+            //not sure this is the right way to do this, but it works now for simple examples
             _lastWalkedType = typeof(System.Int32);
         }
-        
+        #endregion
+
         #region constants/primitives
         public override void VisitInteger(ASTInteger n)
         {
@@ -166,13 +208,11 @@ namespace ILCodeGen
             //push string on stack
             _gen.Emit(OpCodes.Ldstr, n.Value);
         }
-
         public override void VisitBoolean(ASTBoolean n)
         {
-            //assume jump0?
+            //assume 1 == true?
             if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
         }
-
         public override void VisitReal(ASTReal n)
         {
             //push real on stack

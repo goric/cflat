@@ -7,7 +7,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTIfThenElse : ASTIfThen
     {
-        private ASTStatement Else;
+        public ASTStatement Else { get; set; }
 
         public ASTIfThenElse (ASTExpression condition, ASTStatement then, ASTStatement elseStatement)
             : base(condition, then)
