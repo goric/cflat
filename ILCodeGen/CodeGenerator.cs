@@ -215,6 +215,31 @@ namespace ILCodeGen
             //break label
             _gen.MarkLabel(exit);
         }
+
+        public override void VisitWhile(ASTWhile n)
+        {
+            //define labels
+            Label loop = _gen.DefineLabel();
+            Label exit = _gen.DefineLabel();
+
+            //loop label
+            _gen.MarkLabel(loop);
+
+            //check condition
+            n.Condition.Visit(this);
+
+            //break on false
+            _gen.Emit(OpCodes.Brfalse, exit);
+
+            //emit body of loop
+            n.Body.Visit(this);
+
+            //unconditional loop branch
+            _gen.Emit(OpCodes.Br, loop);
+
+            //break label
+            _gen.MarkLabel(exit);
+        }
         #endregion
 
         
