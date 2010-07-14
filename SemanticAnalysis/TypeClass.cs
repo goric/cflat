@@ -16,31 +16,36 @@ namespace SemanticAnalysis
         public ClassDescriptor Parent { get; set; }
         public Scope Scope { get; set; }
 
-        public Dictionary<String, CFlatType> _fields;
-        public Dictionary<String, CFlatType> _methods;
+        public Dictionary<String, CFlatType> Fields;
+        public Dictionary<String, CFlatType> Methods;
 
         public TypeClass(string name, ClassDescriptor parent = null)
         {
             ClassName = name;
             Parent = parent;
 
-            _fields = new Dictionary<string,CFlatType>();
-            _methods = new Dictionary<string,CFlatType>();
+            Fields = new Dictionary<string,CFlatType>();
+            Methods = new Dictionary<string,CFlatType>();
         }
 
         public void AddField (string name, CFlatType type)
         {
-            _fields.Add(name, type);
+            Fields.Add(name, type);
         }
 
         public void AddMethod (string name, CFlatType type)
         {
-            _methods.Add(name, type);
+            Methods.Add(name, type);
         }
 
         public override string ToString ()
         {
             return "class";
+        }
+
+        public override bool IsSupertype(CFlatType checkType)
+        {
+            throw new NotImplementedException("we need to actually implement these guys do typecheck method calls and stuff");
         }
     }
 }

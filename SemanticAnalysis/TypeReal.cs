@@ -19,6 +19,10 @@ namespace SemanticAnalysis
         }
 
         public override string ToString() { return "real"; }
-        
+
+        public override bool IsSupertype(TypeInt checkType)
+        {
+            return true;
+        }
     }
 }
