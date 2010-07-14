@@ -94,7 +94,7 @@ namespace CFlat.SemanticPasses
         public override void VisitDeclConstructor (ASTDeclarationCtor n)
         {
             var ctorScope = _scopeMgr.PushScope(string.Format("ctor {0}", n.Name));
-            var func = new TypeFunction() { ReturnType = new TypeVoid() };
+            var func = new TypeFunction() { ReturnType = new TypeVoid(), IsConstructor = true };
 
             CollectFormals(n.Formals, func);
 

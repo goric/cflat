@@ -20,5 +20,10 @@ namespace SemanticAnalysis
             Name = name;
             Descriptors = new Dictionary<string, Descriptor>();
         }
+
+        public bool HasSymbol(string identifier)
+        {
+            return Descriptors.ContainsKey(identifier);
+        }
     }
 }

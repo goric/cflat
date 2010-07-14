@@ -28,6 +28,11 @@ namespace CFlat.SemanticPasses
             return old;
         }
 
+        public void RestoreScope(Scope s)
+        {
+            CurrentScope = s;
+        }
+
         /// <summary>
         /// create a descriptor and add it to the current scope
         /// </summary>
@@ -87,5 +92,23 @@ namespace CFlat.SemanticPasses
             return null;
         }
 
+        public bool HasSymbol(string identifier)
+        {
+            Scope checkScope = CurrentScope;
+
+            while (checkScope != null)
+            {
+                if (checkScope.HasSymbol(identifier))
+                    return true;
+                checkScope = checkScope.Parent;
+            }
+
+            return false;
+        }
+
+        public bool HasSymbolShallow(string identifier)
+        {
+            return CurrentScope.HasSymbol(identifier);
+        }
     }
 }

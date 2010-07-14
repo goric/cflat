@@ -33,6 +33,16 @@ namespace CFlat.SemanticPasses
         }
 
         /// <summary>
+        /// Added a single function incase we want to do something besides writing to the console.
+        /// </summary>
+        public void ReportError(SourceLocation loc, string msg, params string[] formatArgs)
+        {
+            Failed = true;
+            string formattedMsg = String.Format(msg, formatArgs);
+            Console.WriteLine("{0}{1}  at {2}", formattedMsg, Environment.NewLine, (loc != null) ? loc.ToString() : "unknown");
+        }
+
+        /// <summary>
         /// Visiting an abstract node means something is wrong, so we'll error
         /// </summary>
         /// <param name="n"></param>
