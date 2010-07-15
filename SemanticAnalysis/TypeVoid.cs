@@ -15,6 +15,11 @@ namespace SemanticAnalysis
             }
         }
 
+        public override bool IsSupertype(TypeVoid checkType)
+        {
+            return true;
+        }
+
         public override string ToString() { return "void"; }
     }
 }
