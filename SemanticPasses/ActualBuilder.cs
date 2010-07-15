@@ -19,8 +19,11 @@ namespace CFlat.SemanticPasses
 
         public override void VisitExprList(ASTExpressionList n)
         {
-            Actuals.Add(n.Expr.CFlatType);
-            n.Tail.Visit(this);
+            if (!n.IsEmpty)
+            {
+                Actuals.Add(n.Expr.CFlatType);
+                n.Tail.Visit(this);
+            }
         }
     }
 }

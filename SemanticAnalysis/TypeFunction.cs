@@ -54,6 +54,8 @@ namespace SemanticAnalysis
             for (int i = 0; i < formals.Count; i++)
             {
                 //is the formal a super type of what we're passing in? If not, then this is not valid
+
+                /* NOTE: This is calling the wrong overload of IsSupertype, need to fix this */
                 if (!actuals[i].IsSupertype(formals[i]))
                     return false;
             }
@@ -64,7 +66,8 @@ namespace SemanticAnalysis
         public override bool IsSupertype(TypeFunction checkType)
         {
             throw new NotImplementedException();
-        }
+        }
+
 
         public override string ToString() { return ""; }
     }

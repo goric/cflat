@@ -12,7 +12,7 @@ namespace AbstractSyntaxTree
         public virtual void VisitNode(ASTNode n) { }
 
         #region Types
-
+        /* Variables */
         public virtual void VisitType (ASTType n) { }
         public virtual void VisitTypeArray (ASTTypeArray n) { }
         public virtual void VisitTypeBool (ASTTypeBool n) { }
@@ -21,7 +21,7 @@ namespace AbstractSyntaxTree
         public virtual void VisitTypeReal (ASTTypeReal n) { }
         public virtual void VisitTypeName (ASTTypeName n) { }
         public virtual void VisitTypeVoid (ASTTypeVoid n) { }
-
+        /* Literals */
         public virtual void VisitIdentifier (ASTIdentifier n) { }
         public virtual void VisitInteger (ASTInteger n) { }
         public virtual void VisitReal (ASTReal n) { }
