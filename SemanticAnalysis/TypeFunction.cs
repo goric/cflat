@@ -38,6 +38,29 @@ namespace SemanticAnalysis
             Locals.Add(name, type);
         }
 
+        /// <summary>
+        /// Checks if the given list of actuals satisfied the type constraints of this method.
+        /// Checks to make sure there are the same number of actuals and formals, and that each formal is a
+        /// supertype of the given actual
+        /// </summary>
+        /// <param name="actuals"></param>
+        /// <returns></returns>
+        public bool AcceptCall(List<CFlatType> actuals)
+        {
+            List<CFlatType> formals = Formals.Values.OfType<CFlatType>().ToList();
+            if (formals.Count != actuals.Count)
+                return false;
+
+            for (int i = 0; i < formals.Count; i++)
+            {
+                //is the formal a super type of what we're passing in? If not, then this is not valid
+                if (!actuals[i].IsSupertype(formals[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
         public override bool IsSupertype(TypeFunction checkType)
         {
             throw new NotImplementedException();

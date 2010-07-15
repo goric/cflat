@@ -20,11 +20,11 @@ namespace CFlat.SemanticPasses
         protected TypeClass _currentClass;
         protected CFlatType _lastSeenType;
 
-        public FirstPass(ASTNode treeNode)
+        public FirstPass(ASTNode treeNode, ScopeManager mgr)
         {
             Failed = false;
             _treeNode = treeNode;
-            _scopeMgr = new ScopeManager();
+            _scopeMgr = mgr;
         }
 
         public void Run() 

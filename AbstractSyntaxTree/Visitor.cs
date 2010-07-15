@@ -109,7 +109,7 @@ namespace AbstractSyntaxTree
 
         #region Declarations
 
-        public virtual void VisitDecl (ASTDeclaration n) { }
+        public virtual void VisitDecl(ASTDeclaration n) { } /* The ASTDeclaration class never gets instanciated, right?? */
         public virtual void VisitDeclLocal (ASTDeclarationLocal n) { }
         public virtual void VisitDeclField (ASTDeclarationField n) { }
         public virtual void VisitDeclMethod (ASTDeclarationMethod n) { }

@@ -11,16 +11,19 @@ namespace CFlat.SemanticPasses
         //returns object for now, not sure where i'm going with this...
         public static object Analyze(ASTNode treeNode)
         {
+            //all of the passes need to share a ScopeManager rather than creating a new one in the constructor
+            ScopeManager scopeMgr = new ScopeManager();
+
             //one at a time and bail on failure?
-            FirstPass semPass1 = new FirstPass(treeNode);
+            FirstPass semPass1 = new FirstPass(treeNode, scopeMgr);
             semPass1.Run();
             if(semPass1.Failed) return null;
 
-            SecondPass semPass2 = new SecondPass(treeNode);
+            SecondPass semPass2 = new SecondPass(treeNode, scopeMgr);
             semPass2.Run();
             if(semPass2.Failed) return null;
 
-            ThirdPass semPass3 = new ThirdPass(treeNode);
+            ThirdPass semPass3 = new ThirdPass(treeNode, scopeMgr);
             semPass3.Run();
             if(semPass3.Failed) return null;
 
