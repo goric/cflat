@@ -17,11 +17,31 @@ namespace CFlat.SemanticPasses
 
         }
 
-        #region Types
+        #region Types (Literals)
 
         public override void VisitIdentifier(ASTIdentifier n)
         {
+            throw new NotImplementedException("Unsure if ThirdPass needs to override this");
+        }
 
+        public override void VisitInteger(ASTInteger n)
+        {
+            n.CFlatType = _lastSeenType = new TypeInt();
+        }
+
+        public override void VisitReal(ASTReal n)
+        {
+            n.CFlatType = _lastSeenType = new TypeReal();
+        }
+
+        public override void VisitString(ASTString n)
+        {
+            n.CFlatType = _lastSeenType = new TypeString();
+        }
+
+        public override void VisitBoolean(ASTBoolean n)
+        {
+            n.CFlatType = _lastSeenType = new TypeBool();
         }
 
         #endregion
@@ -300,14 +320,31 @@ namespace CFlat.SemanticPasses
         /// <summary>
         /// Checks if the variable already exists. This does not allow for shadowing of variables, maybe as an
         /// enhancement, cause it wouldn't be that hard.
+        /// 
+        /// Cflat also allows for declarations and assignments on the same line, so this will process the InitialValue sub tree
+        /// as well.
         /// </summary>
         /// <param name="n"></param>
         public override void VisitDeclLocal(ASTDeclarationLocal n)
         {
             if (!_scopeMgr.HasSymbol(n.ID))
             {
-                CFlatType t = CheckSubTree(n.Type);
-                _scopeMgr.AddLocal(n.ID, t, _currentMethod);
+                CFlatType lhs = CheckSubTree(n.Type);
+                //Check if the code is also assigning a value on the same line
+                bool valid = true;
+
+                if (n.InitialValue != null)
+                {
+                    CFlatType rhs = CheckSubTree(n.InitialValue);
+                    if (!rhs.IsSupertype(lhs))
+                    {
+                        valid = false;
+                        ReportError(n.Location, "Invalid assignment, type mismatch. Expected: {0} Got: {1}", lhs.BaseType.ToString(), rhs.BaseType.ToString());
+                    }
+                }
+
+                if (valid)
+                    _scopeMgr.AddLocal(n.ID, lhs, _currentMethod);
             }
             else
                 ReportError(n.Location, "The identifier '{0}' already exists", n.ID);
