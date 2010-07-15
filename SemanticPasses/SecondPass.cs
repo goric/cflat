@@ -145,7 +145,14 @@ namespace CFlat.SemanticPasses
         public override void VisitTypeName (ASTTypeName n)
         {
             Descriptor aDesc = _scopeMgr.GetType(n.Name);
-            n.Type = _lastSeenType = new TypeName(aDesc.Type);
+            if (aDesc == null)
+            {
+                ReportError(null, "Identifier '{0}' has not been defined.", n.Name);
+            }
+            else
+            {
+                n.Type = _lastSeenType = new TypeName(aDesc.Type);
+            }
         }
 
         public override void VisitTypeVoid (ASTTypeVoid n)
