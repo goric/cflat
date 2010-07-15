@@ -11,8 +11,8 @@ namespace CFlat.SemanticPasses
     {
         private TypeFunction _currentMethod;
 
-        public ThirdPass(ASTNode treeNode)
-            : base(treeNode)
+        public ThirdPass(ASTNode treeNode, ScopeManager mgr)
+            : base(treeNode, mgr)
         {
 
         }
@@ -213,6 +213,57 @@ namespace CFlat.SemanticPasses
             VisitClassBody(n.Type as TypeClass, n.Declarations);
         }
 
+        public override void VisitInstantiateClass(ASTInstantiateClass n)
+        {
+            ClassDescriptor desc = _scopeMgr.GetType(n.ClassName) as ClassDescriptor;
+            if (desc != null)
+            {
+                TypeClass currentClass = (TypeClass)desc.Type;
+                //Check if the class we're working with has a constructor of the same name
+                TypeFunction ctor = currentClass.Methods[n.ClassName] as TypeFunction;
+                if (ctor != null)
+                {
+                    CheckSubTree(n.Actuals);
+                    //check the method signature of the constructor to make sure the correct arguments are passed in
+                    ActualBuilder builder = new ActualBuilder();
+                    n.Actuals.Visit(builder);
+
+                    if (ctor.AcceptCall(builder.Actuals))
+                    {
+                        //hooray, the code is valid (I think)
+                        MethodDescriptor ctorDescriptor = (MethodDescriptor)currentClass.Scope.Descriptors[n.ClassName];
+                        _lastSeenType = currentClass;
+                        n.ClassDescriptor = desc;
+                        n.Descriptor = ctorDescriptor;
+                    }
+                    else
+                        ReportError(null, "Invalid parameters for constructor '{0}'", n.ClassName);
+                }
+                else
+                    ReportError(null, "No constructor found for class '{0}'.", n.ClassName);
+            }
+            else
+                ReportError(null, "The name '{0}' is not a class.", n.ClassName);
+        }
+
+        /// <summary>
+        /// Checks to make sure that both the upper and lower bounds are integers
+        /// </summary>
+        /// <param name="n"></param>
+        public override void VisitInstantiateArray(ASTInstantiateArray n)
+        {
+            if ((CheckSubTree(n.Upper) is TypeInt) && (CheckSubTree(n.Lower) is TypeInt))
+            {
+                CFlatType elementType = CheckSubTree(n.Type);
+
+                TypeArray arrType = new TypeArray(elementType);
+                _lastSeenType = arrType;
+                n.CFlatType = arrType;
+            }
+            else
+                ReportError(null, "Bounds of an array must be integers.");
+        }
+
         #endregion
 
         #region Declarations
@@ -224,7 +275,7 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitDeclField(ASTDeclarationField n)
         {
-
+            //nothing to do here, already done in SecondPass
         }
 
         /// <summary>
@@ -246,33 +297,20 @@ namespace CFlat.SemanticPasses
             VisitMethodBody(string.Format("ctor body {0}", n.Name), n.Body, n.Type as TypeFunction);
         }
 
-        public override void VisitInstantiateClass(ASTInstantiateClass n)
+        /// <summary>
+        /// Checks if the variable already exists. This does not allow for shadowing of variables, maybe as an
+        /// enhancement, cause it wouldn't be that hard.
+        /// </summary>
+        /// <param name="n"></param>
+        public override void VisitDeclLocal(ASTDeclarationLocal n)
         {
-            ClassDescriptor desc = _scopeMgr.GetType(n.ClassName) as ClassDescriptor;
-            if (desc != null)
+            if (!_scopeMgr.HasSymbol(n.ID))
             {
-                TypeClass currentClass = (TypeClass)desc.Type;
-                //Check if the class we're working with has a constructor of the same name
-                TypeFunction ctor = currentClass.Methods[n.ClassName] as TypeFunction;
-                if (ctor != null)
-                {
-                    CheckSubTree(n.Actuals);
-                    //check the method signature of the constructor to make sure the correct arguments are passed in
-                    ActualBuilder builder = new ActualBuilder();
-                    n.Actuals.Visit(builder);
-
-                    // Not done yet!!
-
-                    MethodDescriptor ctorDescriptor = (MethodDescriptor)currentClass.Scope.Descriptors[n.ClassName];
-                    _lastSeenType = currentClass;
-                    n.ClassDescriptor = desc;
-                    n.Descriptor = ctorDescriptor;
-                }
-                else
-                    ReportError(null, "No constructor found for class '{0}'.", n.ClassName);
+                CFlatType t = CheckSubTree(n.Type);
+                _scopeMgr.AddLocal(n.ID, t, _currentMethod);
             }
             else
-                ReportError(null, "The name '{0}' is not a class.", n.ClassName);
+                ReportError(n.Location, "The identifier '{0}' already exists", n.ID);
         }
 
         #endregion

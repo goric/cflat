@@ -40,8 +40,7 @@ namespace CFlat
             // call this to pretty print the AST
             Console.WriteLine(root.Print(0));
 
-            //commented temporarily - was adding methods twice causing a crash
-       //     SemanticPasses.SemanticDriver.Analyze(root);
+            SemanticPasses.SemanticDriver.Analyze(root);
 
             //I fail at string processing but w/e
             CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""));

@@ -17,8 +17,8 @@ namespace CFlat.SemanticPasses
         private ActualBuilder _actuals;
         private FormalBuilder _formals;
 
-        public SecondPass(ASTNode treeNode)
-            : base(treeNode)
+        public SecondPass(ASTNode treeNode, ScopeManager mgr)
+            : base(treeNode, mgr)
         {
 
         }

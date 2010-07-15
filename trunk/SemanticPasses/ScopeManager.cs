@@ -70,6 +70,14 @@ namespace CFlat.SemanticPasses
             return descriptor;
         }
 
+        public LocalDescriptor AddLocal(string name, CFlatType type, TypeFunction containingMethod)
+        {
+            var descriptior = new LocalDescriptor(type, name);
+            CurrentScope.Descriptors.Add(name, descriptior);
+            containingMethod.AddLocal(name, type);
+            return descriptior;
+        }
+
         /// <summary>
         /// Need to go up scope hierarchy and see if this is indeed a type
         /// </summary>
