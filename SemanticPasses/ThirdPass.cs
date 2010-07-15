@@ -329,7 +329,8 @@ namespace CFlat.SemanticPasses
         {
             if (!_scopeMgr.HasSymbol(n.ID))
             {
-                CFlatType lhs = CheckSubTree(n.Type);
+                TypeName t = (TypeName)CheckSubTree(n.Type);
+                CFlatType lhs = t.Base;
                 //Check if the code is also assigning a value on the same line
                 bool valid = true;
 
