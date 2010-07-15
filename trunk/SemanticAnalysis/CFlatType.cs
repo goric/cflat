@@ -8,8 +8,12 @@ namespace SemanticAnalysis
     public abstract class CFlatType
     {
         public virtual bool IsSupertype(CFlatType checkType) { return false; }
-        public virtual bool IsSupertype(TypeInt checkType) { return false; }
+        public virtual bool IsSupertype(TypeArray checkType) { return false; }
         public virtual bool IsSupertype(TypeBool checkType) { return false; }
+        public virtual bool IsSupertype(TypeClass checkType) { return false; }
+        public virtual bool IsSupertype(TypeFunction checkType) { return false; }
+        public virtual bool IsSupertype(TypeInt checkType) { return false; }
+        public virtual bool IsSupertype(TypeName checkType) { return false; }
         public virtual bool IsSupertype(TypeReal checkType) { return false; }
         public virtual bool IsSupertype(TypeString checkType) { return false; }
         public virtual bool IsSupertype(TypeVoid checkType) { return false; }
@@ -22,5 +26,10 @@ namespace SemanticAnalysis
         public virtual int Size { get { return 0; } }
 
         public virtual CFlatType BaseType { get { return this; } set { /* do nothing */} }
+
+        public bool IsSubtypeOf(CFlatType t)
+        {
+            return t.IsSupertype(this);
+        }
     }
 }

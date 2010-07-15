@@ -38,6 +38,11 @@ namespace SemanticAnalysis
             Locals.Add(name, type);
         }
 
+        public override bool IsSupertype(TypeFunction checkType)
+        {
+            throw new NotImplementedException();
+        }
+
         public override string ToString() { return ""; }
     }
 }

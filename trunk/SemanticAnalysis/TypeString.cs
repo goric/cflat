@@ -18,6 +18,11 @@ namespace SemanticAnalysis
             }
         }
 
+        public override bool IsSupertype(TypeString checkType)
+        {
+            return true;
+        }
+
         public override string ToString() { return "string"; }
     }
 }

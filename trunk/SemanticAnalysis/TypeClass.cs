@@ -43,9 +43,19 @@ namespace SemanticAnalysis
             return "class";
         }
 
-        public override bool IsSupertype(CFlatType checkType)
+        /// <summary>
+        /// returns true if checkType is a super type of this
+        /// </summary>
+        /// <param name="checkType"></param>
+        /// <returns></returns>
+        public override bool IsSupertype(TypeClass checkType)
         {
-            throw new NotImplementedException("we need to actually implement these guys do typecheck method calls and stuff");
+            if (checkType.ClassName == this.ClassName)
+                return true;
+            else if (this.Parent != null)
+                return this.Parent.Type.IsSupertype(checkType);
+            else
+                return false;
         }
     }
 }
