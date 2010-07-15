@@ -11,11 +11,6 @@ namespace SemanticAnalysis
         {
             return true;
         }
-
-        public override bool IsSupertype(CFlatType checkType)
-        {
-            return base.IsSupertype(checkType);
-        }
        
         //I don't think a bool should be a super type, unless we're going C++ style 
         //public override bool IsSupertype(TypeBool t) { return true; }
