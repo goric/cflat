@@ -13,11 +13,16 @@ class TestClass
 	} 
 }
 
+class Other
+{
+	
+}
+
 class Program
 {
 	void main()
 	{
-		TestClass c = new TestClass(5);
+		Other c = new TestClass(5);
 		print(c.GetValue());
 	}
 }

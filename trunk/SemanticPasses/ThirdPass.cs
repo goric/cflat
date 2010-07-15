@@ -329,8 +329,10 @@ namespace CFlat.SemanticPasses
         {
             if (!_scopeMgr.HasSymbol(n.ID))
             {
-                TypeName t = (TypeName)CheckSubTree(n.Type);
-                CFlatType lhs = t.Base;
+                CFlatType lhs = CheckSubTree(n.Type);
+                if (lhs is TypeName)
+                    lhs = ((TypeName)lhs).Base; // get the real type that the name represents
+
                 //Check if the code is also assigning a value on the same line
                 bool valid = true;
 
@@ -340,7 +342,7 @@ namespace CFlat.SemanticPasses
                     if (!rhs.IsSupertype(lhs))
                     {
                         valid = false;
-                        ReportError(n.Location, "Invalid assignment, type mismatch. Expected: {0} Got: {1}", lhs.BaseType.ToString(), rhs.BaseType.ToString());
+                        ReportError(n.Location, "Invalid assignment, type mismatch. Expected: {0} Got: {1}", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
                     }
                 }
 
@@ -408,6 +410,12 @@ namespace CFlat.SemanticPasses
 
                 return true;
             }
+        }
+
+        private string TypeToFriendlyName(CFlatType t)
+        {
+            TypeClass c = t as TypeClass;
+            return (c == null) ? t.ToString() : c.ClassName;
         }
 
         #endregion
