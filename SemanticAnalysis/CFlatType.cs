@@ -7,7 +7,14 @@ namespace SemanticAnalysis
 {
     public abstract class CFlatType
     {
-        public virtual bool IsSupertype(CFlatType checkType) { return false; }
+        public virtual bool IsSupertype(CFlatType checkType)
+        {
+            /* This method should never return a value itself, but rather call the appropriate overload for the
+             *  concrete type of checkType */
+            dynamic realType = checkType;
+            return this.IsSupertype(realType);
+        }
+
         public virtual bool IsSupertype(TypeArray checkType) { return false; }
         public virtual bool IsSupertype(TypeBool checkType) { return false; }
         public virtual bool IsSupertype(TypeClass checkType) { return false; }
