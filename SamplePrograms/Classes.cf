@@ -1,0 +1,23 @@
+class TestClass
+{
+	int value;
+
+	TestClass(int x)
+	{
+		value = x;
+	}
+
+	int GetValue()
+	{
+		return value;
+	} 
+}
+
+class Program
+{
+	void main()
+	{
+		TestClass c = new TestClass(5);
+		print(c.GetValue());
+	}
+}
