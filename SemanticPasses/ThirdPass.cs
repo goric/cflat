@@ -253,19 +253,19 @@ namespace CFlat.SemanticPasses
             }
         }
 
-        public override void VisitWhile(ASTWhile n)
-        {
-
-        }
-
+        /// <summary>
+        /// Ok this is actually kinda confusing. How do we typecheck the first statement in a for loop?
+        /// Our grammar allows for a lot of different stuff, but I guess we just allow it??
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitFor(ASTFor n) 
         {
-
+            throw new NotImplementedException();
         }
 
         public override void VisitForIn(ASTForIn n)
         {
-
+            throw new NotImplementedException();
         }
 
         public override void VisitReturn(ASTReturn n) 
@@ -283,19 +283,59 @@ namespace CFlat.SemanticPasses
             }
         }
 
+        /// <summary>
+        /// Simple open a new scope for the block and visit the body. Pop the scope when we're done.
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitBlock(ASTBlock n) 
-        { 
+        {
+            _scopeMgr.PushScope("block");
+            CheckSubTree(n.Body);
+            _scopeMgr.PopScope();
+        }
 
+        /// <summary>
+        /// Pretty simple, just ensure that the condition is a boolean.
+        /// </summary>
+        /// <param name="n"></param>
+        public override void VisitWhile(ASTWhile n)
+        {
+            CFlatType condType = CheckSubTree(n.Condition);
+            if (condType is TypeBool)
+            {
+                CheckSubTree(n.Body);
+            }
+            else
+            {
+                ReportError(n.Location, "While loop condition must be a boolean. Got type '{0}'", TypeToFriendlyName(condType));
+            }
         }
 
         public override void VisitIfThen(ASTIfThen n)
-        { 
-
+        {
+            CFlatType condType = CheckSubTree(n.Condition);
+            if (condType is TypeBool)
+            {
+                CheckSubTree(n.Then);
+            }
+            else
+            {
+                ReportError(n.Location, "If statement must evaluate to boolean. Got type '{0}'", TypeToFriendlyName(condType));
+            }
         }
 
         public override void VisitIfThenElse(ASTIfThenElse n) 
-        { 
-
+        {
+            CFlatType condType = CheckSubTree(n.Condition);
+            if (condType is TypeBool)
+            {
+                CheckSubTree(n.Then);
+                CheckSubTree(n.Else);
+            }
+            else
+            {
+                ReportError(n.Location, "If statement must evaluate to boolean. Got type '{0}'", TypeToFriendlyName(condType));
+            }
         }
 
         public override void VisitStatementExpr(ASTStatementExpr n) 
