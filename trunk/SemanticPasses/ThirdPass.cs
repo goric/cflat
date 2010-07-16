@@ -7,7 +7,7 @@ using SemanticAnalysis;
 
 namespace CFlat.SemanticPasses
 {
-    public class ThirdPass : SecondPass
+    public class ThirdPass : SecondPass, ICompilerPass
     {
         private TypeFunction _currentMethod;
 
@@ -15,6 +15,11 @@ namespace CFlat.SemanticPasses
             : base(treeNode, mgr)
         {
 
+        }
+
+        new public string PassName()
+        {
+            return "Third Pass";
         }
 
         #region Types (Literals)

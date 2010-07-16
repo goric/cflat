@@ -8,27 +8,40 @@ namespace CFlat.SemanticPasses
 {
     public sealed class SemanticDriver
     {
-        //returns object for now, not sure where i'm going with this...
-        public static object Analyze(ASTNode treeNode)
+        /// <summary>
+        /// update WJS - changed this to return a bool and stop once the first error has been detected.
+        /// </summary>
+        /// <param name="treeNode"></param>
+        /// <returns></returns>
+        public static bool Analyze(ASTNode treeNode)
         {
             //all of the passes need to share a ScopeManager rather than creating a new one in the constructor
             ScopeManager scopeMgr = new ScopeManager();
 
-            //one at a time and bail on failure?
-            FirstPass semPass1 = new FirstPass(treeNode, scopeMgr);
-            semPass1.Run();
-            if(semPass1.Failed) return null;
+            //one at a time and bail on failure
+            return TryRunPass(new FirstPass(treeNode, scopeMgr)) &&
+                   TryRunPass(new SecondPass(treeNode, scopeMgr)) &&
+                   TryRunPass(new ThirdPass(treeNode, scopeMgr));
+        }
 
-            SecondPass semPass2 = new SecondPass(treeNode, scopeMgr);
-            semPass2.Run();
-            if(semPass2.Failed) return null;
+        private static bool TryRunPass(ICompilerPass pass)
+        {
+            try
+            {
+                pass.Run();
+            }
+            catch (SourceCodeErrorException ex)
+            {
+                HandleError(ex, pass.PassName());
+                return false;
+            }
 
-            ThirdPass semPass3 = new ThirdPass(treeNode, scopeMgr);
-            semPass3.Run();
-            if(semPass3.Failed) return null;
+            return true;
+        }
 
-            //null for now - change later
-            return null;
+        private static void HandleError(SourceCodeErrorException ex, string passName)
+        {
+            Console.WriteLine("Error in {0}: {1}", passName, ex.Message);
         }
     }
 }

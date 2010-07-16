@@ -12,7 +12,7 @@ namespace CFlat.SemanticPasses
     /// This includes classes, member variables, and methods within the classes.  Also creates
     /// variable scopes for each class and method for validation later.
     /// </summary>
-    public class SecondPass : FirstPass
+    public class SecondPass : FirstPass, ICompilerPass
     {
         private ActualBuilder _actuals;
         private FormalBuilder _formals;
@@ -21,6 +21,11 @@ namespace CFlat.SemanticPasses
             : base(treeNode, mgr)
         {
 
+        }
+
+        new public string PassName()
+        {
+            return "Second Pass";
         }
 
         /// <summary>

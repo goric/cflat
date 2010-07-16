@@ -40,15 +40,21 @@ namespace CFlat
             // call this to pretty print the AST
             Console.WriteLine(root.Print(0));
 
-            SemanticPasses.SemanticDriver.Analyze(root);
+            if (SemanticPasses.SemanticDriver.Analyze(root))
+            {
+                //I fail at string processing but w/e
+                
+                CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""));
 
-            //I fail at string processing but w/e
-            CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""));
+                cg.Generate(root);
 
-            cg.Generate(root);
+                cg.WriteAssembly();
+            }
 
-            cg.WriteAssembly();
-            
+#if DEBUG
+            Console.Write("Press any key to exit...");
+            Console.ReadKey();
+#endif
         }
 
         private static void PrintUsage ()
