@@ -10,8 +10,12 @@ namespace SemanticAnalysis
     /// </summary>
     public class LocalDescriptor : Descriptor
     {
-        private string Name { get; set; }
-        public LocalDescriptor (CFlatType type, string name) : base(type)
+        public string Name { get; set; }
+
+        public override bool IsType { get { return true; } }
+
+        public LocalDescriptor(CFlatType type, string name)
+            : base(type)
         {
             Name = name;
         }

@@ -52,6 +52,7 @@
     <Compile Include="SemanticPasses\ScopeManager.cs" />
     <Compile Include="SemanticPasses\SecondPass.cs" />
     <Compile Include="SemanticPasses\SemanticDriver.cs" />
+    <Compile Include="SemanticPasses\SourceCodeErrorException.cs" />
     <Compile Include="SemanticPasses\ThirdPass.cs" />
     <Compile Include="SemanticValue.cs" />
     <Compile Include="Scanner.cs" />

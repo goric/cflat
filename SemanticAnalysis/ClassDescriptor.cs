@@ -7,16 +7,13 @@ namespace SemanticAnalysis
 {
     public class ClassDescriptor : Descriptor
     {
-        public override bool IsType
+        public ClassDescriptor(CFlatType t, ClassDescriptor parentClass) 
+            : base(t)
         {
-            get
-            {
-                return true;
-            }
+            ParentClass = parentClass;
         }
 
-        
-        public ClassDescriptor(CFlatType t, ClassDescriptor parentClass) : base(t) { ParentClass = parentClass; }
+        public override bool IsType { get { return true; } }
 
         public ClassDescriptor ParentClass { get; private set; }
 
@@ -25,6 +22,6 @@ namespace SemanticAnalysis
             return "CFlatType_Class<" + this.Type.ToString() + ">";
         }
 
-        
+
     }
 }

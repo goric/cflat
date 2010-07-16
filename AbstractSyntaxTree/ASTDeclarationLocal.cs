@@ -9,7 +9,6 @@ namespace AbstractSyntaxTree
     {
         public ASTType Type { get; set; }
         public String ID { get; set; }
-        public SourceLocation Location { get; set; }
         public bool HasValue { get; set; }
         public ASTExpression InitialValue { get; set; }
 
