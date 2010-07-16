@@ -7,7 +7,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTReturn : ASTStatement
     {
-        protected ASTExpression ReturnValue { get; set; }
+        public ASTExpression ReturnValue { get; set; }
         public Type Type { get; set; }
 
         public ASTReturn (ASTExpression retVal)

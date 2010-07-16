@@ -11,10 +11,17 @@ namespace SemanticAnalysis
         {
             return true;
         }
-       
-        //I don't think a bool should be a super type, unless we're going C++ style 
-        //public override bool IsSupertype(TypeBool t) { return true; }
-        
+
+        public override bool IsSupertype(TypeReal checkType)
+        {
+            return true;
+        }
+
+        public override bool IsNumeric
+        {
+            get { return true; }
+        }
+
         public override string ToString() { return "int"; }
 
         public override int Size { get { return 4; } }

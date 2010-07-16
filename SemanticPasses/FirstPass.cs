@@ -59,7 +59,7 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitNode(ASTNode n)
         {
-            ReportError(n.Location, "VisitNode was called");
+            throw new InternalCompilerException("VisitNode was called");
         }
 
         /// <summary>
