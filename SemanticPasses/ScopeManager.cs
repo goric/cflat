@@ -16,12 +16,12 @@ namespace CFlat.SemanticPasses
             CurrentScope = new Scope("top", null);
         }
 
-        public Scope PushScope (string name)
+        public Scope PushScope(string name)
         {
             CurrentScope = new Scope(name, CurrentScope);
             return CurrentScope;
         }
-        public Scope PopScope ()
+        public Scope PopScope()
         {
             var old = CurrentScope;
             CurrentScope = CurrentScope.Parent;
@@ -47,7 +47,7 @@ namespace CFlat.SemanticPasses
             return cd;
         }
 
-        public MethodDescriptor AddMethod (string name, CFlatType type, TypeClass containingClass)
+        public MethodDescriptor AddMethod(string name, CFlatType type, TypeClass containingClass)
         {
             var md = new MethodDescriptor(type);
             CurrentScope.Descriptors.Add(name, md);
@@ -55,14 +55,14 @@ namespace CFlat.SemanticPasses
             return md;
         }
 
-        public FormalDescriptor AddFormal (string name, CFlatType type)
+        public FormalDescriptor AddFormal(string name, CFlatType type)
         {
             var descriptor = new FormalDescriptor(type, name);
             CurrentScope.Descriptors.Add(name, descriptor);
             return descriptor;
         }
 
-        public MemberDescriptor AddMember (string name, CFlatType type, TypeClass containingClass)
+        public MemberDescriptor AddMember(string name, CFlatType type, TypeClass containingClass)
         {
             var descriptor = new MemberDescriptor(type);
             CurrentScope.Descriptors.Add(name, descriptor);
@@ -78,6 +78,49 @@ namespace CFlat.SemanticPasses
             return descriptior;
         }
 
+        #region Scope Traversal
+
+        /// <summary>
+        /// Finds the given symbol in the current scope.
+        /// Specify a predicate to find only Types, Methods, etc.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="pred"></param>
+        /// <returns>A Descriptor if found, null otherwise.</returns>
+        public Descriptor Find(string name, Func<Descriptor, bool> pred)
+        {
+            return Find(name, pred, CurrentScope);
+        }
+
+        /// <summary>
+        /// Finds the given symbol in the given scope.
+        /// Specify a predicate to find only Types, Methods, etc.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="pred"></param>
+        /// <param name="s"></param>
+        /// <returns>A Descriptor if found, null otherwise.</returns>
+        public Descriptor Find(string name, Func<Descriptor, bool> pred, Scope s)
+        {
+            Scope checkScope = s;
+
+            while (checkScope != null)
+            {
+                if (checkScope.HasSymbol(name))
+                {
+                    Descriptor d = checkScope.Descriptors[name];
+                    if (pred(d))
+                        return d;
+                    //This thing could actually short circuit and return false here, cause we're looking in a dictionary.
+                    //I'll hold off on doing that cause maybe we want to change the data structure to a bucket to allow overloading and shadowing. The performance penalty for looping is pretty much nothing so w/e.
+                }
+
+                checkScope = checkScope.Parent;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Need to go up scope hierarchy and see if this is indeed a type
         /// </summary>
@@ -85,38 +128,20 @@ namespace CFlat.SemanticPasses
         /// <returns></returns>
         public Descriptor GetType(string name)
         {
-            Scope checkScope = CurrentScope;
-
-            while (checkScope != null)
-            {
-                //if this is a type and it's in this scope, return it
-                if (checkScope.Descriptors.ContainsKey(name) && checkScope.Descriptors[name].IsType)
-                {
-                    return (Descriptor)checkScope.Descriptors[name];
-                }
-                checkScope = checkScope.Parent;
-            }
-
-            return null;
+            //refactored the scope traversal out into 1 method.
+            return Find(name, d => d.IsType);
         }
 
         public bool HasSymbol(string identifier)
         {
-            Scope checkScope = CurrentScope;
-
-            while (checkScope != null)
-            {
-                if (checkScope.HasSymbol(identifier))
-                    return true;
-                checkScope = checkScope.Parent;
-            }
-
-            return false;
+            return Find(identifier, d => true) != null;
         }
 
         public bool HasSymbolShallow(string identifier)
         {
             return CurrentScope.HasSymbol(identifier);
         }
+
+        #endregion
     }
 }

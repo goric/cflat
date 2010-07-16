@@ -22,7 +22,7 @@ namespace CFlat.SemanticPasses
             return "Third Pass";
         }
 
-        #region Types (Literals)
+        #region Types
 
         /// <summary>
         /// Makes sure the identifier has been declared and that is is actually a type of some kind (i.e. local, member, not a method).
@@ -52,21 +52,37 @@ namespace CFlat.SemanticPasses
             }
         }
 
+        /// <summary>
+        /// Integer literal
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitInteger(ASTInteger n)
         {
             n.CFlatType = _lastSeenType = new TypeInt();
         }
 
+        /// <summary>
+        /// Real literal
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitReal(ASTReal n)
         {
             n.CFlatType = _lastSeenType = new TypeReal();
         }
 
+        /// <summary>
+        /// String literal
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitString(ASTString n)
         {
             n.CFlatType = _lastSeenType = new TypeString();
         }
 
+        /// <summary>
+        /// Boolean literal
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitBoolean(ASTBoolean n)
         {
             n.CFlatType = _lastSeenType = new TypeBool();
@@ -174,11 +190,6 @@ namespace CFlat.SemanticPasses
 
         #region Statements
 
-        public override void VisitStatement(ASTStatement n) 
-        { 
-            
-        }
-
         /// <summary>
         /// Makes sure the left hand side of the assignment is a supertype of the right hand side.
         /// </summary>
@@ -196,7 +207,7 @@ namespace CFlat.SemanticPasses
             }
             else
             {
-                ReportError(n.Location, "Type mismatch in assignment. Expected: {0} Got: {1}", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
+                ReportError(n.Location, "Invalid assignment, type mismatch. Expected: {0} Got: {1}", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
             }
         }
 
@@ -301,14 +312,67 @@ namespace CFlat.SemanticPasses
                 ReportError(n.Location, "The name '{0}' is not a class.", n.ClassName);
         }
 
+        /// <summary>
+        /// VisitInvoke and VisitDereferenceField are very similiar, so this should probably be refactored out
+        /// into a common method.
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitInvoke(ASTInvoke n)
-        { 
+        {
+            //Make sure the lvalue is a type and the method name exists
+            CFlatType lhs = CheckSubTree(n.Object);
+            if (lhs.IsClass)
+            {
+                TypeClass lvalue = (TypeClass)lhs;
+                //check if a method with the given name exists in the scope.
+                //This needs to check not only the class's shallow scope, but all the parents as well.
+                if (lvalue.Scope.HasSymbol(n.Method))
+                {
+                    MethodDescriptor methodDesc = lvalue.Scope.Descriptors[n.Method] as MethodDescriptor;
+                    if (methodDesc != null)
+                    {
+                        //check if the arguments match
+                        TypeFunction method = (TypeFunction)methodDesc.Type;
+                        //visit any actuals that need processing
+                        CheckSubTree(n.Actuals);
+                        //collect the actuals
+                        ActualBuilder builder = new ActualBuilder();
+                        n.Actuals.Visit(builder);
 
+                        if (method.AcceptCall(builder.Actuals))
+                        {
+                            n.Descriptor = methodDesc;
+                            n.CFlatType = methodDesc.Type;
+
+                            _lastSeenType = methodDesc.Type;
+                        }
+                        else
+                        {
+                            ReportError(n.Location, "Invalid parameters for method  '{0}.{1}'", TypeToFriendlyName(lvalue), n.Method);
+                        }
+                    }
+                    else
+                    {
+                        ReportError(n.Location, "'{0}' is not a method for type '{1}'", n.Method, TypeToFriendlyName(lvalue));
+                    }
+                }
+                else
+                {
+                    ReportError(n.Location, "Method '{0}' does not exist for type '{1}'", n.Method, TypeToFriendlyName(lvalue));
+                }
+            }
+            else
+            {
+                ReportError(n.Location, "Type '{0}' does not support methods.", TypeToFriendlyName(lhs));
+            }
         }
 
         public override void VisitSelf(ASTSelf n)
         {
+            n.CFlatType = _currentClass;
+            //set n.Descriptor if it hasn't already been set?
 
+            _lastSeenType = _currentClass;
         }
 
         public override void VisitBase(ASTBase n) 
@@ -323,7 +387,8 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitDerefField(ASTDereferenceField n)
         {
-            //we're processing lvalue.identifier
+            //we're processing something of the form: lvalue.identifier
+
             //Make sure the lvalue is a type and the identifier exists
             CFlatType lhs = CheckSubTree(n.Object);
             if (lhs.IsClass)
