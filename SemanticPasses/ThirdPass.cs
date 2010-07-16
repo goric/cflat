@@ -252,8 +252,8 @@ namespace CFlat.SemanticPasses
         }
 
         public override void VisitStatementExpr(ASTStatementExpr n) 
-        { 
-
+        {
+            CheckSubTree(n.Expression);
         }
 
         #endregion
@@ -342,9 +342,9 @@ namespace CFlat.SemanticPasses
                         if (method.AcceptCall(builder.Actuals))
                         {
                             n.Descriptor = methodDesc;
-                            n.CFlatType = methodDesc.Type;
+                            n.CFlatType = method.ReturnType;
 
-                            _lastSeenType = methodDesc.Type;
+                            _lastSeenType = method.ReturnType;
                         }
                         else
                         {
@@ -370,14 +370,22 @@ namespace CFlat.SemanticPasses
         public override void VisitSelf(ASTSelf n)
         {
             n.CFlatType = _currentClass;
-            //set n.Descriptor if it hasn't already been set?
+            n.Descriptor = _scopeMgr.Find(_currentClass.ClassName, d => d is ClassDescriptor);
 
             _lastSeenType = _currentClass;
         }
 
         public override void VisitBase(ASTBase n) 
         {
-
+            if (_currentClass.Parent != null)
+            {
+                n.CFlatType = _currentClass.Parent.Type;
+                _lastSeenType = _currentClass.Parent.Type;
+            }
+            else
+            {
+                ReportError(n.Location, "Class '{0}' does not have a parent class.", _currentClass.ClassName);
+            }
         }
 
         /// <summary>

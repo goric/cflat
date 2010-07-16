@@ -146,7 +146,7 @@ expression		: expression AND  expression		{ $$ = new ASTAnd($1, $3); }
 
 lvalue			: IDENTIFIER						{ $$ = new ASTIdentifier(Location(@$.StartLine, @1.StartColumn), $1.Value); }
 				| IDENTIFIER LPAREN actuals RPAREN 
-								{ $$ = new ASTInvoke(new ASTIdentifier(Location(@$.StartLine, @1.StartColumn), "self"), $1.Value, $3); }
+								{ $$ = new ASTInvoke(new ASTSelf(), $1.Value, $3); }
 				| lvalue LBRACKET expression RBRACKET			{ $$ = new ASTDereferenceArray($1, $3); }
 				| lvalue DOT IDENTIFIER LPAREN actuals RPAREN	{ $$ = new ASTInvoke($1, $3.Value, $5); }
 				| lvalue DOT IDENTIFIER							{ $$ = new ASTDereferenceField($1, $3.Value); }

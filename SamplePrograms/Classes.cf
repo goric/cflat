@@ -1,28 +1,7 @@
-class TestClass
-{
-	int value;
-
-	TestClass(int x)
-	{
-		value = x;
-	}
-
-	int GetValue()
-	{
-		return value;
-	} 
-}
-
-class Other
-{
-	
-}
-
 class Program
 {
 	void main()
 	{
-		TestClass c = new TestClass(5);
 		DoStuff();
 	}
 
