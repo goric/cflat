@@ -2,11 +2,13 @@ class Program
 {
 	void main()
 	{
-		DoStuff();
+		int x = 6;
+		x++;
+		x--;
 	}
 
-	void DoStuff()
+	int Stuff()
 	{
-		int x = 666;
+		return 1;
 	}
 }

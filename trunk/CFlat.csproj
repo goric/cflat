@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InternalCompilerException.cs" />
     <Compile Include="SemanticPasses\ActualBuilder.cs" />
     <Compile Include="SemanticPasses\FirstPass.cs" />
     <Compile Include="SemanticPasses\FormalBuilder.cs" />

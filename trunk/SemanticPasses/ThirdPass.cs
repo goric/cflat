@@ -166,24 +166,47 @@ namespace CFlat.SemanticPasses
 
         #region Unary Operations
 
+        /// <summary>
+        /// These guys are a little trickier, can't just increment anything that typechecks to a numeric type
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitIncrement(ASTIncrement n) 
-        { 
-            
+        {
+            //the second parameter, the string is simply for display purposes, I'm not doing any logic with it, cause that would be hella stupid
+            _lastSeenType = n.CFlatType = TypeCheckIncrementDecrement(n.Expression, "++", n.Location);
         }
 
         public override void VisitDecrement(ASTDecrement n)
-        { 
-
+        {
+            _lastSeenType = n.CFlatType = TypeCheckIncrementDecrement(n.Expression, "--", n.Location);
         }
 
         public override void VisitNeg(ASTNegative n)
         {
-
+            CFlatType t = CheckSubTree(n.Expression);
+            if (t.IsNumeric)
+            {
+                n.CFlatType = t;
+                _lastSeenType = t;
+            }
+            else
+            {
+                ReportError(n.Location, "Only numeric datatypes can be negated. Got type '{0}'", TypeToFriendlyName(t));
+            }
         }
 
         public override void VisitNot(ASTNot n)
         { 
-
+            CFlatType t = CheckSubTree(n.Expression);
+            if (t is TypeBool)
+            {
+                n.CFlatType = t;
+                _lastSeenType = t;
+            }
+            else
+            {
+                ReportError(n.Location, "Operand for not must be a boolean. Got type '{0}'", TypeToFriendlyName(t));
+            }
         }
 
         #endregion
@@ -228,12 +251,17 @@ namespace CFlat.SemanticPasses
 
         public override void VisitReturn(ASTReturn n) 
         {
-
-        }
-
-        public override void VisitNoop(ASTNoop n) 
-        {
-
+            CFlatType actual = CheckSubTree(n.ReturnValue);
+            CFlatType expected = _currentMethod.ReturnType;
+            if (actual.IsSupertype(expected))
+            {
+                n.CFlatType = expected;
+                _lastSeenType = expected;
+            }
+            else
+            {
+                ReportError(n.Location, "Type mismatch in return statement. Expected: {0} Got: {1}", TypeToFriendlyName(expected), TypeToFriendlyName(actual));
+            }
         }
 
         public override void VisitBlock(ASTBlock n) 
@@ -565,6 +593,34 @@ namespace CFlat.SemanticPasses
             //pop the body scope and the formal scope
             _scopeMgr.PopScope();
             _scopeMgr.PopScope();
+        }
+
+        private CFlatType TypeCheckIncrementDecrement(ASTExpression expr, string operatorName, SourceLocation loc)
+        {
+            //kinda cheating here. the grammar should not even allow this to happen.
+            if (expr is ASTIdentifier)
+            {
+                ASTIdentifier identifier = (ASTIdentifier)expr;
+                CFlatType t = CheckSubTree(identifier);
+                if (t.IsNumeric)
+                {
+                    return t;
+                }
+                else
+                {
+                    ReportError(loc, "The {0} operator requires an instance of a numeric datatype", operatorName);
+                }
+            }
+            else
+            {
+                ReportError(loc, "The {0} operator requires an instance of a numeric datatype", operatorName);
+            }
+            
+            /* note: the ReportError method will always throw, so this part of the code should not be reached,
+             * unless of course we change the ReportError method to not throw or try to implement some error recovery
+             * strategy...
+             * */
+            throw new InternalCompilerException("This part of the code should not be reachable.");
         }
 
         private string TypeToFriendlyName(CFlatType t)

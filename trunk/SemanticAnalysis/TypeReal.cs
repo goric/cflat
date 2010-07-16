@@ -12,17 +12,19 @@ namespace SemanticAnalysis
         /// </summary>
         public override int Size
         {
-            get
-            {
-                return 16;
-            }
+            get { return 16; }
+        }
+
+        public override bool IsNumeric
+        {
+            get { return true; }
         }
 
         public override string ToString() { return "real"; }
 
-        public override bool IsSupertype(TypeInt checkType)
+        public override bool IsSupertype(TypeReal checkType)
         {
             return true;
-        }
+        } 
     }
 }
