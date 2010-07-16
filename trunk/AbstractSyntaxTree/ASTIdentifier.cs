@@ -9,7 +9,6 @@ namespace AbstractSyntaxTree
 {
     public class ASTIdentifier : ASTExpression
     {
-        public SourceLocation Location { get; set; }
         public String ID { get; set; }
         public Descriptor Descriptor { get; set; }
         public Descriptor SelfDescriptor { get; set; }

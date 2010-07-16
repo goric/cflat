@@ -10,8 +10,12 @@ namespace SemanticAnalysis
     /// </summary>
     public class MemberDescriptor : Descriptor
     {
-        public MemberDescriptor(CFlatType type) : base(type)
+        public MemberDescriptor(CFlatType type)
+            : base(type)
         {
+
         }
+
+        public override bool IsType { get { return true; } }
     }
 }

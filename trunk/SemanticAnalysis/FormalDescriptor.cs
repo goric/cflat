@@ -13,10 +13,13 @@ namespace SemanticAnalysis
     {
         public string Name { get; private set; }
 
+        public override bool IsType { get { return true; } }
+
         /// <summary>
         /// Takes a type and the index in the function of a parameter
         /// </summary>
-        public FormalDescriptor (CFlatType type, string name) : base(type)
+        public FormalDescriptor(CFlatType type, string name)
+            : base(type)
         {
             Name = name;
         }

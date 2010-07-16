@@ -22,7 +22,8 @@ class Program
 {
 	void main()
 	{
-		Other c = new TestClass(5);
-		print(c.GetValue());
+		TestClass c = new TestClass(5);
+		int x;
+		x = b;
 	}
 }

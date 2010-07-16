@@ -19,9 +19,32 @@ namespace CFlat.SemanticPasses
 
         #region Types (Literals)
 
+        /// <summary>
+        /// Makes sure the identifier has been declared and that is is actually a type of some kind (i.e. local, member, not a method).
+        /// Sets the AST node's type and descriptor if it is declared.
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitIdentifier(ASTIdentifier n)
         {
-            throw new NotImplementedException("Unsure if ThirdPass needs to override this");
+            if (_scopeMgr.HasSymbol(n.ID))
+            {
+                Descriptor d = _scopeMgr.GetType(n.ID);
+                if (d != null)
+                {
+                    n.Descriptor = d;
+                    n.CFlatType = d.Type;
+
+                    _lastSeenType = d.Type;
+                }
+                else
+                {
+                    ReportError(n.Location, "Identifier '{0}' is not a type (it's probably a method or something).", n.ID);
+                }
+            }
+            else
+            {
+                ReportError(n.Location, "Identifier '{0}' has not been declared.", n.ID);
+            }
         }
 
         public override void VisitInteger(ASTInteger n)
@@ -42,15 +65,6 @@ namespace CFlat.SemanticPasses
         public override void VisitBoolean(ASTBoolean n)
         {
             n.CFlatType = _lastSeenType = new TypeBool();
-        }
-
-        #endregion
-
-        #region Expressions
-
-        public override void VisitExpr(ASTExpression n)
-        {
-
         }
 
         #endregion
@@ -160,9 +174,25 @@ namespace CFlat.SemanticPasses
             
         }
 
+        /// <summary>
+        /// Makes sure the left hand side of the assignment is a supertype of the right hand side.
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitAssign(ASTAssign n) 
         {
+            CFlatType lhs = CheckSubTree(n.LValue);
+            CFlatType rhs = CheckSubTree(n.Expr);
 
+            if (rhs.IsSupertype(lhs))
+            {
+                //I believe we don't really do anything when the source code is correct in this case.
+                n.CFlatType = new TypeVoid();
+                _lastSeenType = n.CFlatType;
+            }
+            else
+            {
+                ReportError(n.Location, "Type mismatch in assignment. Expected: {0} Got: {1}", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
+            }
         }
 
         public override void VisitWhile(ASTWhile n)
@@ -250,20 +280,81 @@ namespace CFlat.SemanticPasses
 
                     if (ctor.AcceptCall(builder.Actuals))
                     {
-                        //hooray, the code is valid (I think)
+                        //hooray, the code is valid
                         MethodDescriptor ctorDescriptor = (MethodDescriptor)currentClass.Scope.Descriptors[n.ClassName];
                         _lastSeenType = currentClass;
                         n.ClassDescriptor = desc;
                         n.Descriptor = ctorDescriptor;
                     }
                     else
-                        ReportError(null, "Invalid parameters for constructor '{0}'", n.ClassName);
+                        ReportError(n.Location, "Invalid parameters for constructor '{0}'", n.ClassName);
                 }
                 else
-                    ReportError(null, "No constructor found for class '{0}'.", n.ClassName);
+                    ReportError(n.Location, "No constructor found for class '{0}'.", n.ClassName);
             }
             else
-                ReportError(null, "The name '{0}' is not a class.", n.ClassName);
+                ReportError(n.Location, "The name '{0}' is not a class.", n.ClassName);
+        }
+
+        public override void VisitInvoke(ASTInvoke n)
+        { 
+
+        }
+
+        public override void VisitSelf(ASTSelf n)
+        {
+
+        }
+
+        public override void VisitBase(ASTBase n) 
+        {
+
+        }
+
+        /// <summary>
+        /// For now, this will only allow Classes to have fields and methods.
+        /// So primitives like int, real, bool won't have any.
+        /// </summary>
+        /// <param name="n"></param>
+        public override void VisitDerefField(ASTDereferenceField n)
+        {
+            //we're processing lvalue.identifier
+            //Make sure the lvalue is a type and the identifier exists
+            CFlatType lhs = CheckSubTree(n.Object);
+            if (lhs.IsClass)
+            {
+                TypeClass lvalue = (TypeClass)lhs;
+                //check if a field exists.
+                if (lvalue.Scope.HasSymbol(n.Field))
+                {
+                    MemberDescriptor fieldDesc = lvalue.Scope.Descriptors[n.Field] as MemberDescriptor;
+                    if (fieldDesc != null)
+                    {
+                        //hooray, code is valid
+                        n.Descriptor = fieldDesc;
+                        n.CFlatType = fieldDesc.Type;
+
+                        _lastSeenType = fieldDesc.Type;
+                    }
+                    else
+                    {
+                        ReportError(n.Location, "'{0}' is not a field for type '{1}'", n.Field, TypeToFriendlyName(lvalue));
+                    }
+                }
+                else
+                {
+                    ReportError(n.Location, "Field '{0}' does not exist for type '{1}'", n.Field, TypeToFriendlyName(lvalue)); 
+                }
+            }
+            else
+            {
+                ReportError(n.Location, "Type '{0}' does not support fields.", TypeToFriendlyName(lhs));
+            }
+        }
+
+        public override void VisitDerefArray(ASTDereferenceArray n)
+        {
+
         }
 
         /// <summary>
@@ -281,7 +372,7 @@ namespace CFlat.SemanticPasses
                 n.CFlatType = arrType;
             }
             else
-                ReportError(null, "Bounds of an array must be integers.");
+                ReportError(n.Location, "Bounds of an array must be integers.");
         }
 
         #endregion
@@ -365,6 +456,8 @@ namespace CFlat.SemanticPasses
         /// </summary>
         private void VisitClassBody(TypeClass currentClass, ASTDeclarationList declarations)
         {
+            _currentClass = currentClass;
+            
             _scopeMgr.RestoreScope(currentClass.Scope);
 
             CheckSubTree(declarations);
@@ -394,22 +487,6 @@ namespace CFlat.SemanticPasses
             //pop the body scope and the formal scope
             _scopeMgr.PopScope();
             _scopeMgr.PopScope();
-        }
-
-        private bool CheckMethodSignature(TypeFunction fn, List<CFlatType> actuals)
-        {
-            List<CFlatType> formals = fn.Formals.Values.OfType<CFlatType>().ToList<CFlatType>();
-            if (formals.Count != actuals.Count)
-                return false;
-            else
-            {
-                for (int i = 0; i < formals.Count; i++)
-                {
-                   //need to check if the formal is a supertype of the actual
-                }
-
-                return true;
-            }
         }
 
         private string TypeToFriendlyName(CFlatType t)

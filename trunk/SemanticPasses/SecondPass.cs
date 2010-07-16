@@ -147,7 +147,7 @@ namespace CFlat.SemanticPasses
             Descriptor aDesc = _scopeMgr.GetType(n.Name);
             if (aDesc == null)
             {
-                ReportError(null, "Identifier '{0}' has not been defined.", n.Name);
+                ReportError(n.Location, "Identifier '{0}' has not been defined.", n.Name);
             }
             else
             {

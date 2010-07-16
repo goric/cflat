@@ -9,6 +9,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTNode
     {
+        public SourceLocation Location { get; set; }
         public virtual CFlatType CFlatType { get; set; }
         protected String NewLine(int depth)
         {
