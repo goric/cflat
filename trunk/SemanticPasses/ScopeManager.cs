@@ -134,7 +134,12 @@ namespace CFlat.SemanticPasses
 
         public bool HasSymbol(string identifier)
         {
-            return Find(identifier, d => true) != null;
+            return HasSymbol(identifier, CurrentScope);
+        }
+
+        public bool HasSymbol(string identifier, Scope s)
+        {
+            return Find(identifier, d => true,  s) != null;
         }
 
         public bool HasSymbolShallow(string identifier)

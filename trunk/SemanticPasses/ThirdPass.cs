@@ -326,9 +326,9 @@ namespace CFlat.SemanticPasses
                 TypeClass lvalue = (TypeClass)lhs;
                 //check if a method with the given name exists in the scope.
                 //This needs to check not only the class's shallow scope, but all the parents as well.
-                if (lvalue.Scope.HasSymbol(n.Method))
+                if (_scopeMgr.HasSymbol(n.Method, lvalue.Scope))
                 {
-                    MethodDescriptor methodDesc = lvalue.Scope.Descriptors[n.Method] as MethodDescriptor;
+                    MethodDescriptor methodDesc = _scopeMgr.Find(n.Method, d => d.IsMethod, lvalue.Scope) as MethodDescriptor;
                     if (methodDesc != null)
                     {
                         //check if the arguments match
@@ -348,7 +348,7 @@ namespace CFlat.SemanticPasses
                         }
                         else
                         {
-                            ReportError(n.Location, "Invalid parameters for method  '{0}.{1}'", TypeToFriendlyName(lvalue), n.Method);
+                            ReportError(n.Location, "Invalid parameters for method '{0}.{1}'", TypeToFriendlyName(lvalue), n.Method);
                         }
                     }
                     else
