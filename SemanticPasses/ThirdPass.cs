@@ -93,73 +93,92 @@ namespace CFlat.SemanticPasses
         #region Binary Operators
 
         public override void VisitGreater(ASTGreater n)
-        { 
-
+        {
+            TypeCheckNumericBinary(n, "Operands for > must both be numeric.", new TypeBool());
         }
 
         public override void VisitGreaterEqual(ASTGreaterEqual n)
-        { 
-
+        {
+            TypeCheckNumericBinary(n, "Operands for >= must both be numeric.", new TypeBool());
         }
 
         public override void VisitSmaller(ASTSmaller n)
-        { 
-
+        {
+            TypeCheckNumericBinary(n, "Operands for < must both be numeric.", new TypeBool());
         }
 
         public override void VisitSmallerEqual(ASTSmallerEqual n)
-        { 
-
-        }
-
-        public override void VisitEqual(ASTEqual n)
-        { 
-
-        }
-
-        public override void VisitNotEqual(ASTNotEqual n)
-        { 
-
+        {
+            TypeCheckNumericBinary(n, "Operands for <= must both be numeric.", new TypeBool());
         }
 
         public override void VisitMul(ASTMultiply n)
-        { 
-
+        {
+            TypeCheckNumericBinary(n, "Operands for multiplication must both be numeric.");
         }
 
         public override void VisitDiv(ASTDivide n)
-        { 
-
+        {
+            TypeCheckNumericBinary(n, "Operands for division must both be numeric.");
         }
 
         public override void VisitMod(ASTModulo n)
         {
-
+            TypeCheckNumericBinary(n, "Operands for modulo must both be numeric.");
         }
 
+        /// <summary>
+        /// We're using the + operator for string concatenation too.
+        /// Binary operators are not supported for classes, only primatives.
+        /// </summary>
+        /// <param name="n"></param>
         public override void VisitAdd(ASTAdd n)
-        { 
+        {
+            CFlatType lhs = CheckSubTree(n.Left);
+            CFlatType rhs = CheckSubTree(n.Right);
 
+            if ((lhs is TypeString) && (rhs is TypeString))
+            {
+                _lastSeenType = n.CFlatType = new TypeString();
+            }
+            else if (lhs.IsNumeric && rhs.IsNumeric)
+            {
+                _lastSeenType = n.CFlatType = Supertype(lhs, rhs);
+            }
+            else
+            {
+                ReportError(n.Location, "Invalid operands for addition. Got types '{0}' and '{1}'.", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
+            }
         }
 
         public override void VisitSub(ASTSubtract n)
         {
-
-        }
-
-        public override void VisitAnd(ASTAnd n)
-        { 
-
-        }
-
-        public override void VisitOr(ASTOr n)
-        {
-
+            TypeCheckNumericBinary(n, "Operands for subtraction must both be numeric.");
         }
 
         public override void VisitExponent(ASTExponent n)
         {
+            TypeCheckNumericBinary(n, "Operands for exponentiation must both be numeric.");
+        }
 
+        public override void VisitAnd(ASTAnd n)
+        {
+            TypeCheckBooleanOperator(n, "Operands for && must both be booleans.");
+        }
+
+        public override void VisitOr(ASTOr n)
+        {
+            TypeCheckBooleanOperator(n, "Operands for || must both be booleans.");
+        }
+
+        public override void VisitEqual(ASTEqual n)
+        {
+            TypeCheckEquality(n);
+        }
+
+        public override void VisitNotEqual(ASTNotEqual n)
+        {
+            TypeCheckEquality(n);
         }
 
         #endregion
@@ -205,7 +224,7 @@ namespace CFlat.SemanticPasses
             }
             else
             {
-                ReportError(n.Location, "Operand for not must be a boolean. Got type '{0}'", TypeToFriendlyName(t));
+                ReportError(n.Location, "Operand for the not operator must be a boolean. Got type '{0}'", TypeToFriendlyName(t));
             }
         }
 
@@ -460,7 +479,7 @@ namespace CFlat.SemanticPasses
 
         public override void VisitDerefArray(ASTDereferenceArray n)
         {
-
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -597,7 +616,7 @@ namespace CFlat.SemanticPasses
 
         private CFlatType TypeCheckIncrementDecrement(ASTExpression expr, string operatorName, SourceLocation loc)
         {
-            //kinda cheating here. the grammar should not even allow this to happen.
+            //totally cheating here. the grammar should not even allow this to happen.
             if (expr is ASTIdentifier)
             {
                 ASTIdentifier identifier = (ASTIdentifier)expr;
@@ -623,10 +642,104 @@ namespace CFlat.SemanticPasses
             throw new InternalCompilerException("This part of the code should not be reachable.");
         }
 
+        /// <summary>
+        /// This method looks kinda ugly because I'm using it for all binary operations, which may actually typecheck
+        /// to different types
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="errorMessage"></param>
+        /// <param name="resultingType">The type that the expression will evaluate as. This is optional, so if you
+        /// don't pass it in, the compiler will use the supertype of the two operands.
+        /// </param>
+        private void TypeCheckNumericBinary(ASTBinary n, string errorMessage, CFlatType resultingType = null)
+        {
+            bool valid = false;
+            CFlatType lhs = CheckSubTree(n.Left);
+            if (lhs.IsNumeric)
+            {
+                CFlatType rhs = CheckSubTree(n.Right);
+                if (rhs.IsNumeric)
+                {
+                    //if the parameter was not passed in, we'll figure it out
+                    resultingType = resultingType ?? Supertype(lhs, rhs);
+
+                    n.CFlatType = resultingType;
+                    _lastSeenType = resultingType;
+                    valid = true;
+                }
+            }
+
+
+            if (!valid)
+            {
+                ReportError(n.Location, errorMessage);
+            }
+        }
+
+        private void TypeCheckBooleanOperator(ASTBinary n, string errorMessage)
+        {
+            bool valid = false;
+            CFlatType lhs = CheckSubTree(n.Left);
+            if (lhs is TypeBool)
+            {
+                CFlatType rhs = CheckSubTree(n.Right);
+                if (rhs is TypeBool)
+                {
+                    _lastSeenType = n.CFlatType = new TypeBool();
+                    valid = true;
+                }
+            }
+
+            if (!valid)
+            {
+                ReportError(n.Location, errorMessage);
+            }
+        }
+
+        private void TypeCheckEquality(ASTBinary n)
+        {
+            CFlatType lhs = CheckSubTree(n.Left);
+            CFlatType rhs = CheckSubTree(n.Right);
+
+            if (lhs.IsClass || rhs.IsClass)
+            {
+                //we're not going to implement equality for complex types, only primitives.
+                ReportError(n.Location, "Equality operators are not supported for classes, only primative types.");
+            }
+            else if (lhs.IsNumeric && rhs.IsNumeric)
+            {
+                //we're good
+                _lastSeenType = n.CFlatType = new TypeBool();
+
+            }
+            else if (lhs.IsSupertype(rhs) && rhs.IsSupertype(lhs))
+            {
+                //we're good
+                _lastSeenType = n.CFlatType = new TypeBool();
+            }
+            else
+            {
+                //invalid
+                ReportError(n.Location, "Types '{0}' and '{1}' are not compatibly for equality.", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
+            }
+        }
+
         private string TypeToFriendlyName(CFlatType t)
         {
             TypeClass c = t as TypeClass;
             return (c == null) ? t.ToString() : c.ClassName;
+        }
+
+        /// <summary>
+        /// Takes two types and returns which one is the super class of the two.
+        /// If both types are the same, then of course the first is returned.
+        /// </summary>
+        /// <param name="t1"></param>
+        /// <param name="t2"></param>
+        /// <returns></returns>
+        private CFlatType Supertype(CFlatType t1, CFlatType t2)
+        {
+            return t1.IsSupertype(t2) ? t2 : t1;
         }
 
         #endregion

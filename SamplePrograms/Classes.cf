@@ -2,13 +2,11 @@ class Program
 {
 	void main()
 	{
-		int x = 6;
-		x++;
-		x--;
+		bool b = Test(5);
 	}
 
-	int Stuff()
+	bool Test(real x)
 	{
-		return 1;
+		return x != 6.7;
 	}
 }
