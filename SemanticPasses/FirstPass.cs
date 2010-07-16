@@ -12,9 +12,8 @@ namespace CFlat.SemanticPasses
     /// in an instance of a ScopeManager.  The next passes will gather and analyze field/function
     /// information and finally local information.
     /// </summary>
-    public class FirstPass : Visitor
+    public class FirstPass : Visitor, ICompilerPass
     {
-        public bool Failed { get; protected set; }
         private ASTNode _treeNode;
         protected ScopeManager _scopeMgr;
         protected TypeClass _currentClass;
@@ -22,7 +21,6 @@ namespace CFlat.SemanticPasses
 
         public FirstPass(ASTNode treeNode, ScopeManager mgr)
         {
-            Failed = false;
             _treeNode = treeNode;
             _scopeMgr = mgr;
         }
@@ -32,14 +30,27 @@ namespace CFlat.SemanticPasses
             _treeNode.Visit(this);    
         }
 
+        public string PassName()
+        {
+            return "First Pass";
+        }
+
         /// <summary>
         /// Added a single function incase we want to do something besides writing to the console.
+        /// 
+        /// Changed this to throw an exception so our compiler will just stop at the first error it finds.
+        /// Attempting to continue on error will end up with whacky stuff happening in ThirdPass (NREs) and would make our code
+        /// a LOT more complex
         /// </summary>
         public void ReportError(SourceLocation loc, string msg, params string[] formatArgs)
         {
-            Failed = true;
             string formattedMsg = String.Format(msg, formatArgs);
-            Console.WriteLine("{0}{1}  at {2}", formattedMsg, Environment.NewLine, (loc != null) ? loc.ToString() : "unknown");
+            throw new SourceCodeErrorException(String.Format(
+                "{0}{1}  at {2}", 
+                formattedMsg, 
+                Environment.NewLine, 
+                (loc != null) ? loc.ToString() : "unknown")
+                );
         }
 
         /// <summary>
@@ -48,7 +59,7 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitNode(ASTNode n)
         {
-            Failed = true;
+            ReportError(n.Location, "VisitNode was called");
         }
 
         /// <summary>
@@ -86,9 +97,9 @@ namespace CFlat.SemanticPasses
             _currentClass = cls;
 
             //prnt should be null if it's not a type or isn't found.. check for error, then check the actual type
-            if (prnt == null || !prnt.IsType) { Failed = true; Console.WriteLine("Could not find base type " + n.Parent + " for type " + n.Name); } 
+            if (prnt == null || !prnt.IsType) { ReportError(n.Location, "Could not find base type '{0}' for type '{1}'.", n.Parent, n.Name); } 
             //cls.BaseType = prnt.Type;
-            if (cls.BaseType == null || !cls.IsClass) { Failed = true; Console.WriteLine("Could not find base type " + n.Parent + " for type " + n.Name); } 
+            if (cls.BaseType == null || !cls.IsClass) { ReportError(n.Location, "Could not find base type '{0}' for type '{1}'.", n.Parent, n.Name); } 
             n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, prnt);
             n.Type = cls;
         }
