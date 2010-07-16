@@ -42,6 +42,8 @@ namespace CFlat
 
             if (SemanticPasses.SemanticDriver.Analyze(root))
             {
+                Console.WriteLine("Hooray, no errors found in the semantic passes.");
+
                 //I fail at string processing but w/e
                 
                 CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""));
