@@ -50,7 +50,9 @@
     <Compile Include="SemanticPasses\FirstPass.cs" />
     <Compile Include="SemanticPasses\FormalBuilder.cs" />
     <Compile Include="SemanticPasses\ICompilerPass.cs" />
-    <Compile Include="SemanticPasses\ScopeManager.cs" />
+    <Compile Include="SemanticPasses\ScopeManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SemanticPasses\SecondPass.cs" />
     <Compile Include="SemanticPasses\SemanticDriver.cs" />
     <Compile Include="SemanticPasses\SourceCodeErrorException.cs" />
