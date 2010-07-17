@@ -9,6 +9,7 @@ namespace SemanticAnalysis
     {
         public override bool IsFunction { get { return true; } }
         public bool IsConstructor { get; set; }
+        public bool HasReturnStatement { get; set; }
         public Scope Scope { get; set; }
         public CFlatType ReturnType { get; set; }
 
