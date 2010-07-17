@@ -2,11 +2,17 @@ class Program
 {
 	void main()
 	{
-		bool b = Test(5);
+		int[] numbers = new int[0..UpperBound()];
+		int x = Get(numbers, 0);
 	}
 
-	bool Test(real x)
+	int UpperBound()
 	{
-		return x != 6.7;
+		return 666;
+	}
+
+	int Get(int[] numbers, int index)
+	{
+		return numbers[index];
 	}
 }

@@ -276,6 +276,8 @@ namespace CFlat.SemanticPasses
             {
                 n.CFlatType = expected;
                 _lastSeenType = expected;
+
+                _currentMethod.HasReturnStatement = true;
             }
             else
             {
@@ -519,7 +521,16 @@ namespace CFlat.SemanticPasses
 
         public override void VisitDerefArray(ASTDereferenceArray n)
         {
-            throw new NotImplementedException();
+            CFlatType arrType = CheckSubTree(n.Array);
+            CFlatType index = CheckSubTree(n.Index);
+            if (arrType.IsArray && index is TypeInt)
+            {
+                _lastSeenType = n.CFlatType = ((TypeArray)arrType).BaseType;
+            }
+            else
+            {
+                ReportError(n.Location, "Array index must be an integer.");
+            }
         }
 
         /// <summary>
@@ -562,6 +573,15 @@ namespace CFlat.SemanticPasses
         public override void VisitDeclMethod(ASTDeclarationMethod n)
         {
             VisitMethodBody(string.Format("body {0}", n.Name), n.Body, n.Type as TypeFunction);
+
+            //make sure there is a return statement if it's required.
+            //This is pretty weak, because you could have an arbitrary return statement in a single block, and this would not catch it.
+            //To make this actually work, a function would need to keep track of its block, and each block would keep track of it's child blocks and whether or not it contains a return
+            //Then, we would check if the main block has a return statement, or if all inner blocks have a return.
+            if ((_currentMethod.ReturnType is TypeVoid == false) && (!_currentMethod.HasReturnStatement))
+            {
+                ReportError(n.Location, "Method '{0}' does not have a return statement.", n.Name);
+            }
         }
 
         /// <summary>
