@@ -2,17 +2,10 @@ class Program
 {
 	void main()
 	{
-		int[] numbers = new int[0..UpperBound()];
-		int x = Get(numbers, 0);
-	}
+		int x = 4;
+		for(x in [0..5])
+		{
 
-	int UpperBound()
-	{
-		return 666;
-	}
-
-	int Get(int[] numbers, int index)
-	{
-		return numbers[index];
+		}
 	}
 }

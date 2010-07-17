@@ -22,7 +22,7 @@ namespace AbstractSyntaxTree
 
         public override string Print (int depth)
         {
-            return "for (" + InitialExpr.Print(depth) + ";" + Conditional.Print(depth) + ";" + LoopExpr.Print(depth) + ")"
+            return "for (" + CheckNullPrint(InitialExpr, depth) + ";" + CheckNullPrint(Conditional, depth) + ";" + CheckNullPrint(LoopExpr, depth) + ")"
                         + NewLine(depth+1) + Body.Print(depth+1);
         }
 
@@ -30,5 +30,7 @@ namespace AbstractSyntaxTree
         {
             v.VisitFor(this);
         }
+
+
     }
 }

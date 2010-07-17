@@ -30,5 +30,10 @@ namespace AbstractSyntaxTree
         {
             v.VisitNode(this);
         }
+
+        public string CheckNullPrint(ASTNode n, int depth)
+        {
+            return (n != null) ? n.Print(depth) : string.Empty;
+        }
     }
 }

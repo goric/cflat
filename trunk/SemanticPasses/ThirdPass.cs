@@ -189,7 +189,7 @@ namespace CFlat.SemanticPasses
         /// These guys are a little trickier, can't just increment anything that typechecks to a numeric type
         /// </summary>
         /// <param name="n"></param>
-        public override void VisitIncrement(ASTIncrement n) 
+        public override void VisitIncrement(ASTIncrement n)
         {
             //the second parameter, the string is simply for display purposes, I'm not doing any logic with it, cause that would be hella stupid
             _lastSeenType = n.CFlatType = TypeCheckIncrementDecrement(n.Expression, "++", n.Location);
@@ -215,7 +215,7 @@ namespace CFlat.SemanticPasses
         }
 
         public override void VisitNot(ASTNot n)
-        { 
+        {
             CFlatType t = CheckSubTree(n.Expression);
             if (t is TypeBool)
             {
@@ -236,7 +236,7 @@ namespace CFlat.SemanticPasses
         /// Makes sure the left hand side of the assignment is a supertype of the right hand side.
         /// </summary>
         /// <param name="n"></param>
-        public override void VisitAssign(ASTAssign n) 
+        public override void VisitAssign(ASTAssign n)
         {
             CFlatType lhs = CheckSubTree(n.LValue);
             CFlatType rhs = CheckSubTree(n.Expr);
@@ -254,21 +254,70 @@ namespace CFlat.SemanticPasses
         }
 
         /// <summary>
-        /// Ok this is actually kinda confusing. How do we typecheck the first statement in a for loop?
-        /// Our grammar allows for a lot of different stuff, but I guess we just allow it??
+        /// 
         /// </summary>
         /// <param name="n"></param>
-        public override void VisitFor(ASTFor n) 
+        public override void VisitFor(ASTFor n)
         {
-            throw new NotImplementedException();
+            //allow for things like for(;;)
+            if (n.InitialExpr == null)
+                n.InitialExpr = new ASTNoop();
+
+            //C# only allows assignment, call, increment, decrement, and new object expressions for the first thing in a for loop.
+            //Not sure the best way to check for this, because the grammar will allow for a lot more things to be passed in...
+            ASTNode statementToCheck = n.InitialExpr;
+            if (n.InitialExpr is ASTStatementExpr)
+                statementToCheck = ((ASTStatementExpr)n.InitialExpr).Expression;//wow this is getting really ugly
+
+            if (!statementToCheck.IsAnyType(typeof(ASTAssign), typeof(ASTDeclarationLocal), typeof(ASTInvoke), 
+                typeof(ASTInstantiateClass), typeof(ASTInstantiateArray), typeof(ASTIncrement), typeof(ASTDecrement), typeof(ASTNoop)))
+            {
+                ReportError(n.Location, "Only assignment, call, increment, decrement, and new object expressions can be used as a statement	in a for loop.");
+            }
+
+            CFlatType initType = CheckSubTree(n.InitialExpr);
+            n.InitialExpr.CFlatType = initType;
+
+            TypeBool condition = CheckSubTree(n.Conditional) as TypeBool;
+            if (condition != null)
+            {
+                n.Conditional.CFlatType = condition;
+                CFlatType loopType = CheckSubTree(n.LoopExpr);
+                n.LoopExpr.CFlatType = loopType;
+            }
+            else
+            {
+                ReportError(n.Location, "The condition of a for loop must be a boolean.");
+            }
         }
 
         public override void VisitForIn(ASTForIn n)
         {
-            throw new NotImplementedException();
+            n.Lower.CFlatType = CheckSubTree(n.Lower);
+            n.Upper.CFlatType = CheckSubTree(n.Upper);
+
+            if (n.Lower.CFlatType is TypeInt && n.Upper.CFlatType is TypeInt)
+            {
+                 //check if the temp variable has been assigned.
+                if (!_scopeMgr.HasSymbol(n.TempVariable.ID, _currentMethod.Scope))
+                {
+                    //we're good
+
+                    //now I need to record the precense of the temp variable and add it to the scope of the block of the body
+                    //of the loop...
+                }
+                else
+                {
+                    ReportError(n.Location, "ID '{0}' has already been assigned.", n.TempVariable.ID);
+                }
+            }
+            else
+            {
+                ReportError(n.Location, "Bounds of the for in loop must be integers. Got types '{0}' and '{1}'.", TypeToFriendlyName(n.Lower.CFlatType), TypeToFriendlyName(n.Upper.CFlatType));
+            }
         }
 
-        public override void VisitReturn(ASTReturn n) 
+        public override void VisitReturn(ASTReturn n)
         {
             CFlatType actual = CheckSubTree(n.ReturnValue);
             CFlatType expected = _currentMethod.ReturnType;
@@ -289,7 +338,7 @@ namespace CFlat.SemanticPasses
         /// Simple open a new scope for the block and visit the body. Pop the scope when we're done.
         /// </summary>
         /// <param name="n"></param>
-        public override void VisitBlock(ASTBlock n) 
+        public override void VisitBlock(ASTBlock n)
         {
             _scopeMgr.PushScope("block");
             CheckSubTree(n.Body);
@@ -326,7 +375,7 @@ namespace CFlat.SemanticPasses
             }
         }
 
-        public override void VisitIfThenElse(ASTIfThenElse n) 
+        public override void VisitIfThenElse(ASTIfThenElse n)
         {
             CFlatType condType = CheckSubTree(n.Condition);
             if (condType is TypeBool)
@@ -340,7 +389,7 @@ namespace CFlat.SemanticPasses
             }
         }
 
-        public override void VisitStatementExpr(ASTStatementExpr n) 
+        public override void VisitStatementExpr(ASTStatementExpr n)
         {
             CheckSubTree(n.Expression);
         }
@@ -464,7 +513,7 @@ namespace CFlat.SemanticPasses
             _lastSeenType = _currentClass;
         }
 
-        public override void VisitBase(ASTBase n) 
+        public override void VisitBase(ASTBase n)
         {
             if (_currentClass.Parent != null)
             {
@@ -510,7 +559,7 @@ namespace CFlat.SemanticPasses
                 }
                 else
                 {
-                    ReportError(n.Location, "Field '{0}' does not exist for type '{1}'", n.Field, TypeToFriendlyName(lvalue)); 
+                    ReportError(n.Location, "Field '{0}' does not exist for type '{1}'", n.Field, TypeToFriendlyName(lvalue));
                 }
             }
             else
@@ -577,7 +626,7 @@ namespace CFlat.SemanticPasses
             //make sure there is a return statement if it's required.
             //This is pretty weak, because you could have an arbitrary return statement in a single block, and this would not catch it.
             //To make this actually work, a function would need to keep track of its block, and each block would keep track of it's child blocks and whether or not it contains a return
-            //Then, we would check if the main block has a return statement, or if all inner blocks have a return.
+            //Then, we would check if the main block has a return statement, or if all inner branching blocks have a return.
             if ((_currentMethod.ReturnType is TypeVoid == false) && (!_currentMethod.HasReturnStatement))
             {
                 ReportError(n.Location, "Method '{0}' does not have a return statement.", n.Name);
@@ -621,7 +670,6 @@ namespace CFlat.SemanticPasses
                         ReportError(n.Location, "Invalid assignment, type mismatch. Expected: {0} Got: {1}", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
                     }
                 }
-
                 if (valid)
                     _scopeMgr.AddLocal(n.ID, lhs, _currentMethod);
             }
@@ -642,7 +690,7 @@ namespace CFlat.SemanticPasses
         private void VisitClassBody(TypeClass currentClass, ASTDeclarationList declarations)
         {
             _currentClass = currentClass;
-            
+
             _scopeMgr.RestoreScope(currentClass.Scope);
 
             CheckSubTree(declarations);
@@ -664,13 +712,15 @@ namespace CFlat.SemanticPasses
             _currentMethod = f;
             //restore the scope of the formals
             _scopeMgr.RestoreScope(_currentMethod.Scope);
+
+            //NOTE: No idea why I was adding another scope for locals, it seems like it's not needed.
             //add a new scope for any locals
-            Scope localScope = _scopeMgr.PushScope(scopeName);
+            //Scope localScope = _scopeMgr.PushScope(scopeName);
 
             CheckSubTree(body);
 
             //pop the body scope and the formal scope
-            _scopeMgr.PopScope();
+            //_scopeMgr.PopScope();
             _scopeMgr.PopScope();
         }
 
@@ -694,7 +744,7 @@ namespace CFlat.SemanticPasses
             {
                 ReportError(loc, "The {0} operator requires an instance of a numeric datatype", operatorName);
             }
-            
+
             /* note: the ReportError method will always throw, so this part of the code should not be reached,
              * unless of course we change the ReportError method to not throw or try to implement some error recovery
              * strategy...
@@ -729,7 +779,6 @@ namespace CFlat.SemanticPasses
                 }
             }
 
-
             if (!valid)
             {
                 ReportError(n.Location, errorMessage);
@@ -761,18 +810,7 @@ namespace CFlat.SemanticPasses
             CFlatType lhs = CheckSubTree(n.Left);
             CFlatType rhs = CheckSubTree(n.Right);
 
-            if (lhs.IsClass || rhs.IsClass)
-            {
-                //we're not going to implement equality for complex types, only primitives.
-                ReportError(n.Location, "Equality operators are not supported for classes, only primative types.");
-            }
-            else if (lhs.IsNumeric && rhs.IsNumeric)
-            {
-                //we're good
-                _lastSeenType = n.CFlatType = new TypeBool();
-
-            }
-            else if (lhs.IsSupertype(rhs) && rhs.IsSupertype(lhs))
+            if (lhs.IsSupertype(rhs) || rhs.IsSupertype(lhs))
             {
                 //we're good
                 _lastSeenType = n.CFlatType = new TypeBool();
@@ -780,28 +818,48 @@ namespace CFlat.SemanticPasses
             else
             {
                 //invalid
-                ReportError(n.Location, "Types '{0}' and '{1}' are not compatibly for equality.", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
+                ReportError(n.Location, "Types '{0}' and '{1}' are not compatible for equality.", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
             }
         }
 
+        /// <summary>
+        /// This kind of logic should probably be in the ToString() methods of TypeClass
+        /// and TypeArray...
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         private string TypeToFriendlyName(CFlatType t)
         {
-            TypeClass c = t as TypeClass;
-            return (c == null) ? t.ToString() : c.ClassName;
+            if (t.IsClass)
+                return ((TypeClass)t).ClassName;
+            else if (t.IsArray)
+            {
+                TypeArray arr = (TypeArray)t;
+                string baseType = TypeToFriendlyName(arr.BaseType);
+                return String.Concat(baseType, "[]");
+            }
+            else
+                return t.ToString();
         }
 
         /// <summary>
         /// Takes two types and returns which one is the super class of the two.
         /// If both types are the same, then of course the first is returned.
+        /// If the types are totally unrelated (that is, neither is a supertype), then null is returned (or maybe it should throw?)
         /// </summary>
         /// <param name="t1"></param>
         /// <param name="t2"></param>
         /// <returns></returns>
         private CFlatType Supertype(CFlatType t1, CFlatType t2)
         {
-            return t1.IsSupertype(t2) ? t2 : t1;
+            if (t1.IsSupertype(t2))
+                return t2;
+            else if (t2.IsSupertype(t1))
+                return t1;
+            else
+                return null;
         }
-
+        
         #endregion
     }
 }
