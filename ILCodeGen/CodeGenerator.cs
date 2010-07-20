@@ -311,7 +311,7 @@ namespace ILCodeGen
             //??
             _lastWalkedType = null;
         }
-        public override void VisitTypeName(ASTTypeName n)
+        public override void VisitTypeName(ASTTypeClass n)
         {
             //??
             _lastWalkedType = n.GetType();
