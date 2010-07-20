@@ -98,8 +98,7 @@ namespace CFlat.SemanticPasses
 
             //prnt should be null if it's not a type or isn't found.. check for error, then check the actual type
             if (prnt == null || !prnt.IsType) { ReportError(n.Location, "Could not find base type '{0}' for type '{1}'.", n.Parent, n.Name); } 
-            //cls.BaseType = prnt.Type;
-            if (cls.BaseType == null || !cls.IsClass) { ReportError(n.Location, "Could not find base type '{0}' for type '{1}'.", n.Parent, n.Name); } 
+            if (!cls.IsClass) { ReportError(n.Location, "Could not find base type '{0}' for type '{1}'.", n.Parent, n.Name); } 
             n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, prnt);
             n.Type = cls;
         }

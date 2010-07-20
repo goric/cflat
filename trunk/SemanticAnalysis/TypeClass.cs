@@ -10,7 +10,6 @@ namespace SemanticAnalysis
         public override bool IsClass { get { return true; } }
         //set this to true when instantiated?  not sure how to work this
         public override bool IsInstance { get { return true; } }
-        public override CFlatType BaseType { get; set; }
 
         public string ClassName { get; set; }
         public ClassDescriptor Parent { get; set; }

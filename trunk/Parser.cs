@@ -3,10 +3,10 @@
 // (see accompanying GPPGcopyright.rtf)
 
 // GPPG version 1.4.0
-// Machine:  WILL-LAPTOP
-// DateTime: 7/16/2010 4:34:07 PM
-// UserName: Will
-// Input file <..\GeneratorInputFiles\CFlat.y>
+// Machine:  VOSTRO
+// DateTime: 7/20/2010 6:03:58 PM
+// UserName: Tim
+// Input file <..\..\GeneratorInputFiles\CFlat.y>
 
 // options: no-lines gplex
 
@@ -572,7 +572,7 @@ internal class Parser: ShiftReduceParser<SemanticValue, LexLocation>
 { CurrentSemanticValue.Type = new ASTTypeReal(); }
         break;
       case 83: // integralType -> IDENTIFIER
-{ CurrentSemanticValue.Type = new ASTTypeName(ValueStack[ValueStack.Depth-1].Token.Value); }
+{ CurrentSemanticValue.Type = new ASTTypeClass(ValueStack[ValueStack.Depth-1].Token.Value); }
         break;
       case 84: // literal -> LITERAL_INT
 { CurrentSemanticValue.Expression = new ASTInteger(Int32.Parse(ValueStack[ValueStack.Depth-1].Token.Value)); }
