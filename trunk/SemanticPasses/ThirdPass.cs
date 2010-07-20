@@ -260,19 +260,13 @@ namespace CFlat.SemanticPasses
         public override void VisitFor(ASTFor n)
         {
             //allow for things like for(;;)
-            if (n.InitialExpr == null)
-                n.InitialExpr = new ASTNoop();
+            /*if (n.InitialExpr == null)
+                n.InitialExpr = new ASTNoop();*/
 
-            //C# only allows assignment, call, increment, decrement, and new object expressions for the first thing in a for loop.
-            //Not sure the best way to check for this, because the grammar will allow for a lot more things to be passed in...
             ASTNode statementToCheck = n.InitialExpr;
-            if (n.InitialExpr is ASTStatementExpr)
-                statementToCheck = ((ASTStatementExpr)n.InitialExpr).Expression;//wow this is getting really ugly
-
-            if (!statementToCheck.IsAnyType(typeof(ASTAssign), typeof(ASTDeclarationLocal), typeof(ASTInvoke), 
-                typeof(ASTInstantiateClass), typeof(ASTInstantiateArray), typeof(ASTIncrement), typeof(ASTDecrement), typeof(ASTNoop)))
+            if (!statementToCheck.IsAnyType(typeof(ASTDeclarationLocal)))
             {
-                ReportError(n.Location, "Only assignment, call, increment, decrement, and new object expressions can be used as a statement	in a for loop.");
+                ReportError(n.Location, "Only assignment expressions can be used as a statement	in a for loop.");
             }
 
             CFlatType initType = CheckSubTree(n.InitialExpr);
