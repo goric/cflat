@@ -175,7 +175,7 @@ integralType	: TINT			{ $$ = new ASTTypeInt(); }
 		        | TVOID			{ $$ = new ASTTypeVoid(); }
 				| TSTRING		{ $$ = new ASTTypeString(); }
 				| TREAL			{ $$ = new ASTTypeReal(); }
-				| IDENTIFIER	{ $$ = new ASTTypeName($1.Value); }
+				| IDENTIFIER	{ $$ = new ASTTypeClass($1.Value); }
 				;
 
 

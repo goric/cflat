@@ -19,7 +19,7 @@ namespace AbstractSyntaxTree
         public virtual void VisitTypeString (ASTTypeString n) { }
         public virtual void VisitTypeInt (ASTTypeInt n) { }
         public virtual void VisitTypeReal (ASTTypeReal n) { }
-        public virtual void VisitTypeName (ASTTypeName n) { }
+        public virtual void VisitTypeName (ASTTypeClass n) { }
         public virtual void VisitTypeVoid (ASTTypeVoid n) { }
         /* Literals */
         public virtual void VisitIdentifier (ASTIdentifier n) { }

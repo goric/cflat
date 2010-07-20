@@ -100,7 +100,7 @@
     <Compile Include="ASTTypeArray.cs" />
     <Compile Include="ASTTypeBool.cs" />
     <Compile Include="ASTTypeInt.cs" />
-    <Compile Include="ASTTypeName.cs" />
+    <Compile Include="ASTTypeClass.cs" />
     <Compile Include="ASTTypeReal.cs" />
     <Compile Include="ASTTypeString.cs" />
     <Compile Include="ASTTypeVoid.cs" />

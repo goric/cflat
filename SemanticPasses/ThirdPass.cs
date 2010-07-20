@@ -655,8 +655,6 @@ namespace CFlat.SemanticPasses
             if (!_scopeMgr.HasSymbol(n.ID))
             {
                 CFlatType lhs = CheckSubTree(n.Type);
-                if (lhs is TypeName)
-                    lhs = ((TypeName)lhs).Base; // get the real type that the name represents
 
                 //Check if the code is also assigning a value on the same line
                 bool valid = true;
