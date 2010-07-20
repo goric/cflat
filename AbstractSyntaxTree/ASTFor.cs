@@ -7,12 +7,12 @@ namespace AbstractSyntaxTree
 {
     public class ASTFor : ASTStatement
     {
-        public ASTStatement InitialExpr { get; set; }
+        public ASTDeclarationLocal InitialExpr { get; set; }
         public ASTExpression Conditional { get; set; }
         public ASTExpression LoopExpr { get; set; }
         public ASTStatement Body { get; set; }
 
-        public ASTFor(ASTStatement init, ASTExpression conditional, ASTExpression loop, ASTStatement body)
+        public ASTFor (ASTDeclarationLocal init, ASTExpression conditional, ASTExpression loop, ASTStatement body)
         {
             InitialExpr = init;
             Conditional = conditional;

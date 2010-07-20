@@ -88,8 +88,8 @@ statement		: SEMI
 				| lvalue ASSIGN expression SEMI					{ $$ = new ASTAssign($1, $3); }
 				| LBRACE statementList RBRACE					{ $$ = new ASTBlock($2); }
 				| WHILE LPAREN expression RPAREN statement		{ $$ = new ASTWhile($3, $5); }
-				| FOR LPAREN statement expression SEMI expression RPAREN statement 
-											{ $$ = new ASTFor($3, $4, $6, $8); }
+				| FOR LPAREN type IDENTIFIER ASSIGN expression SEMI expression SEMI expression RPAREN statement 
+											{ $$ = new ASTFor(new ASTDeclarationLocal(Location(@$.StartLine, @3.StartColumn), $3, $4.Value, $6), $8, $10, $12); }
 				| FOR LPAREN IDENTIFIER IN LBRACKET expression DOTDOT expression RBRACKET RPAREN statement
 											{ $$ = new ASTForIn(new ASTIdentifier(Location(@$.StartLine, @3.StartColumn), $3.Value), $6, $8, $11); }
 				| IF LPAREN expression RPAREN statement			{ $$ = new ASTIfThen($3, $5); }
