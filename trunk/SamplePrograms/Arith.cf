@@ -33,5 +33,10 @@ class arithmetic
 			Console.WriteLine(high);
 			high--;
 		}
+
+		for(a in [-10..5])
+		{
+			Console.WriteLine(a);
+		}
 	}
 }
