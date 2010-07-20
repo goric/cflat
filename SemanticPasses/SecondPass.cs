@@ -128,7 +128,7 @@ namespace CFlat.SemanticPasses
         public override void VisitFormal(ASTFormal n) 
         {
             n.CFlatType = CheckSubTree(n.Type);
-		    _scopeMgr.AddFormal(n.Name, n.CFlatType);
+		    _scopeMgr.AddFormal(n.Name, n.CFlatType, n.Modifier);
         }
 
         public override void VisitTypeArray (ASTTypeArray n)

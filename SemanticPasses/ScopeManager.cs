@@ -55,9 +55,9 @@ namespace CFlat.SemanticPasses
             return md;
         }
 
-        public FormalDescriptor AddFormal(string name, CFlatType type)
+        public FormalDescriptor AddFormal(string name, CFlatType type, string modifier)
         {
-            var descriptor = new FormalDescriptor(type, name);
+            var descriptor = new FormalDescriptor(type, name, modifier);
             CurrentScope.Descriptors.Add(name, descriptor);
             return descriptor;
         }
