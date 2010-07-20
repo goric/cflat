@@ -124,16 +124,11 @@ namespace ILCodeGen
 
             LocalBuilder lb = _gen.DeclareLocal(_lastWalkedType);
 
-            if (_locals.ContainsKey(n.ID))
-                _locals[n.ID] = lb.LocalIndex;
-            else
-                _locals.Add(n.ID, lb.LocalIndex);
-
+            //set value
             n.InitialValue.Visit(this);
 
-            //store local here
-            _gen.Emit(OpCodes.Stloc, _locals[n.ID]);
-
+            StoreLocal(n.ID, lb.LocalIndex);
+            
         }
         #endregion
 
@@ -221,6 +216,50 @@ namespace ILCodeGen
             _gen.MarkLabel(exit);
         }
 
+        public override void VisitForIn(ASTForIn n)
+        {
+            //define labels
+            Label loop = _gen.DefineLabel();
+            Label exit = _gen.DefineLabel();
+
+            //evaluate lower
+            n.Lower.Visit(this);
+
+            LocalBuilder lb = _gen.DeclareLocal(typeof(int));
+
+            //store temp variable
+            StoreLocal(n.TempVariable.ID, lb.LocalIndex);
+            
+            //loop label
+            _gen.MarkLabel(loop);
+
+            //load value into temp variable
+            n.TempVariable.Visit(this);
+
+            //visit upper bound
+            n.Upper.Visit(this);
+
+            _gen.Emit(OpCodes.Cgt);
+
+            //break on false
+            _gen.Emit(OpCodes.Brtrue, exit);
+
+            //emit body of loop
+            n.Body.Visit(this);
+
+            n.TempVariable.Visit(this);
+            _gen.Emit(OpCodes.Ldc_I4_1);
+            _gen.Emit(OpCodes.Add);
+
+            StoreLocal(n.TempVariable.ID, lb.LocalIndex);
+
+            //unconditional loop branch
+            _gen.Emit(OpCodes.Br, loop);
+
+            //break label
+            _gen.MarkLabel(exit);
+        }
+
         public override void VisitWhile(ASTWhile n)
         {
             //define labels
@@ -255,6 +294,29 @@ namespace ILCodeGen
             //not sure this is the right way to do this, but it works now for simple examples
             _lastWalkedType = typeof(System.Int32);
         }
+        public override void VisitTypeBool(ASTTypeBool n)
+        {
+            _lastWalkedType = typeof(System.Boolean);
+        }
+        public override void VisitTypeReal(ASTTypeReal n)
+        {
+            _lastWalkedType = typeof(System.Double);
+        }
+        public override void VisitTypeString(ASTTypeString n)
+        {
+            _lastWalkedType = typeof(System.String);
+        }
+        public override void VisitTypeVoid(ASTTypeVoid n)
+        {
+            //??
+            _lastWalkedType = null;
+        }
+        public override void VisitTypeName(ASTTypeName n)
+        {
+            //??
+            _lastWalkedType = n.GetType();
+        }
+        
         #endregion
 
         #region constants/primitives
@@ -283,13 +345,7 @@ namespace ILCodeGen
         #region deref
         public override void VisitIdentifier(ASTIdentifier n)
         {
-            if (_locals.ContainsKey(n.ID))
-            {
-                _gen.Emit(OpCodes.Ldloc, _locals[n.ID]);
-                _lastWalkedIdentifier = n.ID;
-            }
-            else //??
-                _lastWalkedIdentifier = "";
+            LoadLocal(n.ID);
         }
         #endregion
         
@@ -466,6 +522,7 @@ namespace ILCodeGen
         {
             n.Expr.Visit(this);
 
+
             n.LValue.Visit(this);
 
         }
@@ -495,8 +552,26 @@ namespace ILCodeGen
             n.Right.Visit(this);
         }
 
-        
+        private void StoreLocal(string id, int index)
+        {
+            if (_locals.ContainsKey(id))
+                _locals[id] = index;
+            else
+                _locals.Add(id, index);
 
-        
+            //store local here
+            _gen.Emit(OpCodes.Stloc, _locals[id]);
+        }
+
+        private void LoadLocal(string id)
+        {
+            if (_locals.ContainsKey(id))
+            {
+                _gen.Emit(OpCodes.Ldloc, _locals[id]);
+                _lastWalkedIdentifier = id;
+            }
+            else //??
+                _lastWalkedIdentifier = "";
+        }
     }
 }
