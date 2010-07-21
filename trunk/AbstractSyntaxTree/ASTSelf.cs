@@ -7,10 +7,8 @@ using SemanticAnalysis;
 
 namespace AbstractSyntaxTree
 {
-    public class ASTSelf : ASTExpression
-    {
-        public Descriptor Descriptor { get; set; }
-        
+    public class ASTSelf : ASTLValue
+    {       
         public ASTSelf ()
         {
         }

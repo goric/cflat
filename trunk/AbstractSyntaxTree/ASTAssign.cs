@@ -7,10 +7,10 @@ namespace AbstractSyntaxTree
 {
     public class ASTAssign : ASTStatement
     {
-        public ASTExpression LValue { get; private set; }
+        public ASTLValue LValue { get; private set; }
         public ASTExpression Expr { get; private set; }
 
-        public ASTAssign(ASTExpression lval, ASTExpression exp)
+        public ASTAssign(ASTLValue lval, ASTExpression exp)
         {
             LValue = lval;
             Expr = exp;

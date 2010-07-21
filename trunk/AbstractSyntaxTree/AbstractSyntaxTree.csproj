@@ -76,6 +76,7 @@
     <Compile Include="ASTInstantiateClass.cs" />
     <Compile Include="ASTInteger.cs" />
     <Compile Include="ASTInvoke.cs" />
+    <Compile Include="ASTLValue.cs" />
     <Compile Include="ASTModifierList.cs" />
     <Compile Include="ASTModulo.cs" />
     <Compile Include="ASTMultiply.cs" />

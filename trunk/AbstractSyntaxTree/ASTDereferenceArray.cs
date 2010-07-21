@@ -5,9 +5,9 @@ using System.Text;
 
 namespace AbstractSyntaxTree
 {
-    public class ASTDereferenceArray : ASTExpression
+    public class ASTDereferenceArray : ASTLValue
     {
-        public ASTExpression Array {get;set;}
+        public ASTExpression Array { get;set; }
         public ASTExpression Index { get; set; }
 
         public ASTDereferenceArray(ASTExpression array, ASTExpression index)

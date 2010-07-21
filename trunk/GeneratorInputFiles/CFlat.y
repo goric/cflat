@@ -30,7 +30,8 @@
 %type<FormalList> formals onePlusFormals 
 %type<Formal> formal
 %type<ExpressionList> onePlusActuals actuals
-%type<Expression> expression lvalue literal
+%type<Expression> expression rvalue literal
+%type<LValue> lvalue
 %type<Type> type integralType
 %type<ModifierList> modifierList
 %type<Token> modifier formalModifier
@@ -137,6 +138,7 @@ expression		: expression AND  expression		{ $$ = new ASTAnd($1, $3); }
 				| expression DECREMENT				{ $$ = new ASTDecrement($1); }
 				| LPAREN expression RPAREN			{ $$ = $2; } 
 				| lvalue							{ $$ = $1; }
+				| rvalue							{ $$ = $1; }
 				| NEW IDENTIFIER LPAREN actuals RPAREN		{ $$ = new ASTInstantiateClass($2.Value, $4); }
 				| NEW type LBRACKET expression DOTDOT expression RBRACKET 
 						{ $$ = new ASTInstantiateArray($2, $4, $6); }
@@ -145,15 +147,16 @@ expression		: expression AND  expression		{ $$ = new ASTAnd($1, $3); }
 	     
 
 lvalue			: IDENTIFIER						{ $$ = new ASTIdentifier(Location(@$.StartLine, @1.StartColumn), $1.Value); }
-				| IDENTIFIER LPAREN actuals RPAREN 
-								{ $$ = new ASTInvoke(new ASTSelf(), $1.Value, $3); }
 				| lvalue LBRACKET expression RBRACKET			{ $$ = new ASTDereferenceArray($1, $3); }
-				| lvalue DOT IDENTIFIER LPAREN actuals RPAREN	{ $$ = new ASTInvoke($1, $3.Value, $5); }
 				| lvalue DOT IDENTIFIER							{ $$ = new ASTDereferenceField($1, $3.Value); }
 				| SELF								{ $$ = new ASTSelf(); }
 				| BASE								{ $$ = new ASTBase(); }
 				;
-		  
+
+rvalue			: IDENTIFIER LPAREN actuals RPAREN 
+								{ $$ = new ASTInvoke(new ASTSelf(), $1.Value, $3); }
+				| lvalue DOT IDENTIFIER LPAREN actuals RPAREN	{ $$ = new ASTInvoke($1, $3.Value, $5); }
+				;
 
 actuals			:					{ $$ = new ASTExpressionList(); }
 				| onePlusActuals	{ $$ = $1; }

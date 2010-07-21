@@ -1,11 +1,14 @@
 class Program
 {
-	void main()
+	void main(string x, readonly string y)
 	{
-		int x = 4;
-		for(x in [0..5])
-		{
+		int a;
+		string b;
 
-		}
+		b = "hello";
+		a = 666;
+
+		x = "hi";
+		y = "poop";
 	}
 }
