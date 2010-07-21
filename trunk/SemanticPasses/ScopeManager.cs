@@ -9,11 +9,13 @@ namespace CFlat.SemanticPasses
     public class ScopeManager
     {
         public Scope CurrentScope { get; set; }
+        public Scope TopScope { get; private set; }
 
         public ScopeManager()
         {
             //top level scope
             CurrentScope = new Scope("top", null);
+            TopScope = CurrentScope;
         }
 
         public Scope PushScope(string name)

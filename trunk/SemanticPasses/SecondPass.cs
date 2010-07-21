@@ -20,7 +20,7 @@ namespace CFlat.SemanticPasses
         public SecondPass(ASTNode treeNode, ScopeManager mgr)
             : base(treeNode, mgr)
         {
-
+            
         }
 
         new public string PassName()
