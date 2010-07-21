@@ -10,6 +10,7 @@ namespace CFlat.SemanticPasses
     public class ThirdPass : SecondPass, ICompilerPass
     {
         private TypeFunction _currentMethod;
+        private const string READONLY_MODIFIER = "readonly";
 
         public ThirdPass(ASTNode treeNode, ScopeManager mgr)
             : base(treeNode, mgr)
@@ -241,8 +242,18 @@ namespace CFlat.SemanticPasses
             CFlatType lhs = CheckSubTree(n.LValue);
             CFlatType rhs = CheckSubTree(n.Expr);
 
-            if (rhs.IsSupertype(lhs))
+            if (IsValidAssignment(lhs, rhs))
             {
+                //check if the assignment is to a readonly method parameter
+                if (n.LValue.Descriptor is FormalDescriptor)
+                {
+                    FormalDescriptor descriptor = (FormalDescriptor)n.LValue.Descriptor;
+                    if (String.Compare(descriptor.Modifier, READONLY_MODIFIER, true) == 0)
+                    {
+                        ReportError(n.Location, "Parameter '{0}' is marked as readonly and can not be assigned.", descriptor.Name);
+                    }
+                }
+
                 //I believe we don't really do anything when the source code is correct in this case.
                 n.CFlatType = new TypeVoid();
                 _lastSeenType = n.CFlatType;
@@ -259,16 +270,6 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitFor(ASTFor n)
         {
-            //allow for things like for(;;)
-            /*if (n.InitialExpr == null)
-                n.InitialExpr = new ASTNoop();*/
-
-            ASTNode statementToCheck = n.InitialExpr;
-            if (!statementToCheck.IsAnyType(typeof(ASTDeclarationLocal)))
-            {
-                ReportError(n.Location, "Only assignment expressions can be used as a statement	in a for loop.");
-            }
-
             CFlatType initType = CheckSubTree(n.InitialExpr);
             n.InitialExpr.CFlatType = initType;
 
@@ -292,8 +293,8 @@ namespace CFlat.SemanticPasses
 
             if (n.Lower.CFlatType is TypeInt && n.Upper.CFlatType is TypeInt)
             {
-                 //check if the temp variable has been assigned.
-                if (!_scopeMgr.HasSymbol(n.TempVariable.ID, _currentMethod.Scope))
+                //check if the temp variable has been assigned.
+                if (!_scopeMgr.HasSymbol(n.TempVariable.ID))
                 {
                     //we're good
 
@@ -582,7 +583,10 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitInstantiateArray(ASTInstantiateArray n)
         {
-            if ((CheckSubTree(n.Upper) is TypeInt) && (CheckSubTree(n.Lower) is TypeInt))
+            n.Lower.CFlatType = CheckSubTree(n.Lower);
+            n.Upper.CFlatType = CheckSubTree(n.Upper);
+            
+            if ((n.Lower.CFlatType is TypeInt) && (n.Upper.CFlatType is TypeInt))
             {
                 CFlatType elementType = CheckSubTree(n.Type);
 
@@ -656,7 +660,7 @@ namespace CFlat.SemanticPasses
                 if (n.InitialValue != null)
                 {
                     CFlatType rhs = CheckSubTree(n.InitialValue);
-                    if (!rhs.IsSupertype(lhs))
+                    if (!IsValidAssignment(lhs, rhs))
                     {
                         valid = false;
                         ReportError(n.Location, "Invalid assignment, type mismatch. Expected: {0} Got: {1}", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
@@ -705,14 +709,13 @@ namespace CFlat.SemanticPasses
             //restore the scope of the formals
             _scopeMgr.RestoreScope(_currentMethod.Scope);
 
-            //NOTE: No idea why I was adding another scope for locals, it seems like it's not needed.
             //add a new scope for any locals
-            //Scope localScope = _scopeMgr.PushScope(scopeName);
+            Scope localScope = _scopeMgr.PushScope(scopeName);
 
             CheckSubTree(body);
 
             //pop the body scope and the formal scope
-            //_scopeMgr.PopScope();
+            _scopeMgr.PopScope();
             _scopeMgr.PopScope();
         }
 
@@ -851,7 +854,22 @@ namespace CFlat.SemanticPasses
             else
                 return null;
         }
-        
+
+        /// <summary>
+        /// Returns if the assignment is valid, i.e. if the expression:
+        /// lhs = rhs;
+        /// can be evaluated.
+        /// 
+        /// Returns true if both sides are numeric, of if the left hand side is a super type of the right hand side.
+        /// </summary>
+        /// <param name="lhs"></param>
+        /// <param name="rhs"></param>
+        /// <returns></returns>
+        private bool IsValidAssignment(CFlatType lhs, CFlatType rhs)
+        {
+            return ((lhs.IsNumeric && rhs.IsNumeric) || rhs.IsSupertype(lhs));
+        }
+
         #endregion
     }
 }
