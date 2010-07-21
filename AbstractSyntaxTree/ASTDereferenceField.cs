@@ -7,11 +7,10 @@ using SemanticAnalysis;
 
 namespace AbstractSyntaxTree
 {
-    public class ASTDereferenceField : ASTExpression
+    public class ASTDereferenceField : ASTLValue
     {
         public ASTExpression Object { get; set; }
         public String Field { get; set; }
-        public Descriptor Descriptor { get; set; }
 
         public ASTDereferenceField (ASTExpression obj, String field)
         {

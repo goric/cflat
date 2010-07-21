@@ -7,10 +7,9 @@ using SemanticAnalysis;
 
 namespace AbstractSyntaxTree
 {
-    public class ASTIdentifier : ASTExpression
+    public class ASTIdentifier : ASTLValue
     {
         public String ID { get; set; }
-        public Descriptor Descriptor { get; set; }
         public Descriptor SelfDescriptor { get; set; }
 
         public ASTIdentifier(SourceLocation loc, String id)
