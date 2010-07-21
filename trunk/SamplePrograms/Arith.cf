@@ -38,5 +38,10 @@ class arithmetic
 		{
 			Console.WriteLine(a);
 		}
+
+		int exp = 2 ^ 15;
+		Console.WriteLine(exp);
 	}
+
+	
 }
