@@ -12,17 +12,19 @@ namespace ILCodeGen
     /// <summary>
     /// This class generates CIL by walking a syntax tree.  This assumes that semantic checking has already
     /// been done.  Single Pass for now.
+    /// TODO:Needs to be multiple-pass, can't invoke a method until it's defined, can't create a type until its methods are defined...
+    /// weird
     /// </summary>
     public class CodeGenerator : Visitor
     {
-        private string _assemblyName;
-        private TypeBuilder _currentType;
-        private AssemblyBuilder _asm;
-        private ModuleBuilder _mod;
-        private ILGenerator _gen;
-        private Type _lastWalkedType;
-        private string _lastWalkedIdentifier;
-        private Dictionary<string, int> _locals;
+        protected string _assemblyName;
+        protected TypeBuilder _currentType;
+        protected AssemblyBuilder _asm;
+        protected ModuleBuilder _mod;
+        protected ILGenerator _gen;
+        protected Type _lastWalkedType;
+        protected string _lastWalkedIdentifier;
+        protected Dictionary<string, int> _locals;
 
 
         private MethodAttributes _tmpAttr;
@@ -46,7 +48,8 @@ namespace ILCodeGen
             //Create Module
             string exeName = _assemblyName + ".exe";
             _mod = _asm.DefineDynamicModule(exeName, exeName);
-            
+
+                       
         }
 
         public void Generate(ASTNode n)
@@ -61,9 +64,19 @@ namespace ILCodeGen
             _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
             
             n.Declarations.Visit(this);
-            
+
             _currentType.CreateType();
                                
+        }
+
+        public override void VisitSubClassDefinition(ASTSubClassDefinition n)
+        {
+            //TODO: need to get parent type
+            _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
+
+            n.Declarations.Visit(this);
+
+            _currentType.CreateType();
         }
 
         public override void VisitModifierList(ASTModifierList n)
@@ -130,6 +143,17 @@ namespace ILCodeGen
             StoreLocal(n.ID, lb.LocalIndex);
             
         }
+        public override void VisitDeclField(ASTDeclarationField n)
+        {
+            //TODO: Check Modifier list
+            FieldBuilder fb = _currentType.DefineField(n.Name, _lastWalkedType, FieldAttributes.Public);
+            
+        }
+        public override void VisitDeclConstructor(ASTDeclarationCtor n)
+        {
+            //ConstructorBuilder cb = _currentType.DefineConstructor(MethodAttributes...);
+        }
+        
         #endregion
 
         #region control/invoke
@@ -140,6 +164,10 @@ namespace ILCodeGen
         //        null, new Type[] { typeof(object) }, null));
             //so... different types go on different stacks?
             n.Actuals.Visit(this);
+
+            //MethodInfo mi = _currentType.GetMethod(n.Method);
+            
+            //_gen.Emit(OpCodes.Call, mi);
 
             _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
                 null, new Type[] { typeof(int) }, null));
@@ -241,7 +269,7 @@ namespace ILCodeGen
 
             _gen.Emit(OpCodes.Cgt);
 
-            //break on false
+            //break on true
             _gen.Emit(OpCodes.Brtrue, exit);
 
             //emit body of loop
@@ -400,7 +428,69 @@ namespace ILCodeGen
             SetupOperands(n);
         }
 
-        
+        public override void VisitExponent(ASTExponent n)
+        {
+            string TEMP_NM = "xp_temp";
+            string TOP_NM = "xp_top";
+            string LOOP_NM = "xp_loop";
+            string RES_NM = "xp_res";
+
+            n.Left.Visit(this);
+            
+            LocalBuilder lb = _gen.DeclareLocal(typeof(int));
+            StoreLocal(TEMP_NM, lb.LocalIndex);
+
+            n.Right.Visit(this);
+            LocalBuilder lb2 = _gen.DeclareLocal(typeof(int));
+            StoreLocal(TOP_NM, lb2.LocalIndex);
+
+            LocalBuilder lb3 = _gen.DeclareLocal(typeof(int));
+            _gen.Emit(OpCodes.Ldc_I4_1);
+            StoreLocal(LOOP_NM, lb3.LocalIndex);
+
+            LocalBuilder resBuilder = _gen.DeclareLocal(typeof(int));
+            LoadLocal(TEMP_NM);
+            StoreLocal(RES_NM, resBuilder.LocalIndex);
+
+            //define labels
+            Label loop = _gen.DefineLabel();
+            Label exit = _gen.DefineLabel();
+            
+            //loop label
+            _gen.MarkLabel(loop);
+
+            //check loop
+            LoadLocal(LOOP_NM);
+            LoadLocal(TOP_NM);
+            _gen.Emit(OpCodes.Bge, exit);
+
+            //load temp and result
+            LoadLocal(RES_NM);
+            LoadLocal(TEMP_NM);
+
+            //multiply
+            _gen.Emit(OpCodes.Mul);
+
+            //store result
+            StoreLocal(RES_NM, resBuilder.LocalIndex);
+
+            //load loop var
+            LoadLocal(LOOP_NM);
+            //add 1
+            _gen.Emit(OpCodes.Ldc_I4_1);
+            _gen.Emit(OpCodes.Add);
+
+            //update loop var
+            StoreLocal(LOOP_NM, lb3.LocalIndex);
+
+            //unconditional loop branch
+            _gen.Emit(OpCodes.Br, loop);
+
+            //break label
+            _gen.MarkLabel(exit);
+
+            LoadLocal(RES_NM);
+        }
         #endregion
         
         #region unary operators
