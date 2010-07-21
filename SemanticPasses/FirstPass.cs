@@ -23,6 +23,12 @@ namespace CFlat.SemanticPasses
         {
             _treeNode = treeNode;
             _scopeMgr = mgr;
+
+            if (!_scopeMgr.CurrentScope.HasSymbol("__global"))
+            {
+                _scopeMgr.AddClass("__global", new TypeClass("__global"), null);
+                CFlatMethods.AddToScope(_scopeMgr);
+            }
         }
 
         public void Run() 
@@ -79,6 +85,9 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitClassDefinition(ASTClassDefinition n)
         {
+            if (n.Name == "__global")
+                ReportError(n.Location, "The class name __global is reserved for internal compiler use.");
+
             TypeClass cls = new TypeClass(n.Name);
             _currentClass = cls;
             n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, null);
@@ -92,7 +101,11 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
+            if (n.Name == "__global")
+                ReportError(n.Location, "The class name __global is reserved for internal compiler use.");
+
             ClassDescriptor prnt = (ClassDescriptor)_scopeMgr.GetType(n.Parent);
+            
             TypeClass cls = new TypeClass(n.Name, prnt);
             _currentClass = cls;
 
