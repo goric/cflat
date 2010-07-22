@@ -46,6 +46,7 @@ String		\"(\\.|[^"])*\"
 "."					{ yylval.Token = new Token(Tokens.DOT, yytext, yyline, yycol); return (int)Tokens.DOT; }
 ".."				{ yylval.Token = new Token(Tokens.DOTDOT, yytext, yyline, yycol); return (int)Tokens.DOTDOT;}
 ","					{ yylval.Token = new Token(Tokens.COMMA, yytext, yyline, yycol); return (int)Tokens.COMMA; }
+"&"					{ yylval.Token = new Token(Tokens.AMP, yytext, yyline, yycol); return (int)Tokens.AMP; }
 
 "int"              	{ yylval.Token = new Token(Tokens.TINT, yytext, yyline, yycol); return (int)Tokens.TINT; }
 "real"              { yylval.Token = new Token(Tokens.TREAL, yytext, yyline, yycol); return (int)Tokens.TREAL; }
