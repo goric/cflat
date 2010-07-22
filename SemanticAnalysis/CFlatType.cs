@@ -29,6 +29,7 @@ namespace SemanticAnalysis
         public virtual bool IsFunction { get { return false; } }
         public virtual bool IsClass { get { return false; } }
         public virtual bool IsNumeric { get { return false; } }
+        public virtual bool IsString { get { return false; } }
 
         public virtual int Size { get { return 0; } }
 

@@ -23,6 +23,14 @@ namespace SemanticAnalysis
             return true;
         }
 
+        public override bool IsString
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         public override string ToString() { return "string"; }
     }
 }

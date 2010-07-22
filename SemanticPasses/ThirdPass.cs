@@ -129,7 +129,6 @@ namespace CFlat.SemanticPasses
         }
 
         /// <summary>
-        /// We're using the + operator for string concatenation too.
         /// Binary operators are not supported for classes, only primatives.
         /// </summary>
         /// <param name="n"></param>
@@ -138,11 +137,7 @@ namespace CFlat.SemanticPasses
             CFlatType lhs = CheckSubTree(n.Left);
             CFlatType rhs = CheckSubTree(n.Right);
 
-            if ((lhs is TypeString) && (rhs is TypeString))
-            {
-                _lastSeenType = n.CFlatType = new TypeString();
-            }
-            else if (lhs.IsNumeric && rhs.IsNumeric)
+            if (lhs.IsNumeric && rhs.IsNumeric)
             {
                 _lastSeenType = n.CFlatType = Supertype(lhs, rhs);
             }
@@ -150,6 +145,22 @@ namespace CFlat.SemanticPasses
             {
                 ReportError(n.Location, "Invalid operands for addition. Got types '{0}' and '{1}'.", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
             }
+        }
+
+        /// <summary>
+        /// Do we want to implicitly convert e.g. int, real to string values to make
+        /// print()ing easier?
+        /// </summary>
+        /// <param name="n"></param>
+        public override void VisitConcatenate (ASTConcatenate n)
+        {
+            CFlatType lhs = CheckSubTree(n.Left);
+            CFlatType rhs = CheckSubTree(n.Right);
+
+            if (lhs.IsString && rhs.IsString)
+                _lastSeenType = n.CFlatType = lhs;
+            else
+                ReportError(n.Location, "Operands for concatenation must be strings");
         }
 
         public override void VisitSub(ASTSubtract n)
