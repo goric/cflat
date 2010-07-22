@@ -65,6 +65,7 @@ namespace AbstractSyntaxTree
         public virtual void VisitAnd (ASTAnd n) { }
         public virtual void VisitOr (ASTOr n) { }
         public virtual void VisitExponent (ASTExponent n) { }
+        public virtual void VisitConcatenate (ASTConcatenate n) { }
 
         #endregion
 

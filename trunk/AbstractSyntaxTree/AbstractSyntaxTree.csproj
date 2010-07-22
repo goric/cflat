@@ -48,6 +48,7 @@
     <Compile Include="ASTBlock.cs" />
     <Compile Include="ASTBoolean.cs" />
     <Compile Include="ASTClassDefinition.cs" />
+    <Compile Include="ASTConcatenate.cs" />
     <Compile Include="ASTDeclaration.cs" />
     <Compile Include="ASTDeclarationCtor.cs" />
     <Compile Include="ASTDeclarationField.cs" />

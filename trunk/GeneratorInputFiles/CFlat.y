@@ -11,14 +11,14 @@
 /* Terminals */
 %token<Token> SEMI RPAREN LBRACE RBRACE RBRACKET PBRACKET DOT DOTDOT COMMA IN BASE
 %token<Token> TINT TREAL TSTRING TBOOL TVOID WHILE FOR IF ELSE SELF CLASS EXTENDS NEW RETURN 
-%token<Token> TRUE FALSE READONLY NECESSARY PRIVATE PUBLIC
+%token<Token> TRUE FALSE READONLY NECESSARY PRIVATE PUBLIC AMP
 %token<Token> LITERAL_INT LITERAL_REAL LITERAL_STRING IDENTIFIER
 
 /* Precedence rules */
 %right ASSIGN
 %left OR AND INCREMENT DECREMENT EXP
 %left SMALLER GREATER SMEQ GTEQ EQ NEQ
-%left PLUS MINUS TIMES DIVIDE MOD
+%left PLUS MINUS TIMES DIVIDE MOD AMP
 %left UMINUS LPAREN NOT LBRACKET
 %nonassoc ELSE
 
@@ -131,6 +131,7 @@ expression		: expression AND  expression		{ $$ = new ASTAnd($1, $3); }
 				| expression DIVIDE expression		{ $$ = new ASTDivide($1, $3); } 
 				| expression MOD expression			{ $$ = new ASTModulo($1, $3); } 
 				| expression EXP expression			{ $$ = new ASTExponent($1, $3); } 
+				| expression AMP expression			{ $$ = new ASTConcatenate($1, $3); } 
 				| literal							{ $$ = $1; }
 				| MINUS expression	%prec UMINUS	{ $$ = new ASTNegative($2); } 
 				| NOT expression					{ $$ = new ASTNot($2); } 

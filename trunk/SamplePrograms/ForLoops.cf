@@ -7,11 +7,11 @@ class forLoop
 		for(int i = 0; i < 10; i++)
 			x++;
 
-		print(x + " should be 10");
+		print(x & " should be 10");
 
 		for(a in [0..9])
 			x--;
 
-		print(x + " should be 0");
+		print(x & " should be 0");
 	}
 }
