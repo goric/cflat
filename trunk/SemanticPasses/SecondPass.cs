@@ -14,6 +14,8 @@ namespace CFlat.SemanticPasses
     /// </summary>
     public class SecondPass : FirstPass, ICompilerPass
     {
+        protected const string READONLY_MODIFIER = "readonly";
+        protected const string NECESSARY_MODIFIER = "necessary";
         private ActualBuilder _actuals;
         private FormalBuilder _formals;
 
@@ -34,9 +36,11 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitClassDefinition(ASTClassDefinition n)
         {
-            _currentClass = (TypeClass)n.Descriptor.Type;
+            _currentClass = new TypeClass(n.Name);
             var classScope = _scopeMgr.PushScope(string.Format("class {0}", _currentClass.ClassName));
 
+            _currentClass.Descriptor = (ClassDescriptor)_scopeMgr.Find(n.Name, p => p is ClassDescriptor);
+            
             var declarationType = CheckSubTree(n.Declarations);
             n.Type = _currentClass;
 
@@ -46,14 +50,30 @@ namespace CFlat.SemanticPasses
 
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
-            _currentClass = (TypeClass)n.Descriptor.Type;
+            var parent = (ClassDescriptor)_scopeMgr.Find(n.Parent, p => p is ClassDescriptor);
+            _currentClass = new TypeClass(n.Name, parent);
             var classScope = _scopeMgr.PushScope(string.Format("subclass {0}", _currentClass.ClassName));
+
+            _currentClass.Descriptor = (ClassDescriptor)_scopeMgr.Find(n.Name, p => p is ClassDescriptor);
 
             var declarationType = CheckSubTree(n.Declarations);
             n.Type = _currentClass;
 
+            CheckNecessaryFunctions(n);
+
             _currentClass.Scope = classScope;
             _scopeMgr.PopScope();
+        }
+
+        //finds any 'necessary' methods in the parent class and makes sure that this subclass implements them
+        private void CheckNecessaryFunctions (ASTSubClassDefinition n)
+        {
+            var parent = (ClassDescriptor)_scopeMgr.Find(n.Parent, p => p is ClassDescriptor);
+
+            foreach(var method in parent.Methods)
+                if (method.Modifiers.Contains(NECESSARY_MODIFIER, StringComparer.InvariantCultureIgnoreCase))
+                    if (!_scopeMgr.CurrentScope.HasSymbol(method.Name))
+                        ReportError(n.Location, "Class '{0}' does not implement method '{1}', marked necessary by superclass '{2}'", n.Name, method.Name, n.Parent);
         }
 
         /// <summary>
@@ -66,6 +86,7 @@ namespace CFlat.SemanticPasses
             n.Type = declFieldType;
             var desc = _scopeMgr.AddMember(n.Name, declFieldType, _currentClass);
             n.Descriptor = desc;
+            _currentClass.Descriptor.Fields.Add(desc);
         }
 
         /// <summary>
@@ -79,16 +100,33 @@ namespace CFlat.SemanticPasses
             var methodScope = _scopeMgr.PushScope(string.Format("method {0}", n.Name));
             var func = new TypeFunction();
 
-            CollectFormals(n.Formals, func);
+            var formalDescriptors = CollectFormals(n.Formals, func);
 
             var returnType = CheckSubTree(n.ReturnType);
             func.ReturnType = returnType;
             func.Scope = methodScope;
 
+            var mods = GatherModifiers(n);
+
             _scopeMgr.PopScope();
-            var methodDesc = _scopeMgr.AddMethod(n.Name, func, _currentClass);
+            var methodDesc = _scopeMgr.AddMethod(n.Name, func, _currentClass, mods);
             n.Descriptor = methodDesc;
             n.Type = func;
+
+            foreach (var formal in formalDescriptors)
+                methodDesc.Formals.Add(formal);
+        }
+
+        private List<string> GatherModifiers (ASTDeclarationMethod n)
+        {
+            var names = new List<String>();
+            var mods = n.Modifiers;
+            while (!mods.IsEmpty)
+            {
+                names.Add(mods.Modifier);
+                mods = mods.Tail;
+            }
+            return names;
         }
 
         /// <summary>
@@ -101,17 +139,22 @@ namespace CFlat.SemanticPasses
             var ctorScope = _scopeMgr.PushScope(string.Format("ctor {0}", n.Name));
             var func = new TypeFunction() { ReturnType = new TypeVoid(), IsConstructor = true };
 
-            CollectFormals(n.Formals, func);
+            var formalDescriptors = CollectFormals(n.Formals, func);
 
             func.Scope = ctorScope;
             _scopeMgr.PopScope();
             var methodDesc = _scopeMgr.AddMethod(n.Name, func, _currentClass);
             n.Descriptor = methodDesc;
             n.Type = func;
+
+            foreach (var formal in formalDescriptors)
+                methodDesc.Formals.Add(formal);
+            _currentClass.Descriptor.Methods.Add(methodDesc);
         }
 
-        private void CollectFormals (ASTFormalList formals, TypeFunction containingFunction)
+        private List<FormalDescriptor> CollectFormals (ASTFormalList formals, TypeFunction containingFunction)
         {
+            var descList = new List<FormalDescriptor>();
             var formalsType = CheckSubTree(formals);
 
             if (!formals.IsEmpty)
@@ -120,9 +163,12 @@ namespace CFlat.SemanticPasses
                 while (!list.IsEmpty)
                 {
                     containingFunction.AddFormal(list.Formal.Name, list.Formal.CFlatType);
+                    descList.Add(new FormalDescriptor(list.Formal.CFlatType, list.Formal.Name, list.Formal.Modifier));
                     list = list.Tail;
                 }
             }
+
+            return descList;
         }
 
         public override void VisitFormal(ASTFormal n) 

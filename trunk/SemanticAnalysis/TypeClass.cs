@@ -13,6 +13,7 @@ namespace SemanticAnalysis
 
         public string ClassName { get; set; }
         public ClassDescriptor Parent { get; set; }
+        public ClassDescriptor Descriptor { get; set; }
         public Scope Scope { get; set; }
 
         public Dictionary<String, CFlatType> Fields;
