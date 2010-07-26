@@ -19,4 +19,8 @@ class cat is animal
 class dog is animal
 {
 	/* semantic error - dog is a subclass of animal but does not implement speak() */
+	public void sayhi()
+	{
+		print("woof");
+	}
 }

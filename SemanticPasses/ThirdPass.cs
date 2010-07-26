@@ -10,7 +10,6 @@ namespace CFlat.SemanticPasses
     public class ThirdPass : SecondPass, ICompilerPass
     {
         private TypeFunction _currentMethod;
-        private const string READONLY_MODIFIER = "readonly";
 
         public ThirdPass(ASTNode treeNode, ScopeManager mgr)
             : base(treeNode, mgr)

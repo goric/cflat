@@ -44,16 +44,21 @@ namespace CFlat.SemanticPasses
         /// <returns></returns>
         public ClassDescriptor AddClass(string name, CFlatType t, ClassDescriptor parent = null)
         {
-            ClassDescriptor cd = new ClassDescriptor(t, parent);
+            ClassDescriptor cd = new ClassDescriptor(t, parent, name);
             CurrentScope.Descriptors.Add(name, cd);
             return cd;
         }
 
-        public MethodDescriptor AddMethod(string name, CFlatType type, TypeClass containingClass)
+        public MethodDescriptor AddMethod(string name, CFlatType type, TypeClass containingClass, List<String> modifiers = null)
         {
-            var md = new MethodDescriptor(type);
+            var md = new MethodDescriptor(type, name);
+            if (modifiers != null)
+                md.Modifiers.AddRange(modifiers);
             CurrentScope.Descriptors.Add(name, md);
-            containingClass.AddMethod(name, type);
+
+            Descriptor d;
+            CurrentScope.Descriptors.TryGetValue(name, out d);
+            containingClass.Descriptor.Methods.Add((MethodDescriptor)d);
             return md;
         }
 
@@ -64,11 +69,13 @@ namespace CFlat.SemanticPasses
             return descriptor;
         }
 
-        public MemberDescriptor AddMember(string name, CFlatType type, TypeClass containingClass)
+        public MemberDescriptor AddMember(string name, CFlatType type, TypeClass containingClass, string modifier = null)
         {
             var descriptor = new MemberDescriptor(type);
+            if(modifier != null)
+                descriptor.Modifiers.Add(modifier);
             CurrentScope.Descriptors.Add(name, descriptor);
-            containingClass.AddField(name, type);
+            containingClass.Descriptor.Fields.Add(descriptor);
             return descriptor;
         }
 
