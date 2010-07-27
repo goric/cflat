@@ -45,8 +45,15 @@ namespace CFlat
                 Console.WriteLine("Hooray, no errors found in the semantic passes.");
 
                 //I fail at string processing but w/e
+                TypeManager tm = new TypeManager();
+
+                ClassPass cp = new ClassPass(tm);
+                cp.Run(root);
+
+                MethodPass mp = new MethodPass(tm);
+                mp.Run(root);
                 
-                CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""));
+                CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""), tm);
 
                 cg.Generate(root);
 
