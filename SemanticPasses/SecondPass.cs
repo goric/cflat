@@ -47,6 +47,15 @@ namespace CFlat.SemanticPasses
             n.Type = _currentClass;
 
             _currentClass.Descriptor.Scope = _currentClass.Scope = classScope;
+
+            // add a parameterless ctor if none exists
+            var ctor = _currentClass.Descriptor.Methods.Where(p => p.Name.Equals(_currentClass.ClassName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
+            if (ctor == null)
+            {
+                var func = new TypeFunction(n.Name) { ReturnType = new TypeVoid(), IsConstructor = true, Scope = classScope };
+                _scopeMgr.AddMethod(n.Name, func, _currentClass);
+            }
+
             _scopeMgr.PopScope();
         }
 
@@ -64,6 +73,15 @@ namespace CFlat.SemanticPasses
             CheckNecessaryFunctions(n);
 
             _currentClass.Descriptor.Scope = _currentClass.Scope = classScope;
+
+            // add a parameterless ctor if none exists
+            var ctor = _currentClass.Descriptor.Methods.Where(p => p.Name.Equals(_currentClass.ClassName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
+            if (ctor == null)
+            {
+                var func = new TypeFunction(n.Name) { ReturnType = new TypeVoid(), IsConstructor = true, Scope = classScope };
+                _scopeMgr.AddMethod(n.Name, func, _currentClass);
+            }
+
             _scopeMgr.PopScope();
         }
 
@@ -91,7 +109,6 @@ namespace CFlat.SemanticPasses
 
             var desc = _scopeMgr.AddMember(n.Name, declFieldType, _currentClass, mods);
             n.Descriptor = desc;
-            _currentClass.Descriptor.Fields.Add(desc);
         }
 
         private List<string> GatherFieldModifiers (ASTDeclarationField n)

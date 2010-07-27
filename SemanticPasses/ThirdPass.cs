@@ -428,7 +428,7 @@ namespace CFlat.SemanticPasses
             if (desc != null)
             {
                 var cls = (ClassDescriptor)_scopeMgr.Find(n.ClassName, p => p is ClassDescriptor);
-                var func = cls.Methods[0].Type as TypeFunction;
+                var func = cls.Methods.Where(prop => prop.Name.Equals(n.ClassName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault().Type as TypeFunction;
                 //Check if the class we're working with has a constructor of the same name
                 if (func != null)
                 {
@@ -440,7 +440,7 @@ namespace CFlat.SemanticPasses
                     if (func.AcceptCall(builder.Actuals))
                     {
                         //hooray, the code is valid
-                        MethodDescriptor ctorDescriptor = (MethodDescriptor)func.Scope.Parent.Descriptors[n.ClassName];
+                        MethodDescriptor ctorDescriptor = (MethodDescriptor)func.Scope.Descriptors[n.ClassName];
                         _lastSeenType = func;
                         n.ClassDescriptor = desc;
                         n.Descriptor = ctorDescriptor;
