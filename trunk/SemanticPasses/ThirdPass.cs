@@ -427,21 +427,21 @@ namespace CFlat.SemanticPasses
             ClassDescriptor desc = _scopeMgr.GetType(n.ClassName) as ClassDescriptor;
             if (desc != null)
             {
-                TypeClass currentClass = (TypeClass)desc.Type;
+                var cls = (ClassDescriptor)_scopeMgr.Find(n.ClassName, p => p is ClassDescriptor);
+                var func = cls.Methods[0].Type as TypeFunction;
                 //Check if the class we're working with has a constructor of the same name
-                TypeFunction ctor = currentClass.Methods[n.ClassName] as TypeFunction;
-                if (ctor != null)
+                if (func != null)
                 {
                     CheckSubTree(n.Actuals);
                     //check the method signature of the constructor to make sure the correct arguments are passed in
                     ActualBuilder builder = new ActualBuilder();
                     n.Actuals.Visit(builder);
 
-                    if (ctor.AcceptCall(builder.Actuals))
+                    if (func.AcceptCall(builder.Actuals))
                     {
                         //hooray, the code is valid
-                        MethodDescriptor ctorDescriptor = (MethodDescriptor)currentClass.Scope.Descriptors[n.ClassName];
-                        _lastSeenType = currentClass;
+                        MethodDescriptor ctorDescriptor = (MethodDescriptor)func.Scope.Parent.Descriptors[n.ClassName];
+                        _lastSeenType = func;
                         n.ClassDescriptor = desc;
                         n.Descriptor = ctorDescriptor;
                     }
@@ -467,36 +467,33 @@ namespace CFlat.SemanticPasses
             if (lhs.IsClass)
             {
                 TypeClass lvalue = (TypeClass)lhs;
+                var descriptor = (ClassDescriptor)_scopeMgr.Find(lvalue.ClassName, p => p is ClassDescriptor);
                 //check if a method with the given name exists in the scope.
                 //This needs to check not only the class's shallow scope, but all the parents as well.
-                if (_scopeMgr.HasSymbol(n.Method, lvalue.Scope))
+                MethodDescriptor methodDesc = _scopeMgr.Find(n.Method, d => d is MethodDescriptor, descriptor.Scope) as MethodDescriptor;
+                if (methodDesc != null && (descriptor.Methods.Contains(methodDesc) || methodDesc.IsCFlatMethod))
                 {
-                    MethodDescriptor methodDesc = _scopeMgr.Find(n.Method, d => d.IsMethod, lvalue.Scope) as MethodDescriptor;
-                    if (methodDesc != null)
+                    if (methodDesc.Modifiers.Contains(PRIVATE_MODIFIER, StringComparer.InvariantCultureIgnoreCase))
+                        if (!_scopeMgr.HasSymbolShallow(n.Method))
+                            ReportError(n.Location, "Cannot access the private method {0} in class {1} from class {2}", methodDesc.Name, methodDesc.ContainingClass.Name, _currentClass.ClassName);
+                    //check if the arguments match
+                    TypeFunction method = (TypeFunction)methodDesc.Type;
+                    //visit any actuals that need processing
+                    CheckSubTree(n.Actuals);
+                    //collect the actuals
+                    ActualBuilder builder = new ActualBuilder();
+                    n.Actuals.Visit(builder);
+
+                    if (method.AcceptCall(builder.Actuals))
                     {
-                        //check if the arguments match
-                        TypeFunction method = (TypeFunction)methodDesc.Type;
-                        //visit any actuals that need processing
-                        CheckSubTree(n.Actuals);
-                        //collect the actuals
-                        ActualBuilder builder = new ActualBuilder();
-                        n.Actuals.Visit(builder);
+                        n.Descriptor = methodDesc;
+                        n.CFlatType = method.ReturnType;
 
-                        if (method.AcceptCall(builder.Actuals))
-                        {
-                            n.Descriptor = methodDesc;
-                            n.CFlatType = method.ReturnType;
-
-                            _lastSeenType = method.ReturnType;
-                        }
-                        else
-                        {
-                            ReportError(n.Location, "Invalid parameters for method '{0}.{1}'", TypeToFriendlyName(lvalue), n.Method);
-                        }
+                        _lastSeenType = method.ReturnType;
                     }
                     else
                     {
-                        ReportError(n.Location, "'{0}' is not a method for type '{1}'", n.Method, TypeToFriendlyName(lvalue));
+                        ReportError(n.Location, "Invalid parameters for method '{0}.{1}'", TypeToFriendlyName(lvalue), n.Method);
                     }
                 }
                 else
@@ -542,20 +539,27 @@ namespace CFlat.SemanticPasses
 
             //Make sure the lvalue is a type and the identifier exists
             CFlatType lhs = CheckSubTree(n.Object);
+
             if (lhs.IsClass)
             {
                 TypeClass lvalue = (TypeClass)lhs;
+                var descriptor = (ClassDescriptor)_scopeMgr.Find(lvalue.ClassName, p => p is ClassDescriptor);
                 //check if a field exists.
-                if (lvalue.Scope.HasSymbol(n.Field))
+                MemberDescriptor memberDesc = _scopeMgr.Find(n.Field, d => d is MemberDescriptor, descriptor.Scope) as MemberDescriptor;
+
+                if (memberDesc != null && descriptor.Fields.Contains(memberDesc))
                 {
-                    MemberDescriptor fieldDesc = lvalue.Scope.Descriptors[n.Field] as MemberDescriptor;
-                    if (fieldDesc != null)
+                    if (memberDesc.Modifiers.Contains(PRIVATE_MODIFIER, StringComparer.InvariantCultureIgnoreCase))
+                        if (!_scopeMgr.HasSymbolShallow(n.Field))
+                            ReportError(n.Location, "Cannot reference the private member '{0}' on class '{1}' from class '{2}'", memberDesc.Name, memberDesc.ContainingClass.Name, _currentClass.ClassName);
+
+                    if (memberDesc != null)
                     {
                         //hooray, code is valid
-                        n.Descriptor = fieldDesc;
-                        n.CFlatType = fieldDesc.Type;
+                        n.Descriptor = memberDesc;
+                        n.CFlatType = memberDesc.Type;
 
-                        _lastSeenType = fieldDesc.Type;
+                        _lastSeenType = memberDesc.Type;
                     }
                     else
                     {
@@ -670,6 +674,8 @@ namespace CFlat.SemanticPasses
                 if (n.InitialValue != null)
                 {
                     CFlatType rhs = CheckSubTree(n.InitialValue);
+                    if (rhs is TypeFunction && ((TypeFunction)rhs).IsConstructor)
+                        rhs = new TypeClass(((TypeFunction)rhs).Name);
                     if (!IsValidAssignment(lhs, rhs))
                     {
                         valid = false;

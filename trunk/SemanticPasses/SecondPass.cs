@@ -16,6 +16,8 @@ namespace CFlat.SemanticPasses
     {
         protected const string READONLY_MODIFIER = "readonly";
         protected const string NECESSARY_MODIFIER = "necessary";
+        protected const string PRIVATE_MODIFIER = "private";
+
         private ActualBuilder _actuals;
         private FormalBuilder _formals;
 
@@ -44,7 +46,7 @@ namespace CFlat.SemanticPasses
             var declarationType = CheckSubTree(n.Declarations);
             n.Type = _currentClass;
 
-            _currentClass.Scope = classScope;
+            _currentClass.Descriptor.Scope = _currentClass.Scope = classScope;
             _scopeMgr.PopScope();
         }
 
@@ -61,7 +63,7 @@ namespace CFlat.SemanticPasses
 
             CheckNecessaryFunctions(n);
 
-            _currentClass.Scope = classScope;
+            _currentClass.Descriptor.Scope = _currentClass.Scope = classScope;
             _scopeMgr.PopScope();
         }
 
@@ -84,9 +86,24 @@ namespace CFlat.SemanticPasses
         {
             var declFieldType = CheckSubTree(n.FieldType);
             n.Type = declFieldType;
-            var desc = _scopeMgr.AddMember(n.Name, declFieldType, _currentClass);
+
+            var mods = GatherFieldModifiers(n);
+
+            var desc = _scopeMgr.AddMember(n.Name, declFieldType, _currentClass, mods);
             n.Descriptor = desc;
             _currentClass.Descriptor.Fields.Add(desc);
+        }
+
+        private List<string> GatherFieldModifiers (ASTDeclarationField n)
+        {
+            var names = new List<String>();
+            var mods = n.Modifiers;
+            while (!mods.IsEmpty)
+            {
+                names.Add(mods.Modifier);
+                mods = mods.Tail;
+            }
+            return names;
         }
 
         /// <summary>
@@ -98,7 +115,7 @@ namespace CFlat.SemanticPasses
         public override void VisitDeclMethod (ASTDeclarationMethod n)
         {
             var methodScope = _scopeMgr.PushScope(string.Format("method {0}", n.Name));
-            var func = new TypeFunction();
+            var func = new TypeFunction(n.Name);
 
             var formalDescriptors = CollectFormals(n.Formals, func);
 
@@ -137,7 +154,7 @@ namespace CFlat.SemanticPasses
         public override void VisitDeclConstructor (ASTDeclarationCtor n)
         {
             var ctorScope = _scopeMgr.PushScope(string.Format("ctor {0}", n.Name));
-            var func = new TypeFunction() { ReturnType = new TypeVoid(), IsConstructor = true };
+            var func = new TypeFunction(n.Name) { ReturnType = new TypeVoid(), IsConstructor = true };
 
             var formalDescriptors = CollectFormals(n.Formals, func);
 
@@ -196,6 +213,11 @@ namespace CFlat.SemanticPasses
         public override void VisitTypeVoid (ASTTypeVoid n)
         {
             n.Type = _lastSeenType = new TypeVoid();
+        }
+
+        public override void VisitTypeName (ASTTypeClass n)
+        {
+            n.Type = _lastSeenType = new TypeClass(n.Name);
         }
 
         public override void VisitTypeReal (ASTTypeReal n)

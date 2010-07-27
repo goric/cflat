@@ -12,14 +12,15 @@ namespace SemanticAnalysis
         public bool HasReturnStatement { get; set; }
         public Scope Scope { get; set; }
         public CFlatType ReturnType { get; set; }
+        public string Name { get; private set; }
 
         public Dictionary<string, CFlatType> Formals;
         public Dictionary<string, CFlatType> Locals;
 
-        public TypeFunction()
+        public TypeFunction(string name)
             : this(false)
         {
-
+            Name = name;
         }
 
         public TypeFunction(bool isCtor)
@@ -55,7 +56,7 @@ namespace SemanticAnalysis
             for (int i = 0; i < formals.Count; i++)
             {
                 //is the formal a super type of what we're passing in? If not, then this is not valid
-                if (!actuals[i].IsSupertype(formals[i]))
+                if (!formals[i].IsSupertype(actuals[i]))
                     return false;
             }
 
