@@ -40,8 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassPass.cs" />
     <Compile Include="CodeGenerator.cs" />
+    <Compile Include="MethodPass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AbstractSyntaxTree\AbstractSyntaxTree.csproj">
