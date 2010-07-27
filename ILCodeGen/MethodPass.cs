@@ -21,12 +21,17 @@ namespace ILCodeGen
         {
             _currentType = n.Name;
 
+            _mgr.MethodMap.Add(n.Name, new List<AbstractSyntaxTree.ASTDeclarationMethod>());
+
             n.Declarations.Visit(this);
+
         }
 
         public override void VisitSubClassDefinition(AbstractSyntaxTree.ASTSubClassDefinition n)
         {
             _currentType = n.Name;
+
+            _mgr.MethodMap.Add(n.Name, new List<AbstractSyntaxTree.ASTDeclarationMethod>());
 
             n.Declarations.Visit(this);
         }
@@ -37,7 +42,7 @@ namespace ILCodeGen
         /// <param name="n"></param>
         public override void VisitDeclMethod(AbstractSyntaxTree.ASTDeclarationMethod n)
         {
-            _mgr.MethodMap.Add(_currentType, n);
+            _mgr.MethodMap[_currentType].Add(n);
         }
     }
 }

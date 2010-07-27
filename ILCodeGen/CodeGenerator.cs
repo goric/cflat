@@ -26,7 +26,10 @@ namespace ILCodeGen
         protected string _lastWalkedIdentifier;
         protected Dictionary<string, int> _locals;
         protected TypeManager _mgr;
+        private Type _topOfStackType;
 
+        //i heard you like dictionaries, so i put a dictionary in your dictionary
+        private Dictionary<string, Dictionary<string, MethodBuilder>> _methods;
 
         private MethodAttributes _tmpAttr;
 
@@ -38,6 +41,8 @@ namespace ILCodeGen
             _mgr = m;
             _assemblyName = assemblyName;
             _locals = new Dictionary<string, int>();
+            _methods = new Dictionary<string, Dictionary<string, MethodBuilder>>(); ;
+            
             Init();
         }
 
@@ -51,7 +56,11 @@ namespace ILCodeGen
             string exeName = _assemblyName + ".exe";
             _mod = _asm.DefineDynamicModule(exeName, exeName);
 
-            DefineClasses();  
+            DefineClasses();
+
+            DefineMethodStubs();
+
+            DefineTypes();
         }
 
         public void Generate(ASTNode n)
@@ -95,13 +104,37 @@ namespace ILCodeGen
                 _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Public | TypeAttributes.Class,
                     _mgr.CFlatTypes[_mgr.InheritanceMap[className]]));
         }
-        
+
+        //This stubs out all the methods so you don't get odd invoke errors
+        //it should also let code like this compile --- public void a() { b(); } public void b() { a(); }
+        private void DefineMethodStubs()
+        {
+            foreach (TypeBuilder tb in _mgr.CFlatTypes.Values)
+            {
+                _methods.Add(tb.Name, new Dictionary<string, MethodBuilder>());
+
+                foreach(AbstractSyntaxTree.ASTDeclarationMethod decl in _mgr.MethodMap[tb.Name])
+                {
+                    //TODO:Add Access Modifiers
+                    _methods[tb.Name].Add(decl.Name, tb.DefineMethod(decl.Name, MethodAttributes.Public | MethodAttributes.Static));
+                }
+            }
+        }
+
+        public void DefineTypes()
+        {
+            foreach(TypeBuilder tb in _mgr.CFlatTypes.Values)
+            {
+                tb.CreateType();
+            }
+        }
 
         public override void VisitClassDefinition(ASTClassDefinition n)
         {       
             //gen type
-            _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
-            
+            //_currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
+            _currentType = _mgr.CFlatTypes[n.Name];
+
             n.Declarations.Visit(this);
 
             _currentType.CreateType();
@@ -111,7 +144,8 @@ namespace ILCodeGen
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
             //TODO: need to get parent type
-            _currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
+            //_currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
+            _currentType = _mgr.CFlatTypes[n.Name];
 
             n.Declarations.Visit(this);
 
@@ -150,10 +184,12 @@ namespace ILCodeGen
         {
             n.Modifiers.Visit(this);
 
-            MethodBuilder meth = _currentType.DefineMethod(n.Name, _tmpAttr);
-            //set il generator to this method
-            _gen = meth.GetILGenerator();
             
+            MethodBuilder meth = _methods[_currentType.Name][n.Name];
+            //set il generator to this method
+            //_gen = meth.GetILGenerator();
+            _gen = meth.GetILGenerator();
+
             //is this the entry point
             if (n.Name == MAIN_METHOD_NAME)
             {
@@ -204,12 +240,19 @@ namespace ILCodeGen
             //so... different types go on different stacks?
             n.Actuals.Visit(this);
 
-            //MethodInfo mi = _currentType.GetMethod(n.Method);
+            //HACK:No print statement and i need to get the other cases working
+            if (n.Method == "WriteLine")
+                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
+               null, new Type[] { _topOfStackType }, null));
+            else
+            {
+                //should be there since we stubbed all of these out earlier
+                //MethodInfo mi = _currentType.GetMethod(n.Method);
+
+                //_gen.Emit(OpCodes.Call, mi);
+            }
             
-            //_gen.Emit(OpCodes.Call, mi);
-            
-            _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
-                null, new Type[] { typeof(int) }, null));
+           
         }
 
         public override void VisitIfThen(ASTIfThen n)
@@ -391,21 +434,25 @@ namespace ILCodeGen
         {
             //load integer
             _gen.Emit(OpCodes.Ldc_I4, n.Value);
+            _topOfStackType = typeof(int);
         }
         public override void VisitString(ASTString n)
         {
             //push string on stack
             _gen.Emit(OpCodes.Ldstr, n.Value);
+            _topOfStackType = typeof(string);
         }
         public override void VisitBoolean(ASTBoolean n)
         {
             //assume 1 == true?
             if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
+            _topOfStackType = typeof(int);
         }
         public override void VisitReal(ASTReal n)
         {
             //push real on stack
             _gen.Emit(OpCodes.Ldc_R4, n.Value);
+            _topOfStackType = typeof(double);
         }
         #endregion
 
