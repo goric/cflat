@@ -12,14 +12,16 @@ namespace SemanticAnalysis
         public List<MethodDescriptor> Methods { get; private set; }
         public List<MemberDescriptor> Fields { get; private set; }
         public string Name { get; private set; }
+        public Scope Scope { get; set; }
 
-        public ClassDescriptor(CFlatType t, ClassDescriptor parentClass, string name) 
+        public ClassDescriptor(CFlatType t, ClassDescriptor parentClass, string name, Scope s) 
             : base(t)
         {
             ParentClass = parentClass;
             Methods = new List<MethodDescriptor>();
             Fields = new List<MemberDescriptor>();
             Name = name;
+            Scope = s;
         }
 
         public override string ToString()

@@ -44,21 +44,19 @@ namespace CFlat.SemanticPasses
         /// <returns></returns>
         public ClassDescriptor AddClass(string name, CFlatType t, ClassDescriptor parent = null)
         {
-            ClassDescriptor cd = new ClassDescriptor(t, parent, name);
+            ClassDescriptor cd = new ClassDescriptor(t, parent, name, CurrentScope);
             CurrentScope.Descriptors.Add(name, cd);
             return cd;
         }
 
-        public MethodDescriptor AddMethod(string name, CFlatType type, TypeClass containingClass, List<String> modifiers = null)
+        public MethodDescriptor AddMethod(string name, CFlatType type, TypeClass containingClass, List<String> modifiers = null, bool isCFlat = false)
         {
-            var md = new MethodDescriptor(type, name);
+            var md = new MethodDescriptor(type, name, containingClass.Descriptor);
+            md.IsCFlatMethod = isCFlat;
             if (modifiers != null)
                 md.Modifiers.AddRange(modifiers);
             CurrentScope.Descriptors.Add(name, md);
-
-            Descriptor d;
-            CurrentScope.Descriptors.TryGetValue(name, out d);
-            containingClass.Descriptor.Methods.Add((MethodDescriptor)d);
+            containingClass.Descriptor.Methods.Add(md);
             return md;
         }
 
@@ -69,11 +67,11 @@ namespace CFlat.SemanticPasses
             return descriptor;
         }
 
-        public MemberDescriptor AddMember(string name, CFlatType type, TypeClass containingClass, string modifier = null)
+        public MemberDescriptor AddMember(string name, CFlatType type, TypeClass containingClass, List<string> modifiers = null)
         {
-            var descriptor = new MemberDescriptor(type);
-            if(modifier != null)
-                descriptor.Modifiers.Add(modifier);
+            var descriptor = new MemberDescriptor(type, name, containingClass.Descriptor);
+            if(modifiers != null)
+                descriptor.Modifiers.AddRange(modifiers);
             CurrentScope.Descriptors.Add(name, descriptor);
             containingClass.Descriptor.Fields.Add(descriptor);
             return descriptor;
@@ -109,7 +107,7 @@ namespace CFlat.SemanticPasses
         /// <param name="pred"></param>
         /// <param name="s"></param>
         /// <returns>A Descriptor if found, null otherwise.</returns>
-        public Descriptor Find(string name, Func<Descriptor, bool> pred, Scope s)
+        public Descriptor Find(string name, Func<Descriptor, bool> pred, Scope s, bool currentOnly = false)
         {
             Scope checkScope = s;
 
@@ -123,8 +121,10 @@ namespace CFlat.SemanticPasses
                     //This thing could actually short circuit and return false here, cause we're looking in a dictionary.
                     //I'll hold off on doing that cause maybe we want to change the data structure to a bucket to allow overloading and shadowing. The performance penalty for looping is pretty much nothing so w/e.
                 }
-
-                checkScope = checkScope.Parent;
+                if (!currentOnly)
+                    checkScope = checkScope.Parent;
+                else
+                    checkScope = null;
             }
 
             return null;
@@ -153,7 +153,7 @@ namespace CFlat.SemanticPasses
 
         public bool HasSymbolShallow(string identifier)
         {
-            return CurrentScope.HasSymbol(identifier);
+            return Find(identifier, d => true, CurrentScope, true) != null;
         }
 
         #endregion
