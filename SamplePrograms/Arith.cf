@@ -1,8 +1,9 @@
 class arithmetic
 {
+	int AddInts(int a,int b) { return a + b; }
 	void main()
 	{
-		int x = 1 + 1;
+		int x = AddInts(1,1);
 		Console.WriteLine(x);
 		int y = 2 * 2;
 		Console.WriteLine(y);
