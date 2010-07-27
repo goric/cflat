@@ -10,14 +10,14 @@ namespace ILCodeGen
     {
         public Dictionary<string, string> InheritanceMap;
 
-        public Dictionary<string, ASTDeclarationMethod> MethodMap;
+        public Dictionary<string, List<ASTDeclarationMethod>> MethodMap;
 
         public Dictionary<string, System.Reflection.Emit.TypeBuilder> CFlatTypes;
 
         public TypeManager()
         {
             InheritanceMap = new Dictionary<string, string>();
-            MethodMap = new Dictionary<string, ASTDeclarationMethod>();
+            MethodMap = new Dictionary<string, List<ASTDeclarationMethod>>();
             CFlatTypes = new Dictionary<string, System.Reflection.Emit.TypeBuilder>();
         }
     }
