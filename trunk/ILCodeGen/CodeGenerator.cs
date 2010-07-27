@@ -25,15 +25,17 @@ namespace ILCodeGen
         protected Type _lastWalkedType;
         protected string _lastWalkedIdentifier;
         protected Dictionary<string, int> _locals;
+        protected TypeManager _mgr;
 
 
         private MethodAttributes _tmpAttr;
 
         private const string MAIN_METHOD_NAME = "main";
 
-        public CodeGenerator(string assemblyName)
+        public CodeGenerator(string assemblyName, TypeManager m)
             : base()
         {
+            _mgr = m;
             _assemblyName = assemblyName;
             _locals = new Dictionary<string, int>();
             Init();
@@ -49,7 +51,7 @@ namespace ILCodeGen
             string exeName = _assemblyName + ".exe";
             _mod = _asm.DefineDynamicModule(exeName, exeName);
 
-                       
+            DefineClasses();  
         }
 
         public void Generate(ASTNode n)
@@ -58,6 +60,43 @@ namespace ILCodeGen
         }
 
         #region Declare/Define
+        
+        private void DefineClasses()
+        {
+            foreach (string className in _mgr.InheritanceMap.Keys)
+            {
+                if (!_mgr.CFlatTypes.ContainsKey(className))
+                {
+                    if (!String.IsNullOrEmpty(_mgr.InheritanceMap[className]))
+                    {
+                        GetParent(className);
+                    }
+                    else
+                    {
+                        //TODO:Access Modifiers
+                        _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Class | TypeAttributes.Public));
+                    }
+                }
+            }
+        }
+
+        private void GetParent(string className)
+        {
+            //go back up inheritance tree - this will make sure that the parent is defined before the child class
+            if(_mgr.InheritanceMap.ContainsKey(_mgr.InheritanceMap[className]))
+            {
+                GetParent(_mgr.InheritanceMap[className]);
+            }
+
+            //add type - add parent if it is not null
+            if(String.IsNullOrEmpty(_mgr.InheritanceMap[className]))
+                _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Class | TypeAttributes.Public));
+            else
+                _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Public | TypeAttributes.Class,
+                    _mgr.CFlatTypes[_mgr.InheritanceMap[className]]));
+        }
+        
+
         public override void VisitClassDefinition(ASTClassDefinition n)
         {       
             //gen type
@@ -168,7 +207,7 @@ namespace ILCodeGen
             //MethodInfo mi = _currentType.GetMethod(n.Method);
             
             //_gen.Emit(OpCodes.Call, mi);
-
+            
             _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
                 null, new Type[] { typeof(int) }, null));
         }
