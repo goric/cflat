@@ -38,7 +38,7 @@ namespace CFlat
             var root = parser.SyntaxTreeRoot;
 
             // call this to pretty print the AST
-            Console.WriteLine(root.Print(0));
+            //Console.WriteLine(root.Print(0));
 
             if (SemanticPasses.SemanticDriver.Analyze(root))
             {

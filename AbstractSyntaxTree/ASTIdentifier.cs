@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using SemanticAnalysis;
+using QUT.Gppg;
 
 namespace AbstractSyntaxTree
 {
@@ -12,7 +13,7 @@ namespace AbstractSyntaxTree
         public String ID { get; set; }
         public Descriptor SelfDescriptor { get; set; }
 
-        public ASTIdentifier(SourceLocation loc, String id)
+        public ASTIdentifier(LexLocation loc, String id)
         {
             Location = loc;
             ID = id;

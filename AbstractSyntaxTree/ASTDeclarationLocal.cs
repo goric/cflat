@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using QUT.Gppg;
+
 namespace AbstractSyntaxTree
 {
     public class ASTDeclarationLocal : ASTStatement
@@ -12,14 +14,14 @@ namespace AbstractSyntaxTree
         public bool HasValue { get; set; }
         public ASTExpression InitialValue { get; set; }
 
-        public ASTDeclarationLocal(SourceLocation location, ASTType type, String id)
+        public ASTDeclarationLocal(LexLocation location, ASTType type, String id)
         {
             HasValue = false;
             Type = type; 
             ID = id;
             Location = location;
         }
-        public ASTDeclarationLocal (SourceLocation location, ASTType type, String id, ASTExpression value)
+        public ASTDeclarationLocal (LexLocation location, ASTType type, String id, ASTExpression value)
         {
             HasValue = true;
             Type = type;

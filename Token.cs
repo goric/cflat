@@ -6,12 +6,14 @@ using System.Text;
 using AbstractSyntaxTree;
 using SyntaxAnalysis;
 
+using QUT.Gppg;
+
 namespace CFlat
 {
     internal class Token
     {
         public string Value { get; set; }
-        public SourceLocation Source { get; set; }
+        public LexLocation Source { get; set; }
         public Tokens TokenType { get; set; }
 
         public Token (Tokens type)
@@ -26,7 +28,7 @@ namespace CFlat
         public Token (Tokens type, string value, int line, int column, string file = "")
         {
             Value = value;
-            Source = new SourceLocation(line, column, file);
+            Source = new LexLocation(line, column, 0, 0);
         }
     }
 }

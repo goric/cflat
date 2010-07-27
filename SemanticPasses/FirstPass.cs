@@ -5,6 +5,8 @@ using System.Text;
 using AbstractSyntaxTree;
 using SemanticAnalysis;
 
+using QUT.Gppg;
+
 namespace CFlat.SemanticPasses
 {
     /// <summary>
@@ -38,7 +40,7 @@ namespace CFlat.SemanticPasses
 
         public string PassName()
         {
-            return "First Pass";
+            return "First Semantic Pass";
         }
 
         /// <summary>
@@ -48,14 +50,15 @@ namespace CFlat.SemanticPasses
         /// Attempting to continue on error will end up with whacky stuff happening in ThirdPass (NREs) and would make our code
         /// a LOT more complex
         /// </summary>
-        public void ReportError(SourceLocation loc, string msg, params string[] formatArgs)
+        public void ReportError(LexLocation loc, string msg, params string[] formatArgs)
         {
             string formattedMsg = String.Format(msg, formatArgs);
+            var location = string.Format(" line {0} column {1}", loc.StartLine, loc.StartColumn);
             throw new SourceCodeErrorException(String.Format(
                 "{0}{1}  at {2}", 
                 formattedMsg, 
                 Environment.NewLine, 
-                (loc != null) ? loc.ToString() : "unknown")
+                (loc != null) ? location : "unknown")
                 );
         }
 

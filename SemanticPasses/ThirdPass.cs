@@ -5,6 +5,8 @@ using System.Text;
 using AbstractSyntaxTree;
 using SemanticAnalysis;
 
+using QUT.Gppg;
+
 namespace CFlat.SemanticPasses
 {
     public class ThirdPass : SecondPass, ICompilerPass
@@ -19,7 +21,7 @@ namespace CFlat.SemanticPasses
 
         new public string PassName()
         {
-            return "Third Pass";
+            return "Third Semantic Pass";
         }
 
         #region Types
@@ -440,7 +442,7 @@ namespace CFlat.SemanticPasses
                     if (func.AcceptCall(builder.Actuals))
                     {
                         //hooray, the code is valid
-                        MethodDescriptor ctorDescriptor = (MethodDescriptor)func.Scope.Descriptors[n.ClassName];
+                        MethodDescriptor ctorDescriptor = (MethodDescriptor)_scopeMgr.Find(n.ClassName, p => p is MethodDescriptor, func.Scope);
                         _lastSeenType = func;
                         n.ClassDescriptor = desc;
                         n.Descriptor = ctorDescriptor;
@@ -735,7 +737,7 @@ namespace CFlat.SemanticPasses
             _scopeMgr.PopScope();
         }
 
-        private CFlatType TypeCheckIncrementDecrement(ASTExpression expr, string operatorName, SourceLocation loc)
+        private CFlatType TypeCheckIncrementDecrement(ASTExpression expr, string operatorName, LexLocation loc)
         {
             //totally cheating here. the grammar should not even allow this to happen.
             if (expr is ASTIdentifier)
