@@ -81,6 +81,9 @@ String		\"(\\.|[^"])*\"
 {WhiteSpace}		{ /* Whitespace - Do Nothing */ }
 {Comment}			{ /* Comment - Do Nothing */ }
 
+
+	yylloc = new LexLocation(tokLin,tokCol,tokELin,tokECol);
+
 %%
 
 public override void yyerror (string format, params object[] args)

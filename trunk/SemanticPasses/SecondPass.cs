@@ -5,6 +5,8 @@ using System.Text;
 using AbstractSyntaxTree;
 using SemanticAnalysis;
 
+using QUT.Gppg;
+
 namespace CFlat.SemanticPasses
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace CFlat.SemanticPasses
 
         new public string PassName()
         {
-            return "Second Pass";
+            return "Second Semantic Pass";
         }
 
         /// <summary>
@@ -183,7 +185,6 @@ namespace CFlat.SemanticPasses
 
             foreach (var formal in formalDescriptors)
                 methodDesc.Formals.Add(formal);
-            _currentClass.Descriptor.Methods.Add(methodDesc);
         }
 
         private List<FormalDescriptor> CollectFormals (ASTFormalList formals, TypeFunction containingFunction)

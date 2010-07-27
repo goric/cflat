@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using QUT.Gppg;
 
 using SemanticAnalysis;
 
@@ -9,7 +10,7 @@ namespace AbstractSyntaxTree
 {
     public class ASTNode
     {
-        public SourceLocation Location { get; set; }
+        public LexLocation Location { get; set; }
         public virtual CFlatType CFlatType { get; set; }
         protected String NewLine(int depth)
         {

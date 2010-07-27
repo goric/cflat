@@ -4,7 +4,7 @@
 
 // GPPG version 1.4.0
 // Machine:  VOSTRO
-// DateTime: 7/21/2010 9:02:46 PM
+// DateTime: 7/27/2010 6:55:12 PM
 // UserName: Tim
 // Input file <..\..\GeneratorInputFiles\CFlat.y>
 
@@ -354,255 +354,255 @@ internal class Parser: ShiftReduceParser<SemanticValue, LexLocation>
     switch (action)
     {
       case 2: // program -> classList
-{ SyntaxTreeRoot = CurrentSemanticValue.StatementList; }
+{ SyntaxTreeRoot = CurrentSemanticValue.StatementList; CurrentSemanticValue.StatementList.Location = CurrentLocationSpan; }
         break;
       case 3: // classList -> /* empty */
-{ CurrentSemanticValue.StatementList = new ASTStatementList(); }
+{ CurrentSemanticValue.StatementList = new ASTStatementList(); CurrentSemanticValue.StatementList.Location = CurrentLocationSpan; }
         break;
       case 4: // classList -> classDeclaration, classList
-{ CurrentSemanticValue.StatementList = new ASTStatementList(ValueStack[ValueStack.Depth-2].Statement, ValueStack[ValueStack.Depth-1].StatementList); }
+{ CurrentSemanticValue.StatementList = new ASTStatementList(ValueStack[ValueStack.Depth-2].Statement, ValueStack[ValueStack.Depth-1].StatementList); CurrentSemanticValue.StatementList.Location = CurrentLocationSpan; }
         break;
       case 5: // classDeclaration -> CLASS, IDENTIFIER, LBRACE, declList, RBRACE
-{ CurrentSemanticValue.Statement = new ASTClassDefinition(ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].DeclarationList); }
+{ CurrentSemanticValue.Statement = new ASTClassDefinition(ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].DeclarationList); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 6: // classDeclaration -> CLASS, IDENTIFIER, EXTENDS, IDENTIFIER, LBRACE, declList, 
               //                     RBRACE
-{ CurrentSemanticValue.Statement = new ASTSubClassDefinition(ValueStack[ValueStack.Depth-6].Token.Value, ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].DeclarationList); }
+{ CurrentSemanticValue.Statement = new ASTSubClassDefinition(ValueStack[ValueStack.Depth-6].Token.Value, ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].DeclarationList); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 8: // declList -> /* empty */
-{ CurrentSemanticValue.DeclarationList = new ASTDeclarationList(); }
+{ CurrentSemanticValue.DeclarationList = new ASTDeclarationList(); CurrentSemanticValue.DeclarationList.Location = CurrentLocationSpan; }
         break;
       case 9: // declList -> decl, declList
-{ CurrentSemanticValue.DeclarationList = new ASTDeclarationList(ValueStack[ValueStack.Depth-2].Declaration, ValueStack[ValueStack.Depth-1].DeclarationList); }
+{ CurrentSemanticValue.DeclarationList = new ASTDeclarationList(ValueStack[ValueStack.Depth-2].Declaration, ValueStack[ValueStack.Depth-1].DeclarationList); CurrentSemanticValue.DeclarationList.Location = CurrentLocationSpan; }
         break;
       case 10: // decl -> modifierList, type, IDENTIFIER, SEMI
-{ CurrentSemanticValue.Declaration = new ASTDeclarationField(ValueStack[ValueStack.Depth-4].ModifierList, ValueStack[ValueStack.Depth-3].Type, ValueStack[ValueStack.Depth-2].Token.Value); }
+{ CurrentSemanticValue.Declaration = new ASTDeclarationField(ValueStack[ValueStack.Depth-4].ModifierList, ValueStack[ValueStack.Depth-3].Type, ValueStack[ValueStack.Depth-2].Token.Value); CurrentSemanticValue.Declaration.Location = CurrentLocationSpan; }
         break;
       case 11: // decl -> modifierList, type, IDENTIFIER, LPAREN, formals, RPAREN, LBRACE, 
                //         statementList, RBRACE
-{ CurrentSemanticValue.Declaration = new ASTDeclarationMethod(ValueStack[ValueStack.Depth-9].ModifierList, ValueStack[ValueStack.Depth-8].Type, ValueStack[ValueStack.Depth-7].Token.Value, ValueStack[ValueStack.Depth-5].FormalList, ValueStack[ValueStack.Depth-2].StatementList); }
+{ CurrentSemanticValue.Declaration = new ASTDeclarationMethod(ValueStack[ValueStack.Depth-9].ModifierList, ValueStack[ValueStack.Depth-8].Type, ValueStack[ValueStack.Depth-7].Token.Value, ValueStack[ValueStack.Depth-5].FormalList, ValueStack[ValueStack.Depth-2].StatementList); CurrentSemanticValue.Declaration.Location = CurrentLocationSpan; }
         break;
       case 12: // decl -> modifierList, IDENTIFIER, LPAREN, formals, RPAREN, LBRACE, 
                //         statementList, RBRACE
-{ CurrentSemanticValue.Declaration = new ASTDeclarationCtor(ValueStack[ValueStack.Depth-8].ModifierList, ValueStack[ValueStack.Depth-7].Token.Value, ValueStack[ValueStack.Depth-5].FormalList, ValueStack[ValueStack.Depth-2].StatementList); }
+{ CurrentSemanticValue.Declaration = new ASTDeclarationCtor(ValueStack[ValueStack.Depth-8].ModifierList, ValueStack[ValueStack.Depth-7].Token.Value, ValueStack[ValueStack.Depth-5].FormalList, ValueStack[ValueStack.Depth-2].StatementList); CurrentSemanticValue.Declaration.Location = CurrentLocationSpan; }
         break;
       case 13: // modifierList -> /* empty */
-{ CurrentSemanticValue.ModifierList = new ASTModifierList(); }
+{ CurrentSemanticValue.ModifierList = new ASTModifierList(); CurrentSemanticValue.ModifierList.Location = CurrentLocationSpan; }
         break;
       case 14: // modifierList -> modifier, modifierList
-{ CurrentSemanticValue.ModifierList = new ASTModifierList(ValueStack[ValueStack.Depth-2].Token.Value, ValueStack[ValueStack.Depth-1].ModifierList); }
+{ CurrentSemanticValue.ModifierList = new ASTModifierList(ValueStack[ValueStack.Depth-2].Token.Value, ValueStack[ValueStack.Depth-1].ModifierList); CurrentSemanticValue.ModifierList.Location = CurrentLocationSpan; }
         break;
       case 19: // statementList -> /* empty */
-{ CurrentSemanticValue.StatementList = new ASTStatementList(); }
+{ CurrentSemanticValue.StatementList = new ASTStatementList(); CurrentSemanticValue.StatementList.Location = CurrentLocationSpan; }
         break;
       case 20: // statementList -> statement, statementList
-{ CurrentSemanticValue.StatementList = new ASTStatementList(ValueStack[ValueStack.Depth-2].Statement, ValueStack[ValueStack.Depth-1].StatementList); }
+{ CurrentSemanticValue.StatementList = new ASTStatementList(ValueStack[ValueStack.Depth-2].Statement, ValueStack[ValueStack.Depth-1].StatementList); CurrentSemanticValue.StatementList.Location = CurrentLocationSpan; }
         break;
       case 22: // statement -> expression, SEMI
-{ CurrentSemanticValue.Statement = new ASTStatementExpr(ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.Statement = new ASTStatementExpr(ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 23: // statement -> type, IDENTIFIER, SEMI
-{ CurrentSemanticValue.Statement = new ASTDeclarationLocal(Location(CurrentLocationSpan.StartLine, LocationStack[LocationStack.Depth-3].StartColumn), ValueStack[ValueStack.Depth-3].Type, ValueStack[ValueStack.Depth-2].Token.Value); }
+{ CurrentSemanticValue.Statement = new ASTDeclarationLocal(CurrentLocationSpan, ValueStack[ValueStack.Depth-3].Type, ValueStack[ValueStack.Depth-2].Token.Value); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 24: // statement -> type, IDENTIFIER, ASSIGN, expression, SEMI
-{ CurrentSemanticValue.Statement = new ASTDeclarationLocal(Location(CurrentLocationSpan.StartLine, LocationStack[LocationStack.Depth-5].StartColumn), ValueStack[ValueStack.Depth-5].Type, ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.Statement = new ASTDeclarationLocal(CurrentLocationSpan, ValueStack[ValueStack.Depth-5].Type, ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 25: // statement -> lvalue, ASSIGN, expression, SEMI
-{ CurrentSemanticValue.Statement = new ASTAssign(ValueStack[ValueStack.Depth-4].LValue, ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.Statement = new ASTAssign(ValueStack[ValueStack.Depth-4].LValue, ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 26: // statement -> LBRACE, statementList, RBRACE
-{ CurrentSemanticValue.Statement = new ASTBlock(ValueStack[ValueStack.Depth-2].StatementList); }
+{ CurrentSemanticValue.Statement = new ASTBlock(ValueStack[ValueStack.Depth-2].StatementList); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 27: // statement -> WHILE, LPAREN, expression, RPAREN, statement
-{ CurrentSemanticValue.Statement = new ASTWhile(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Statement); }
+{ CurrentSemanticValue.Statement = new ASTWhile(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Statement); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 28: // statement -> FOR, LPAREN, type, IDENTIFIER, ASSIGN, expression, SEMI, 
                //              expression, SEMI, expression, RPAREN, statement
-{ CurrentSemanticValue.Statement = new ASTFor(new ASTDeclarationLocal(Location(CurrentLocationSpan.StartLine, LocationStack[LocationStack.Depth-10].StartColumn), ValueStack[ValueStack.Depth-10].Type, ValueStack[ValueStack.Depth-9].Token.Value, ValueStack[ValueStack.Depth-7].Expression), ValueStack[ValueStack.Depth-5].Expression, ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Statement); }
+{ CurrentSemanticValue.Statement = new ASTFor(new ASTDeclarationLocal(CurrentLocationSpan, ValueStack[ValueStack.Depth-10].Type, ValueStack[ValueStack.Depth-9].Token.Value, ValueStack[ValueStack.Depth-7].Expression), ValueStack[ValueStack.Depth-5].Expression, ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Statement); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 29: // statement -> FOR, LPAREN, IDENTIFIER, IN, LBRACKET, expression, DOTDOT, 
                //              expression, RBRACKET, RPAREN, statement
-{ CurrentSemanticValue.Statement = new ASTForIn(new ASTIdentifier(Location(CurrentLocationSpan.StartLine, LocationStack[LocationStack.Depth-9].StartColumn), ValueStack[ValueStack.Depth-9].Token.Value), ValueStack[ValueStack.Depth-6].Expression, ValueStack[ValueStack.Depth-4].Expression, ValueStack[ValueStack.Depth-1].Statement); }
+{ CurrentSemanticValue.Statement = new ASTForIn(new ASTIdentifier(CurrentLocationSpan, ValueStack[ValueStack.Depth-9].Token.Value), ValueStack[ValueStack.Depth-6].Expression, ValueStack[ValueStack.Depth-4].Expression, ValueStack[ValueStack.Depth-1].Statement); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 30: // statement -> IF, LPAREN, expression, RPAREN, statement
-{ CurrentSemanticValue.Statement = new ASTIfThen(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Statement); }
+{ CurrentSemanticValue.Statement = new ASTIfThen(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Statement); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 31: // statement -> IF, LPAREN, expression, RPAREN, statement, ELSE, statement
-{ CurrentSemanticValue.Statement = new ASTIfThenElse(ValueStack[ValueStack.Depth-5].Expression, ValueStack[ValueStack.Depth-3].Statement, ValueStack[ValueStack.Depth-1].Statement); }
+{ CurrentSemanticValue.Statement = new ASTIfThenElse(ValueStack[ValueStack.Depth-5].Expression, ValueStack[ValueStack.Depth-3].Statement, ValueStack[ValueStack.Depth-1].Statement); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 32: // statement -> RETURN, expression, SEMI
-{ CurrentSemanticValue.Statement = new ASTReturn(ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.Statement = new ASTReturn(ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 33: // statement -> error, SEMI
-{ CurrentSemanticValue.Statement = new ASTNoop(); }
+{ CurrentSemanticValue.Statement = new ASTNoop(); CurrentSemanticValue.Statement.Location = CurrentLocationSpan; }
         break;
       case 34: // formals -> /* empty */
-{ CurrentSemanticValue.FormalList = new ASTFormalList(); }
+{ CurrentSemanticValue.FormalList = new ASTFormalList(); CurrentSemanticValue.FormalList.Location = CurrentLocationSpan; }
         break;
       case 35: // formals -> onePlusFormals
-{ CurrentSemanticValue.FormalList = ValueStack[ValueStack.Depth-1].FormalList; }
+{ CurrentSemanticValue.FormalList = ValueStack[ValueStack.Depth-1].FormalList; CurrentSemanticValue.FormalList.Location = CurrentLocationSpan; }
         break;
       case 36: // onePlusFormals -> formal
-{ CurrentSemanticValue.FormalList = new ASTFormalList(ValueStack[ValueStack.Depth-1].Formal, new ASTFormalList()); }
+{ CurrentSemanticValue.FormalList = new ASTFormalList(ValueStack[ValueStack.Depth-1].Formal, new ASTFormalList()); CurrentSemanticValue.FormalList.Location = CurrentLocationSpan; }
         break;
       case 37: // onePlusFormals -> formal, COMMA, onePlusFormals
-{ CurrentSemanticValue.FormalList = new ASTFormalList(ValueStack[ValueStack.Depth-3].Formal, ValueStack[ValueStack.Depth-1].FormalList); }
+{ CurrentSemanticValue.FormalList = new ASTFormalList(ValueStack[ValueStack.Depth-3].Formal, ValueStack[ValueStack.Depth-1].FormalList); CurrentSemanticValue.FormalList.Location = CurrentLocationSpan; }
         break;
       case 39: // formal -> formalModifier, type, IDENTIFIER
-{ CurrentSemanticValue.Formal = new ASTFormal(ValueStack[ValueStack.Depth-3].Token.Value, ValueStack[ValueStack.Depth-2].Type, ValueStack[ValueStack.Depth-1].Token.Value); }
+{ CurrentSemanticValue.Formal = new ASTFormal(ValueStack[ValueStack.Depth-3].Token.Value, ValueStack[ValueStack.Depth-2].Type, ValueStack[ValueStack.Depth-1].Token.Value); CurrentSemanticValue.Formal.Location = CurrentLocationSpan; }
         break;
       case 40: // formal -> type, IDENTIFIER
-{ CurrentSemanticValue.Formal = new ASTFormal(ValueStack[ValueStack.Depth-2].Type, ValueStack[ValueStack.Depth-1].Token.Value); }
+{ CurrentSemanticValue.Formal = new ASTFormal(ValueStack[ValueStack.Depth-2].Type, ValueStack[ValueStack.Depth-1].Token.Value); CurrentSemanticValue.Formal.Location = CurrentLocationSpan; }
         break;
       case 41: // expression -> expression, AND, expression
-{ CurrentSemanticValue.Expression = new ASTAnd(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTAnd(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 42: // expression -> expression, OR, expression
-{ CurrentSemanticValue.Expression = new ASTOr(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTOr(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 43: // expression -> expression, SMALLER, expression
-{ CurrentSemanticValue.Expression = new ASTSmaller(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTSmaller(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 44: // expression -> expression, GREATER, expression
-{ CurrentSemanticValue.Expression = new ASTGreater(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTGreater(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 45: // expression -> expression, SMEQ, expression
-{ CurrentSemanticValue.Expression = new ASTSmallerEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTSmallerEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 46: // expression -> expression, GTEQ, expression
-{ CurrentSemanticValue.Expression = new ASTGreaterEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTGreaterEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 47: // expression -> expression, EQ, expression
-{ CurrentSemanticValue.Expression = new ASTEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 48: // expression -> expression, NEQ, expression
-{ CurrentSemanticValue.Expression = new ASTNotEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTNotEqual(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 49: // expression -> expression, PLUS, expression
-{ CurrentSemanticValue.Expression = new ASTAdd(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTAdd(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 50: // expression -> expression, MINUS, expression
-{ CurrentSemanticValue.Expression = new ASTSubtract(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTSubtract(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 51: // expression -> expression, TIMES, expression
-{ CurrentSemanticValue.Expression = new ASTMultiply(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTMultiply(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 52: // expression -> expression, DIVIDE, expression
-{ CurrentSemanticValue.Expression = new ASTDivide(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTDivide(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 53: // expression -> expression, MOD, expression
-{ CurrentSemanticValue.Expression = new ASTModulo(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTModulo(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 54: // expression -> expression, EXP, expression
-{ CurrentSemanticValue.Expression = new ASTExponent(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTExponent(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 55: // expression -> expression, AMP, expression
-{ CurrentSemanticValue.Expression = new ASTConcatenate(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTConcatenate(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 56: // expression -> literal
-{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-1].Expression; }
+{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-1].Expression; CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 57: // expression -> MINUS, expression
-{ CurrentSemanticValue.Expression = new ASTNegative(ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTNegative(ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 58: // expression -> NOT, expression
-{ CurrentSemanticValue.Expression = new ASTNot(ValueStack[ValueStack.Depth-1].Expression); }
+{ CurrentSemanticValue.Expression = new ASTNot(ValueStack[ValueStack.Depth-1].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 59: // expression -> expression, INCREMENT
-{ CurrentSemanticValue.Expression = new ASTIncrement(ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.Expression = new ASTIncrement(ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 60: // expression -> expression, DECREMENT
-{ CurrentSemanticValue.Expression = new ASTDecrement(ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.Expression = new ASTDecrement(ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 61: // expression -> LPAREN, expression, RPAREN
-{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-2].Expression; }
+{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-2].Expression; CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 62: // expression -> lvalue
-{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-1].LValue; }
+{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-1].LValue; CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 63: // expression -> rvalue
-{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-1].Expression; }
+{ CurrentSemanticValue.Expression = ValueStack[ValueStack.Depth-1].Expression; CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 64: // expression -> NEW, IDENTIFIER, LPAREN, actuals, RPAREN
-{ CurrentSemanticValue.Expression = new ASTInstantiateClass(ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].ExpressionList); }
+{ CurrentSemanticValue.Expression = new ASTInstantiateClass(ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].ExpressionList); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 65: // expression -> NEW, type, LBRACKET, expression, DOTDOT, expression, RBRACKET
-{ CurrentSemanticValue.Expression = new ASTInstantiateArray(ValueStack[ValueStack.Depth-6].Type, ValueStack[ValueStack.Depth-4].Expression, ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.Expression = new ASTInstantiateArray(ValueStack[ValueStack.Depth-6].Type, ValueStack[ValueStack.Depth-4].Expression, ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 66: // expression -> NEW, type, LBRACKET, expression, RBRACKET
-{ CurrentSemanticValue.Expression = new ASTInstantiateArray(ValueStack[ValueStack.Depth-4].Type, ValueStack[ValueStack.Depth-2].Expression, new ASTInteger(0)); }
+{ CurrentSemanticValue.Expression = new ASTInstantiateArray(ValueStack[ValueStack.Depth-4].Type, ValueStack[ValueStack.Depth-2].Expression, new ASTInteger(0)); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 67: // lvalue -> IDENTIFIER
-{ CurrentSemanticValue.LValue = new ASTIdentifier(Location(CurrentLocationSpan.StartLine, LocationStack[LocationStack.Depth-1].StartColumn), ValueStack[ValueStack.Depth-1].Token.Value); }
+{ CurrentSemanticValue.LValue = new ASTIdentifier(CurrentLocationSpan, ValueStack[ValueStack.Depth-1].Token.Value); CurrentSemanticValue.LValue.Location = CurrentLocationSpan; }
         break;
       case 68: // lvalue -> lvalue, LBRACKET, expression, RBRACKET
-{ CurrentSemanticValue.LValue = new ASTDereferenceArray(ValueStack[ValueStack.Depth-4].LValue, ValueStack[ValueStack.Depth-2].Expression); }
+{ CurrentSemanticValue.LValue = new ASTDereferenceArray(ValueStack[ValueStack.Depth-4].LValue, ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.LValue.Location = CurrentLocationSpan; }
         break;
       case 69: // lvalue -> lvalue, DOT, IDENTIFIER
-{ CurrentSemanticValue.LValue = new ASTDereferenceField(ValueStack[ValueStack.Depth-3].LValue, ValueStack[ValueStack.Depth-1].Token.Value); }
+{ CurrentSemanticValue.LValue = new ASTDereferenceField(ValueStack[ValueStack.Depth-3].LValue, ValueStack[ValueStack.Depth-1].Token.Value); CurrentSemanticValue.LValue.Location = CurrentLocationSpan; }
         break;
       case 70: // lvalue -> SELF
-{ CurrentSemanticValue.LValue = new ASTSelf(); }
+{ CurrentSemanticValue.LValue = new ASTSelf(); CurrentSemanticValue.LValue.Location = CurrentLocationSpan; }
         break;
       case 71: // lvalue -> BASE
-{ CurrentSemanticValue.LValue = new ASTBase(); }
+{ CurrentSemanticValue.LValue = new ASTBase(); CurrentSemanticValue.LValue.Location = CurrentLocationSpan; }
         break;
       case 72: // rvalue -> IDENTIFIER, LPAREN, actuals, RPAREN
-{ CurrentSemanticValue.Expression = new ASTInvoke(new ASTSelf(), ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].ExpressionList); }
+{ CurrentSemanticValue.Expression = new ASTInvoke(new ASTSelf(), ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].ExpressionList); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 73: // rvalue -> lvalue, DOT, IDENTIFIER, LPAREN, actuals, RPAREN
-{ CurrentSemanticValue.Expression = new ASTInvoke(ValueStack[ValueStack.Depth-6].LValue, ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].ExpressionList); }
+{ CurrentSemanticValue.Expression = new ASTInvoke(ValueStack[ValueStack.Depth-6].LValue, ValueStack[ValueStack.Depth-4].Token.Value, ValueStack[ValueStack.Depth-2].ExpressionList); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 74: // actuals -> /* empty */
-{ CurrentSemanticValue.ExpressionList = new ASTExpressionList(); }
+{ CurrentSemanticValue.ExpressionList = new ASTExpressionList(); CurrentSemanticValue.ExpressionList.Location = CurrentLocationSpan; }
         break;
       case 75: // actuals -> onePlusActuals
-{ CurrentSemanticValue.ExpressionList = ValueStack[ValueStack.Depth-1].ExpressionList; }
+{ CurrentSemanticValue.ExpressionList = ValueStack[ValueStack.Depth-1].ExpressionList; CurrentSemanticValue.ExpressionList.Location = CurrentLocationSpan; }
         break;
       case 76: // onePlusActuals -> expression
-{ CurrentSemanticValue.ExpressionList = new ASTExpressionList(ValueStack[ValueStack.Depth-1].Expression, new ASTExpressionList()); }
+{ CurrentSemanticValue.ExpressionList = new ASTExpressionList(ValueStack[ValueStack.Depth-1].Expression, new ASTExpressionList()); CurrentSemanticValue.ExpressionList.Location = CurrentLocationSpan; }
         break;
       case 77: // onePlusActuals -> expression, COMMA, onePlusActuals
-{ CurrentSemanticValue.ExpressionList = new ASTExpressionList(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].ExpressionList); }
+{ CurrentSemanticValue.ExpressionList = new ASTExpressionList(ValueStack[ValueStack.Depth-3].Expression, ValueStack[ValueStack.Depth-1].ExpressionList); CurrentSemanticValue.ExpressionList.Location = CurrentLocationSpan; }
         break;
       case 78: // type -> integralType
-{ CurrentSemanticValue.Type = ValueStack[ValueStack.Depth-1].Type; }
+{ CurrentSemanticValue.Type = ValueStack[ValueStack.Depth-1].Type; CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 79: // type -> integralType, PBRACKET
-{ CurrentSemanticValue.Type = new ASTTypeArray(ValueStack[ValueStack.Depth-2].Type); }
+{ CurrentSemanticValue.Type = new ASTTypeArray(ValueStack[ValueStack.Depth-2].Type); CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 80: // integralType -> TINT
-{ CurrentSemanticValue.Type = new ASTTypeInt(); }
+{ CurrentSemanticValue.Type = new ASTTypeInt(); CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 81: // integralType -> TBOOL
-{ CurrentSemanticValue.Type = new ASTTypeBool(); }
+{ CurrentSemanticValue.Type = new ASTTypeBool(); CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 82: // integralType -> TVOID
-{ CurrentSemanticValue.Type = new ASTTypeVoid(); }
+{ CurrentSemanticValue.Type = new ASTTypeVoid(); CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 83: // integralType -> TSTRING
-{ CurrentSemanticValue.Type = new ASTTypeString(); }
+{ CurrentSemanticValue.Type = new ASTTypeString(); CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 84: // integralType -> TREAL
-{ CurrentSemanticValue.Type = new ASTTypeReal(); }
+{ CurrentSemanticValue.Type = new ASTTypeReal(); CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 85: // integralType -> IDENTIFIER
-{ CurrentSemanticValue.Type = new ASTTypeClass(ValueStack[ValueStack.Depth-1].Token.Value); }
+{ CurrentSemanticValue.Type = new ASTTypeClass(ValueStack[ValueStack.Depth-1].Token.Value); CurrentSemanticValue.Type.Location = CurrentLocationSpan; }
         break;
       case 86: // literal -> LITERAL_INT
-{ CurrentSemanticValue.Expression = new ASTInteger(Int32.Parse(ValueStack[ValueStack.Depth-1].Token.Value)); }
+{ CurrentSemanticValue.Expression = new ASTInteger(Int32.Parse(ValueStack[ValueStack.Depth-1].Token.Value)); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 87: // literal -> LITERAL_REAL
-{ CurrentSemanticValue.Expression = new ASTReal(Double.Parse(ValueStack[ValueStack.Depth-1].Token.Value)); }
+{ CurrentSemanticValue.Expression = new ASTReal(Double.Parse(ValueStack[ValueStack.Depth-1].Token.Value)); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 88: // literal -> LITERAL_STRING
-{ CurrentSemanticValue.Expression = new ASTString(ValueStack[ValueStack.Depth-1].Token.Value); }
+{ CurrentSemanticValue.Expression = new ASTString(ValueStack[ValueStack.Depth-1].Token.Value); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 89: // literal -> TRUE
-{ CurrentSemanticValue.Expression = new ASTBoolean(true); }
+{ CurrentSemanticValue.Expression = new ASTBoolean(true); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 90: // literal -> FALSE
-{ CurrentSemanticValue.Expression = new ASTBoolean(false); }
+{ CurrentSemanticValue.Expression = new ASTBoolean(false); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
     }
   }
@@ -622,11 +622,6 @@ public ASTStatementList SyntaxTreeRoot { get; set; }
 
 public Parser(Scanner scan) : base(scan)
 {
-}
-
-public SourceLocation Location(int line, int column) 
-{ 
-	return new SourceLocation(line, column, string.Empty);
 }
 }
 }
