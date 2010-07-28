@@ -25,8 +25,9 @@ namespace ILCodeGen
         protected Type _lastWalkedType;
         protected string _lastWalkedIdentifier;
         protected Dictionary<string, int> _locals;
+        protected Dictionary<string, int> _formals;
         protected TypeManager _mgr;
-        private Type _topOfStackType;
+        private Stack<Type> _typesOnStack;
 
         //i heard you like dictionaries, so i put a dictionary in your dictionary
         private Dictionary<string, Dictionary<string, MethodBuilder>> _methods;
@@ -42,7 +43,8 @@ namespace ILCodeGen
             _assemblyName = assemblyName;
             _locals = new Dictionary<string, int>();
             _methods = new Dictionary<string, Dictionary<string, MethodBuilder>>(); ;
-            
+            _typesOnStack = new Stack<Type>();
+            _formals = new Dictionary<string, int>();
             Init();
         }
 
@@ -60,7 +62,7 @@ namespace ILCodeGen
 
             DefineMethodStubs();
 
-            DefineTypes();
+            //DefineTypes();
         }
 
         public void Generate(ASTNode n)
@@ -117,6 +119,8 @@ namespace ILCodeGen
                 {
                     //TODO:Add Access Modifiers
                     _methods[tb.Name].Add(decl.Name, tb.DefineMethod(decl.Name, MethodAttributes.Public | MethodAttributes.Static));
+
+                    //_methods[tb.Name][decl.Name].GetILGenerator().Emit(OpCodes.Nop);
                 }
             }
         }
@@ -150,6 +154,7 @@ namespace ILCodeGen
             n.Declarations.Visit(this);
 
             _currentType.CreateType();
+
         }
 
         public override void VisitModifierList(ASTModifierList n)
@@ -179,15 +184,22 @@ namespace ILCodeGen
             }
             
         }
-        
+
+        public override void VisitFormal(ASTFormal n)
+        {
+            //doesn't take scope into account
+            //if (!_formals.ContainsKey(n.Name))
+            //{
+            //    _formals.Add(n.Name, _formals.Count);
+            //}
+        }
+
         public override void VisitDeclMethod(ASTDeclarationMethod n)
         {
             n.Modifiers.Visit(this);
-
-            
+                        
             MethodBuilder meth = _methods[_currentType.Name][n.Name];
             //set il generator to this method
-            //_gen = meth.GetILGenerator();
             _gen = meth.GetILGenerator();
 
             //is this the entry point
@@ -198,7 +210,9 @@ namespace ILCodeGen
             
             //reset attrs
             _tmpAttr = 0;
-            
+
+            n.Formals.Visit(this);
+
             n.Body.Visit(this);
 
             //bail
@@ -234,22 +248,27 @@ namespace ILCodeGen
         #region control/invoke
         public override void VisitInvoke(ASTInvoke n)
         {
-            //only console for now
-        //    _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
-        //        null, new Type[] { typeof(object) }, null));
-            //so... different types go on different stacks?
+            
             n.Actuals.Visit(this);
+
+            List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
+            types.Reverse();
 
             //HACK:No print statement and i need to get the other cases working
             if (n.Method == "WriteLine")
                 _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
-               null, new Type[] { _topOfStackType }, null));
+               null, types.ToArray(), null));
             else
             {
                 //should be there since we stubbed all of these out earlier
                 //MethodInfo mi = _currentType.GetMethod(n.Method);
-
+                
                 //_gen.Emit(OpCodes.Call, mi);
+                
+                //_gen.Emit(OpCodes.Call,);
+
+                //this still doesn't really work, but it's close
+                _gen.Emit(OpCodes.Call, _methods[_currentType.Name][n.Method].GetBaseDefinition() );
             }
             
            
@@ -434,25 +453,25 @@ namespace ILCodeGen
         {
             //load integer
             _gen.Emit(OpCodes.Ldc_I4, n.Value);
-            _topOfStackType = typeof(int);
+            _typesOnStack.Push(typeof(int));
         }
         public override void VisitString(ASTString n)
         {
             //push string on stack
             _gen.Emit(OpCodes.Ldstr, n.Value);
-            _topOfStackType = typeof(string);
+            _typesOnStack.Push(typeof(string));
         }
         public override void VisitBoolean(ASTBoolean n)
         {
             //assume 1 == true?
             if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
-            _topOfStackType = typeof(int);
+            _typesOnStack.Push(typeof(int));
         }
         public override void VisitReal(ASTReal n)
         {
             //push real on stack
             _gen.Emit(OpCodes.Ldc_R4, n.Value);
-            _topOfStackType = typeof(double);
+            _typesOnStack.Push(typeof(double));
         }
         #endregion
 
