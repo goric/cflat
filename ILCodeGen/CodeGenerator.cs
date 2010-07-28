@@ -254,6 +254,9 @@ namespace ILCodeGen
             List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
             types.Reverse();
 
+            //_gen.Emit(OpCodes.Starg, 0);
+            //_gen.Emit(OpCodes.Starg, 1);
+
             //HACK:No print statement and i need to get the other cases working
             if (n.Method == "WriteLine")
                 _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
