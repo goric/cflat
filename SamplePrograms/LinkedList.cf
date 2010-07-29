@@ -1,0 +1,99 @@
+class node
+{
+	person curr;
+	node next;
+}
+class person
+{
+	string name;
+	int age;
+}
+
+class linkedList
+{
+	private int _size;
+	node _head;
+
+	linkedList()
+	{
+		_size = 0;
+	}
+
+	int count()
+	{
+		return _size;
+	}
+
+	void add(node n)
+	{
+		if(size == 0)
+		{
+			_head = n;
+			size++;
+		}
+		else
+		{
+			_head.next = n;
+			_head = n;
+		}
+	}
+
+	node get(int position)
+	{
+		if(position > _size)
+		{
+			return _head;
+		}
+
+		node current = _head;
+		for(int i = 0; i < position; i++)
+		{
+			current = current.next;
+		}
+
+		return current;
+	}
+
+	bool remove(int position)
+	{
+		if(position > _size)
+		{
+			return false;
+		}
+
+		node prev = get(position - 1);
+		prev.next = get(position + 1);
+		size--;
+		return true;
+	}
+}
+
+class test
+{
+	main()
+	{
+		linkedList list = new linkedList();
+		print(list.count());
+
+		person p = new person();
+		p.age = 32;
+		p.name = "Bill";
+
+		node n = new node();
+		n.curr = p;
+
+		list.add(n);
+		print(list.count());
+
+		p.age = 24;
+		p.name = "Cate";
+
+		n.curr = p;
+
+		list.add(n);
+		print(list.count());
+
+		list.remove(1);
+		print(list.count());
+	}
+}

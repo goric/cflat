@@ -158,7 +158,8 @@ namespace CFlat.SemanticPasses
             CFlatType lhs = CheckSubTree(n.Left);
             CFlatType rhs = CheckSubTree(n.Right);
 
-            if (lhs.IsString && rhs.IsString)
+            // we'll allow for implicit conversion from numeric types to strings for concat purposes
+            if ((lhs.IsString || lhs.IsNumeric) && (rhs.IsString || rhs.IsNumeric))
                 _lastSeenType = n.CFlatType = lhs;
             else
                 ReportError(n.Location, "Operands for concatenation must be strings");
