@@ -8,44 +8,44 @@ class arithmetic
 	void main()
 	{
 		int x = AddInts(1,1);
-		Console.WriteLine(x);
+		print(x);
 		int y = 2 * 2;
-		Console.WriteLine(y);
+		print(y);
 		x = y / 4;
-		Console.WriteLine(x);
+		print(x);
 		int z = 3*2-9;
-		Console.WriteLine(z);
+		print(z);
 
 		int q = 2;
 		if(-q == -2)
 		{
-			Console.WriteLine(1);
+			print(1);
 		}
 		else
 		{
-			Console.WriteLine(0);
+			print(0);
 	    }
 
 		for(int i=0; i<10; i++)
 		{
-			Console.WriteLine(i%2);
+			print(i%2);
 		}
 
 		int high = 10;
 
 		while(high > 0)
 		{
-			Console.WriteLine(high);
+			print(high);
 			high--;
 		}
 
 		for(a in [-10..5])
 		{
-			Console.WriteLine(a);
+			print(a);
 		}
 
 		int exp = 2 ^ 15;
-		Console.WriteLine(exp);
+		print(exp);
 	}
 
 	

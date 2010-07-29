@@ -258,7 +258,7 @@ namespace ILCodeGen
             //_gen.Emit(OpCodes.Starg, 1);
 
             //HACK:No print statement and i need to get the other cases working
-            if (n.Method == "WriteLine")
+            if (n.Method == "print")
                 _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
                null, types.ToArray(), null));
             else
