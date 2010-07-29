@@ -31,6 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SamplePrograms", "SamplePro
 		SamplePrograms\Inheritance.cf = SamplePrograms\Inheritance.cf
 		SamplePrograms\Necessary.cf = SamplePrograms\Necessary.cf
 		SamplePrograms\Readonly.cf = SamplePrograms\Readonly.cf
+		SamplePrograms\Undeclared.cf = SamplePrograms\Undeclared.cf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILCodeGen", "ILCodeGen\ILCodeGen.csproj", "{21837870-A376-4DF5-99E1-C2359C96143D}"
