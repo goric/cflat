@@ -215,9 +215,21 @@ namespace ILCodeGen
             _tmpFormals = new List<Type>();
             n.Formals.Visit(this);
 
+            for (int i = 0; i < _tmpFormals.Count; i++)
+            {
+                LocalBuilder lb = _gen.DeclareLocal(_tmpFormals[0]);
+                _gen.Emit(OpCodes.Ldloc, lb.LocalIndex);
+                //_gen.Emit(OpCodes.Ldarg, i);
+                //_gen.Emit(OpCodes.Ldloc, i);
+            }
+
             n.ReturnType.Visit(this);
 
-            meth.SetSignature(_lastWalkedType, null, null, _tmpFormals.ToArray(), null, null);
+            //This generates args (A_0, A_1, etc... which i don't think i want, not sure how to get around it
+            meth.SetParameters(_tmpFormals.ToArray());
+            
+            meth.SetReturnType(_lastWalkedType);
+            //meth.SetSignature(_lastWalkedType, null, null, _tmpFormals.ToArray(), null, null);
 
             n.Body.Visit(this);
 
@@ -257,13 +269,14 @@ namespace ILCodeGen
             
             n.Actuals.Visit(this);
 
+            //for(int i = n.Actuals.Length; i > 0; i--)
+            //{
+            //    _gen.Emit(OpCodes.Starg, i - 1);
+            //}
+
             List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
             types.Reverse();
-
-            //_gen.Emit(OpCodes.Starg, 0);
-            //_gen.Emit(OpCodes.Starg, 1);
-
-            
+                        
             if (n.Method == "print")
                 _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
                null, types.ToArray(), null));
@@ -271,8 +284,8 @@ namespace ILCodeGen
             {
                 
                 MethodInfo mi = _methods[_currentType.Name][n.Method].GetBaseDefinition();
-                mi.GetGenericArguments();                                
-                //this still doesn't really work, but it's close
+                //mi.GetGenericArguments();                                
+                
                 _gen.Emit(OpCodes.Call,  mi);
             }
             
