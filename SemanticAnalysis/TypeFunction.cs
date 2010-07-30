@@ -47,7 +47,7 @@ namespace SemanticAnalysis
         /// </summary>
         /// <param name="actuals"></param>
         /// <returns></returns>
-        public bool AcceptCall(List<CFlatType> actuals)
+        public bool AcceptCall(List<ActualDescriptor> actuals)
         {
             List<CFlatType> formals = Formals.Values.OfType<CFlatType>().ToList();
             if (formals.Count != actuals.Count)
@@ -56,7 +56,7 @@ namespace SemanticAnalysis
             for (int i = 0; i < formals.Count; i++)
             {
                 //is the formal a super type of what we're passing in? If not, then this is not valid
-                if (!formals[i].IsSupertype(actuals[i]))
+                if (!formals[i].IsSupertype(actuals[i].Type))
                     return false;
             }
 

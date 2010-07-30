@@ -165,6 +165,8 @@ actuals			:					{ $$ = new ASTExpressionList(); $$.Location = CurrentLocationSpa
           
 
 onePlusActuals	: expression						{ $$ = new ASTExpressionList($1, new ASTExpressionList()); $$.Location = CurrentLocationSpan; }
+				| formalModifier IDENTIFIER			{ $$ = new ASTExpressionList(new ASTIdentifier(CurrentLocationSpan, $2.Value, $1.Value), new ASTExpressionList()); $$.Location = CurrentLocationSpan; }
+				| formalModifier IDENTIFIER COMMA onePlusActuals { $$ = new ASTExpressionList(new ASTIdentifier(CurrentLocationSpan, $2.Value, $1.Value), $4); $$.Location = CurrentLocationSpan; }
 				| expression COMMA onePlusActuals	{ $$ = new ASTExpressionList($1, $3); $$.Location = CurrentLocationSpan; }
 				;
 

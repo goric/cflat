@@ -13,7 +13,7 @@ class foo
 		b.change(holder, 5);
 		print(holder.x);
 
-		b.changeAgain(holder, 12);
+		b.changeAgain(readonly holder, 12);
 		print(holder.x);
 	}
 }
@@ -27,6 +27,12 @@ class bar
 	/* readonly can also be a method modifier.  That is the same as setting all parameters to readonly */
 	public void changeAgain(readonly holder h, int n)
 	{
+		sneakyFunc(h,n);
 		h.x = n; /* semantic error, cannot modify a field on a readonly parameter */
+	}
+	
+	public void sneakyFunc(holder h, int n)
+	{
+		h.x = n;
 	}
 }

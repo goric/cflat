@@ -267,6 +267,21 @@ namespace CFlat.SemanticPasses
                     }
                 }
 
+                if (n.LValue is ASTDereferenceField && ((ASTDereferenceField)n.LValue).Object is ASTIdentifier)
+                {
+                    var classInstanceName = ((ASTIdentifier)((ASTDereferenceField)n.LValue).Object).ID;
+                    
+                    var curMethDesc = _scopeMgr.Find(_currentMethod.Name, d => d is MethodDescriptor) as MethodDescriptor;
+                    var formalMatch = curMethDesc.Formals.Where(p => p.Name.Equals(classInstanceName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
+                    
+                    if (formalMatch != null)
+                    {
+                        if(!string.IsNullOrEmpty(formalMatch.Modifier)
+                            && formalMatch.Modifier.Equals(READONLY_MODIFIER, StringComparison.OrdinalIgnoreCase))
+                            ReportError(n.Location, "Parameter '{0}' is marked as readonly and cannot be assigned.", formalMatch.Name);
+                    }
+                }
+
                 //I believe we don't really do anything when the source code is correct in this case.
                 n.CFlatType = new TypeVoid();
                 _lastSeenType = n.CFlatType;
@@ -479,16 +494,22 @@ namespace CFlat.SemanticPasses
                     if (methodDesc.Modifiers.Contains(PRIVATE_MODIFIER, StringComparer.InvariantCultureIgnoreCase))
                         if (!_scopeMgr.HasSymbolShallow(n.Method))
                             ReportError(n.Location, "Cannot access the private method {0} in class {1} from class {2}", methodDesc.Name, methodDesc.ContainingClass.Name, _currentClass.ClassName);
+                    
                     //check if the arguments match
                     TypeFunction method = (TypeFunction)methodDesc.Type;
                     //visit any actuals that need processing
                     CheckSubTree(n.Actuals);
                     //collect the actuals
-                    ActualBuilder builder = new ActualBuilder();
+                    var curMethDesc = _scopeMgr.Find(_currentMethod.Name, d => d is MethodDescriptor) as MethodDescriptor;
+                    ActualBuilder builder = new ActualBuilder(curMethDesc);
                     n.Actuals.Visit(builder);
 
-                    if (method.AcceptCall(builder.Actuals))
+                    if (method.AcceptCall(builder.Actuals)) //if the types check
                     {
+                        CheckActualsHaveReadonly(methodDesc, builder, n);
+
+                        CheckReadonlyNotPassedAsModifiable(methodDesc, builder, n);
+                        
                         n.Descriptor = methodDesc;
                         n.CFlatType = method.ReturnType;
 
@@ -507,6 +528,39 @@ namespace CFlat.SemanticPasses
             else
             {
                 ReportError(n.Location, "Type '{0}' does not support methods.", TypeToFriendlyName(lhs));
+            }
+        }
+
+        public void CheckActualsHaveReadonly (MethodDescriptor desc, ActualBuilder builder, ASTInvoke n)
+        {
+            //check that for all readonly formals the actual is being passes with a readonly modifier
+            int index = 0;
+            foreach (var formal in desc.Formals)
+            {
+                if (!String.IsNullOrEmpty(formal.Modifier)
+                        && formal.Modifier.Equals(READONLY_MODIFIER, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (string.IsNullOrEmpty(builder.Actuals[index].Modifier)
+                        || !builder.Actuals[index].Modifier.Equals(READONLY_MODIFIER, StringComparison.OrdinalIgnoreCase))
+                        ReportError(n.Location, "Missing readonly declaration on method invocation - Parameter '{0}' on function '{1}' must be marked as readonly.", formal.Name, desc.Name);
+                }
+                index++;
+            }
+        }
+
+        public void CheckReadonlyNotPassedAsModifiable (MethodDescriptor methodDesc, ActualBuilder builder, ASTInvoke n)
+        {
+            //check for readonly params being passed as modifiable parameters.
+            int index = 0;
+            foreach (var actual in builder.Actuals)
+            {
+                if (actual.IsFromFormal && actual.IsFormalReadonly)
+                {
+                    if (String.IsNullOrEmpty(methodDesc.Formals[index].Modifier)
+                        || !methodDesc.Formals[index].Modifier.Equals(READONLY_MODIFIER, StringComparison.OrdinalIgnoreCase))
+                        ReportError(n.Location, "Cannot pass readonly identifier '{0}' as a modifiable parameter to method '{1}'", actual.Name, methodDesc.Name);
+                }
+                index++;
             }
         }
 
