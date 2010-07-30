@@ -25,10 +25,10 @@ namespace ILCodeGen
         protected Type _lastWalkedType;
         protected string _lastWalkedIdentifier;
         protected Dictionary<string, int> _locals;
-        protected Dictionary<string, int> _formals;
         protected TypeManager _mgr;
         private Stack<Type> _typesOnStack;
-
+        private List<Type> _tmpFormals;
+        
         //i heard you like dictionaries, so i put a dictionary in your dictionary
         private Dictionary<string, Dictionary<string, MethodBuilder>> _methods;
 
@@ -44,7 +44,8 @@ namespace ILCodeGen
             _locals = new Dictionary<string, int>();
             _methods = new Dictionary<string, Dictionary<string, MethodBuilder>>(); ;
             _typesOnStack = new Stack<Type>();
-            _formals = new Dictionary<string, int>();
+            
+            
             Init();
         }
 
@@ -187,11 +188,8 @@ namespace ILCodeGen
 
         public override void VisitFormal(ASTFormal n)
         {
-            //doesn't take scope into account
-            //if (!_formals.ContainsKey(n.Name))
-            //{
-            //    _formals.Add(n.Name, _formals.Count);
-            //}
+            n.Type.Visit(this);
+            _tmpFormals.Add(_lastWalkedType);
         }
 
         public override void VisitDeclMethod(ASTDeclarationMethod n)
@@ -199,6 +197,9 @@ namespace ILCodeGen
             n.Modifiers.Visit(this);
                         
             MethodBuilder meth = _methods[_currentType.Name][n.Name];
+
+            //meth.DefineParameter(0, ParameterAttributes.Retval, String.Empty);
+
             //set il generator to this method
             _gen = meth.GetILGenerator();
 
@@ -211,7 +212,12 @@ namespace ILCodeGen
             //reset attrs
             _tmpAttr = 0;
 
+            _tmpFormals = new List<Type>();
             n.Formals.Visit(this);
+
+            n.ReturnType.Visit(this);
+
+            meth.SetSignature(_lastWalkedType, null, null, _tmpFormals.ToArray(), null, null);
 
             n.Body.Visit(this);
 
@@ -257,21 +263,17 @@ namespace ILCodeGen
             //_gen.Emit(OpCodes.Starg, 0);
             //_gen.Emit(OpCodes.Starg, 1);
 
-            //HACK:No print statement and i need to get the other cases working
+            
             if (n.Method == "print")
-                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod(n.Method, BindingFlags.Public | BindingFlags.Static,
+                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
                null, types.ToArray(), null));
             else
             {
-                //should be there since we stubbed all of these out earlier
-                //MethodInfo mi = _currentType.GetMethod(n.Method);
                 
-                //_gen.Emit(OpCodes.Call, mi);
-                
-                //_gen.Emit(OpCodes.Call,);
-
+                MethodInfo mi = _methods[_currentType.Name][n.Method].GetBaseDefinition();
+                mi.GetGenericArguments();                                
                 //this still doesn't really work, but it's close
-                _gen.Emit(OpCodes.Call, _methods[_currentType.Name][n.Method].GetBaseDefinition() );
+                _gen.Emit(OpCodes.Call,  mi);
             }
             
            
