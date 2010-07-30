@@ -12,6 +12,7 @@ namespace SemanticAnalysis
         public List<MethodDescriptor> Methods { get; private set; }
         public List<MemberDescriptor> Fields { get; private set; }
         public string Name { get; private set; }
+        public string InstanceName { get; set; }
         public Scope Scope { get; set; }
 
         public ClassDescriptor(CFlatType t, ClassDescriptor parentClass, string name, Scope s) 

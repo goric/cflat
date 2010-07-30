@@ -12,11 +12,13 @@ namespace AbstractSyntaxTree
     {
         public String ID { get; set; }
         public Descriptor SelfDescriptor { get; set; }
+        public string ActualModifier { get; set; }
 
-        public ASTIdentifier(LexLocation loc, String id)
+        public ASTIdentifier(LexLocation loc, String id, string actualModifier = null)
         {
             Location = loc;
             ID = id;
+            ActualModifier = actualModifier;
         }
         
         public override String Print(int depth)

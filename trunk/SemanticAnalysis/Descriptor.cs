@@ -7,7 +7,7 @@ namespace SemanticAnalysis
 {
     public abstract class Descriptor
     {
-        public CFlatType Type { get; private set; }
+        public CFlatType Type { get; protected set; }
         public virtual bool IsType { get { return false; } }
         public virtual bool IsObject { get { return false; } }
         public virtual bool IsField { get { return false; } }

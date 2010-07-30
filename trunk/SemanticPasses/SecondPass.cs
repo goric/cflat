@@ -20,9 +20,6 @@ namespace CFlat.SemanticPasses
         protected const string NECESSARY_MODIFIER = "necessary";
         protected const string PRIVATE_MODIFIER = "private";
 
-        private ActualBuilder _actuals;
-        private FormalBuilder _formals;
-
         public SecondPass(ASTNode treeNode, ScopeManager mgr)
             : base(treeNode, mgr)
         {
