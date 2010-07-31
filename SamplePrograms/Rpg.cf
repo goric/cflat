@@ -1,0 +1,31 @@
+class RPG{
+
+	void main()
+	{
+		println("You are standing in front of RPI, it's a nice Saturday.  1) Enter 2)Leave");
+		string x = readln();
+		if(x == "2")
+		{
+			Grue();
+			return;
+		}
+
+		println("You are at the door. 1) Use keycard 2) Leave");
+		x = readln();
+		if(x != "1")
+		{
+			Grue();
+			return;
+		}
+
+		println("You are inside, facing north.  There is a cafe to your left and elevators to your right.");
+		println("Oh nevermind, ");
+		Grue();
+
+	}
+
+	void Grue()
+	{
+		println("You have been eaten by a grue.");
+	}
+}
