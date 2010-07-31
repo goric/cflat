@@ -370,7 +370,7 @@ namespace CFlat.SemanticPasses
         }
 
         /// <summary>
-        /// Simple open a new scope for the block and visit the body. Pop the scope when we're done.
+        /// Open a new scope for the block and visit the body. Pop the scope when we're done.
         /// </summary>
         /// <param name="n"></param>
         public override void VisitBlock(ASTBlock n)
