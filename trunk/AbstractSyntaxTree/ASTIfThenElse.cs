@@ -12,11 +12,7 @@ namespace AbstractSyntaxTree
         public ASTIfThenElse (ASTExpression condition, ASTStatement then, ASTStatement elseStatement)
             : base(condition, then)
         {
-            if (elseStatement is ASTBlock)
-                Else = (ASTBlock)elseStatement;
-            else
-                Else = new ASTBlock(elseStatement);
-
+            Else = elseStatement.WrapInBlock();
             Else.IsBranch = true;
         }
         

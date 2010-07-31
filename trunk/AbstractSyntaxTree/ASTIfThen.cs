@@ -13,12 +13,9 @@ namespace AbstractSyntaxTree
         public ASTIfThen (ASTExpression condition, ASTStatement then)
         {
             Condition = condition;
-            //I think it's most appropriate to record the presence of the implied block around 1 line statements here, rather than in the grammar.
-            if (then is ASTBlock)
-                Then = (ASTBlock)then;
-            else
-                Then = new ASTBlock(then);
 
+            //I think it's most appropriate to record the presence of the implied block around 1 line statements here, rather than in the grammar.
+            Then = then.WrapInBlock();
             Then.IsBranch = true;
         }
         

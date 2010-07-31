@@ -10,14 +10,14 @@ namespace AbstractSyntaxTree
         public ASTDeclarationLocal InitialExpr { get; set; }
         public ASTExpression Conditional { get; set; }
         public ASTExpression LoopExpr { get; set; }
-        public ASTStatement Body { get; set; }
+        public ASTBlock Body { get; set; }
 
         public ASTFor (ASTDeclarationLocal init, ASTExpression conditional, ASTExpression loop, ASTStatement body)
         {
             InitialExpr = init;
             Conditional = conditional;
             LoopExpr = loop;
-            Body = body;
+            Body = body.WrapInBlock();
         }
 
         public override string Print (int depth)
