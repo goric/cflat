@@ -148,11 +148,6 @@ namespace CFlat.SemanticPasses
             }
         }
 
-        /// <summary>
-        /// Do we want to implicitly convert e.g. int, real to string values to make
-        /// print()ing easier?
-        /// </summary>
-        /// <param name="n"></param>
         public override void VisitConcatenate (ASTConcatenate n)
         {
             CFlatType lhs = CheckSubTree(n.Left);
