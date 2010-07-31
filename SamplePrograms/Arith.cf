@@ -1,51 +1,66 @@
 class arithmetic
 {
-	int AddInts(int a,int b) 
+	int DoubleMe(int a) 
 	{ 
-		int ret = a + b;
-		return ret; 
+		return a * 2; 
+	} 
+
+	int ThreeParametersOhMy(int b, int c, int d)
+	{
+		return b + c + d;
 	}
+
+	void func()
+	{
+		println("Testing method call void...");
+	}
+
 	void main()
 	{
-		int x = AddInts(1,1);
-		print(x);
+		int x = DoubleMe(1);
+		func();
+		println(x);
 		int y = 2 * 2;
-		print(y);
+		println(y);
 		x = y / 4;
-		print(x);
+		println(x);
 		int z = 3*2-9;
-		print(z);
+		println(z);
 
 		int q = 2;
 		if(-q == -2)
 		{
-			print(1);
+			println(1);
 		}
 		else
 		{
-			print(0);
+			println(0);
 	    }
 
 		for(int i=0; i<10; i++)
 		{
-			print(i%2);
+			println(i%2);
 		}
 
 		int high = 10;
 
 		while(high > 0)
 		{
-			print(high);
+			println(high);
 			high--;
 		}
 
 		for(a in [-10..5])
 		{
-			print(a);
+			println(a);
 		}
 
 		int exp = 2 ^ 15;
-		print(exp);
+		println(exp);
+
+		int e = ThreeParametersOhMy(-10, 15, -4);
+
+		println(e);
 	}
 
 	
