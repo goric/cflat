@@ -220,7 +220,7 @@ namespace ILCodeGen
             n.Modifiers.Visit(this);
                         
             MethodBuilder meth = _methods[_currentType.Name][n.Name];
-
+            
             //meth.DefineParameter(0, ParameterAttributes.Retval, String.Empty);
             
             //set il generator to this method
@@ -366,6 +366,8 @@ namespace ILCodeGen
             }
             else
             {
+                TypeBuilder b4 = _currentType;
+                n.Object.Visit(this);
 
                 //MethodInfo mi = _methods[_currentType.Name][n.Method].GetBaseDefinition();
                 MethodInfo mi = _methods[_currentType.Name][n.Method];
@@ -375,6 +377,8 @@ namespace ILCodeGen
                 //mi.GetGenericArguments();                                
 
                 _gen.Emit(OpCodes.Call, mi);
+
+                _currentType = b4;
             }
             
            
