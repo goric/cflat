@@ -11,5 +11,10 @@ namespace AbstractSyntaxTree
         {
             v.VisitVoidExpr(this);
         }
+
+        public override string Print(int depth)
+        {
+            return ";";
+        }
     }
 }
