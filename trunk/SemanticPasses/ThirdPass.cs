@@ -380,6 +380,9 @@ namespace CFlat.SemanticPasses
             {
                 _scopeMgr.PushScope("block");
                 _currentMethod.AddBlock(n.IsBranch);
+            }
+            else
+            {
                 _skipNextBlockScope = false;
             }
 
