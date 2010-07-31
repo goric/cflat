@@ -1,0 +1,16 @@
+class test
+{
+
+	
+
+	int TryMe(int q)
+	{
+		return q / 2;
+	}
+	
+	void main()
+	{
+		int x = TryMe(6);
+		println(x);
+	}
+}
