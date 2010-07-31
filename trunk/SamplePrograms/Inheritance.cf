@@ -11,10 +11,11 @@ class derivedFact is fact
 	void main() 
 	{
 		int x = factorial(5);
-		int y = base.factorial(5);
-		int z = self.factorial(5);
+		/* int y = base.factorial(5);
+		int z = self.factorial(5); */
 
-		print("factorial: " & x & ", base: " & y & ", self: " & z);
+		/* print("factorial: " & x & ", base: " & y & ", self: " & z); */
+		println(x);
 	}
 
 	int factorial(int n) 
