@@ -1,6 +1,6 @@
 class Test
 {
-	main()
+	void main()
 	{
 		int x = 5;
 		x = double(x);

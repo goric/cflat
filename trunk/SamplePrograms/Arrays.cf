@@ -1,6 +1,6 @@
 class arrays
 {
-	main()
+	void main()
 	{
 		int[] a = new int[10];
 
