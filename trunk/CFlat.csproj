@@ -37,6 +37,10 @@
     <Reference Include="QUT.ShiftReduceParser">
       <HintPath>Dependencies\QUT.ShiftReduceParser.dll</HintPath>
     </Reference>
+    <Reference Include="SemanticAnalysis, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>SemanticAnalysis\bin\Debug\SemanticAnalysis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -75,10 +79,6 @@
     <ProjectReference Include="ILCodeGen\ILCodeGen.csproj">
       <Project>{21837870-A376-4DF5-99E1-C2359C96143D}</Project>
       <Name>ILCodeGen</Name>
-    </ProjectReference>
-    <ProjectReference Include="SemanticAnalysis\SemanticAnalysis.csproj">
-      <Project>{599A6891-14DF-425E-8D55-EFF9041D39C0}</Project>
-      <Name>SemanticAnalysis</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

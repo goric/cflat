@@ -1,0 +1,34 @@
+class guessInt
+{
+	void main()
+	{
+		println("Enter a number 1 to 100, and I will guess it.");
+		println("Each time I guess, enter 'higher', 'lower' or 'yes'.");
+		
+		string input = readln();
+		int x = parseInt(input);
+
+		bool accepted = false;
+		int guess = 50;
+		while(accepted == false)
+		{
+			print(guess & "?");
+			string response = readln();
+
+			if(response == "yes");
+			{
+				accepted = true;
+			}
+			if(response == "lower")
+			{
+				guess = guess / 2;
+			}
+			if(response == "higher")
+			{
+				guess = guess + ((100 - guess) / 2);
+			}
+		}
+
+		print("I win.");
+	}
+}

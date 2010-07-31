@@ -1,0 +1,61 @@
+class guesser
+{
+	void main()
+	{
+		println("Think of a letter, and I will try to guess it.");
+		println("Enter 'before' or 'after' as clues.  Enter 'yes' when correct.");
+		string actual = readln();
+
+		int guessIndex = 12;
+		bool right = false;
+
+		string[] letters = new string[26];
+		letters[0] = "a";
+		letters[1] = "b";
+		letters[2] = "c";
+		letters[3] = "d";
+		letters[4] = "e";
+		letters[5] = "f";
+		letters[6] = "g";
+		letters[7] = "h";
+		letters[8] = "i";
+		letters[9] = "j";
+		letters[10] = "k";
+		letters[11] = "l";
+		letters[12] = "m";
+		letters[13] = "n";
+		letters[14] = "o";
+		letters[15] = "p";
+		letters[16] = "q";
+		letters[17] = "r";
+		letters[18] = "s";
+		letters[19] = "t";
+		letters[20] = "u";
+		letters[21] = "v";
+		letters[22] = "w";
+		letters[23] = "x";
+		letters[24] = "y";
+		letters[25] = "z";
+
+		while(right == false)
+		{
+			println(letters[guessIndex] & "?");
+			string answer = readln();
+
+			if(answer == "yes")
+			{
+				right = true;
+			}
+			else if (answer == "before")
+			{
+				guessIndex = guessIndex / 2;
+			}
+			else if (answer == "after")
+			{
+				guessIndex = guessIndex + (26 - guessIndex) / 2;
+			}
+		}
+
+		print("I guessed it!");
+	}
+}

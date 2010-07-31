@@ -5,6 +5,7 @@ using System.Text;
 using AbstractSyntaxTree;
 using System.Reflection.Emit;
 using System.Reflection;
+using SemanticAnalysis;
 
 
 namespace ILCodeGen
@@ -572,24 +573,28 @@ namespace ILCodeGen
             //load integer
             _gen.Emit(OpCodes.Ldc_I4, n.Value);
             _typesOnStack.Push(typeof(int));
+            _lastWalkedType = typeof(int);
         }
         public override void VisitString(ASTString n)
         {
             //push string on stack
             _gen.Emit(OpCodes.Ldstr, n.Value.Replace("\"", "").Replace("\\n", "\n").Replace("\\t", "\t"));
             _typesOnStack.Push(typeof(string));
+            _lastWalkedType = typeof(string);
         }
         public override void VisitBoolean(ASTBoolean n)
         {
             //assume 1 == true?
             if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
             _typesOnStack.Push(typeof(int));
+            _lastWalkedType = typeof(int);
         }
         public override void VisitReal(ASTReal n)
         {
             //push real on stack
             _gen.Emit(OpCodes.Ldc_R4, n.Value);
             _typesOnStack.Push(typeof(double));
+            _lastWalkedType = typeof(double);
         }
         #endregion
 
@@ -597,19 +602,22 @@ namespace ILCodeGen
         public override void VisitIdentifier(ASTIdentifier n)
         {
             LoadLocal(n.ID);
+            var type = GetCilType(n.CFlatType);
+            _typesOnStack.Push(type);
+            _lastWalkedType = type;
         }
         public override void VisitDerefArray (ASTDereferenceArray n)
         {
             LoadLocal(((ASTIdentifier)n.Array).ID);
             n.Index.Visit(this);
-
+            _typesOnStack.Push(GetCilType(n.CFlatType));
             //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
             if (!_isArrayAssign)
             {
-                if(_lastWalkedType == typeof(int))
+                if (_lastWalkedType == typeof(int))
                     _gen.Emit(OpCodes.Ldelem_I4);
                 if (_lastWalkedType == typeof(double))
-                    _gen.Emit(OpCodes.Ldelem_R4);
+                    _gen.Emit(OpCodes.Ldelem, typeof(double));
                 if (_lastWalkedType == typeof(bool))
                     _gen.Emit(OpCodes.Ldelem_I4);
                 if (_lastWalkedType == typeof(string))
@@ -739,17 +747,10 @@ namespace ILCodeGen
         {
             //push left and right
             n.Left.Visit(this);
+            BoxIfNecessary(_lastWalkedType);
             n.Right.Visit(this);
-
-            // if not a string we need to box
-            if (_lastWalkedType != typeof(string))
-            {
-                if (_lastWalkedType == typeof(int))
-                    _gen.Emit(OpCodes.Box, typeof(int));
-                else if (_lastWalkedType == typeof(double))
-                    _gen.Emit(OpCodes.Box, typeof(double));
-            }
-
+            BoxIfNecessary(_lastWalkedType);
+            
             //get our parameter types
             List<Type> types = _typesOnStack.Take(2).ToList();
             types.Reverse();
@@ -757,6 +758,21 @@ namespace ILCodeGen
             // now call String.Concat
             _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Concat", BindingFlags.Public | BindingFlags.Static,
                null, types.ToArray(), null));
+
+            //hacky, but we know the last type was a string since we're calling Concat...
+            _lastWalkedType = typeof(string);
+            _typesOnStack.Push(typeof(string));
+        }
+        private void BoxIfNecessary (Type t)
+        {
+            // if not a string we need to box
+            if (t != typeof(string))
+            {
+                if (_lastWalkedType == typeof(int))
+                    _gen.Emit(OpCodes.Box, typeof(int));
+                else if (_lastWalkedType == typeof(double))
+                    _gen.Emit(OpCodes.Box, typeof(double));
+            }
         }
 
         #endregion
@@ -964,9 +980,9 @@ namespace ILCodeGen
         {
             if (n is ASTTypeInt)
                 return typeof(int);
-            if(n is ASTTypeReal)
+            if (n is ASTTypeReal)
                 return typeof(double);
-            if(n is ASTTypeString)
+            if (n is ASTTypeString)
                 return typeof(string);
             if (n is ASTTypeBool)
                 return typeof(bool);
@@ -978,6 +994,23 @@ namespace ILCodeGen
                 return _mgr.CFlatTypes[((ASTTypeClass)n).Name].GetType();
             else
                 return n.GetType();
+        }
+        private Type GetCilType (CFlatType t)
+        {
+            if (t is TypeInt)
+                return typeof(int);
+            if (t is TypeString)
+                return typeof(string);
+            if (t is TypeBool)
+                return typeof(bool);
+            if (t is TypeReal)
+                return typeof(double);
+            if (t is TypeVoid)
+                return typeof(void);
+            if (t is TypeArray)
+                return GetCilType(((TypeArray)t).BaseType);
+            else
+                return t.GetType();
         }
     }
 }

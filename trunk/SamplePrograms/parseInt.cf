@@ -5,8 +5,7 @@ class program
 		print("Enter a number: ");
 		string input = readln();
 		int x = parseInt(input);
-		println(input);
-		/*string s = "You entered: " & x;
-		println(s);*/
+		/*string s = "You entered: " & x;*/
+		println("You entered: " & x);
 	}
 }
