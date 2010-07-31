@@ -258,29 +258,7 @@ namespace CFlat.SemanticPasses
             if (IsValidAssignment(lhs, rhs))
             {
                 //check if the assignment is to a readonly method parameter
-                if (n.LValue.Descriptor is FormalDescriptor)
-                {
-                    FormalDescriptor descriptor = (FormalDescriptor)n.LValue.Descriptor;
-                    if (String.Compare(descriptor.Modifier, READONLY_MODIFIER, true) == 0)
-                    {
-                        ReportError(n.Location, "Parameter '{0}' is marked as readonly and can not be assigned.", descriptor.Name);
-                    }
-                }
-
-                if (n.LValue is ASTDereferenceField && ((ASTDereferenceField)n.LValue).Object is ASTIdentifier)
-                {
-                    var classInstanceName = ((ASTIdentifier)((ASTDereferenceField)n.LValue).Object).ID;
-                    
-                    var curMethDesc = _scopeMgr.Find(_currentMethod.Name, d => d is MethodDescriptor) as MethodDescriptor;
-                    var formalMatch = curMethDesc.Formals.Where(p => p.Name.Equals(classInstanceName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
-                    
-                    if (formalMatch != null)
-                    {
-                        if(!string.IsNullOrEmpty(formalMatch.Modifier)
-                            && formalMatch.Modifier.Equals(READONLY_MODIFIER, StringComparison.OrdinalIgnoreCase))
-                            ReportError(n.Location, "Parameter '{0}' is marked as readonly and cannot be assigned.", formalMatch.Name);
-                    }
-                }
+                CheckForReadonlyAssignments(n);
 
                 //I believe we don't really do anything when the source code is correct in this case.
                 n.CFlatType = new TypeVoid();
@@ -289,6 +267,36 @@ namespace CFlat.SemanticPasses
             else
             {
                 ReportError(n.Location, "Invalid assignment, type mismatch. Expected: {0} Got: {1}", TypeToFriendlyName(lhs), TypeToFriendlyName(rhs));
+            }
+        }
+
+        private void CheckForReadonlyAssignments (ASTAssign n)
+        {
+            if (n.LValue.Descriptor is FormalDescriptor)
+            {
+                FormalDescriptor descriptor = (FormalDescriptor)n.LValue.Descriptor;
+                if (String.Compare(descriptor.Modifier, READONLY_MODIFIER, true) == 0)
+                {
+                    ReportError(n.Location, "Parameter '{0}' is marked as readonly and can not be assigned.", descriptor.Name);
+                }
+            }
+
+            bool isDerefField = (n.LValue is ASTDereferenceField && ((ASTDereferenceField)n.LValue).Object is ASTIdentifier);
+            bool isDerefArray = (n.LValue is ASTDereferenceArray && ((ASTDereferenceArray)n.LValue).Array is ASTIdentifier);
+
+            if (isDerefArray || isDerefField)
+            {
+                var item = isDerefField ? ((ASTDereferenceField)n.LValue).Object : ((ASTDereferenceArray)n.LValue).Array;
+                var id = ((ASTIdentifier)item).ID;
+                var curMethDesc = _scopeMgr.Find(_currentMethod.Name, d => d is MethodDescriptor) as MethodDescriptor;
+                var formalMatch = curMethDesc.Formals.Where(p => p.Name.Equals(id, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
+
+                if (formalMatch != null)
+                {
+                    if (!string.IsNullOrEmpty(formalMatch.Modifier)
+                        && formalMatch.Modifier.Equals(READONLY_MODIFIER, StringComparison.OrdinalIgnoreCase))
+                        ReportError(n.Location, "Parameter '{0}' passed to method '{1}' is marked as readonly and cannot be assigned.", formalMatch.Name, _currentMethod.Name);
+                }
             }
         }
 
@@ -492,7 +500,7 @@ namespace CFlat.SemanticPasses
                 if (methodDesc != null && (descriptor.Methods.Contains(methodDesc) || methodDesc.IsCFlatMethod))
                 {
                     if (methodDesc.Modifiers.Contains(PRIVATE_MODIFIER, StringComparer.InvariantCultureIgnoreCase))
-                        if (!_scopeMgr.HasSymbolShallow(n.Method))
+                        if (!_scopeMgr.HasSymbol(n.Method, _currentClass.Scope))
                             ReportError(n.Location, "Cannot access the private method {0} in class {1} from class {2}", methodDesc.Name, methodDesc.ContainingClass.Name, _currentClass.ClassName);
                     
                     //check if the arguments match
@@ -690,6 +698,12 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitDeclMethod(ASTDeclarationMethod n)
         {
+            //if the method is tagged as readonly, this translates to all of its formals being readonly
+            var func = _scopeMgr.Find(n.Name, p => p is MethodDescriptor) as MethodDescriptor;
+            if (func.Modifiers.Contains("readonly", StringComparer.OrdinalIgnoreCase))
+                foreach (var formal in func.Formals)
+                    formal.Modifier = "readonly";
+
             VisitMethodBody(string.Format("body {0}", n.Name), n.Body, n.Type as TypeFunction);
 
             //make sure there is a return statement if it's required.

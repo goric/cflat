@@ -47,13 +47,7 @@ namespace CFlat.SemanticPasses
 
             _currentClass.Descriptor.Scope = _currentClass.Scope = classScope;
 
-            // add a parameterless ctor if none exists
-            var ctor = _currentClass.Descriptor.Methods.Where(p => p.Name.Equals(_currentClass.ClassName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
-            if (ctor == null)
-            {
-                var func = new TypeFunction(n.Name) { ReturnType = new TypeVoid(), IsConstructor = true, Scope = classScope };
-                _scopeMgr.AddMethod(n.Name, func, _currentClass);
-            }
+            AddCtorIfNone(classScope, n.Name);
 
             _scopeMgr.PopScope();
         }
@@ -73,15 +67,19 @@ namespace CFlat.SemanticPasses
 
             _currentClass.Descriptor.Scope = _currentClass.Scope = classScope;
 
-            // add a parameterless ctor if none exists
+            AddCtorIfNone(classScope, n.Name);
+
+            _scopeMgr.PopScope();
+        }
+
+        private void AddCtorIfNone (Scope classScope, string name)
+        {
             var ctor = _currentClass.Descriptor.Methods.Where(p => p.Name.Equals(_currentClass.ClassName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
             if (ctor == null)
             {
-                var func = new TypeFunction(n.Name) { ReturnType = new TypeVoid(), IsConstructor = true, Scope = classScope };
-                _scopeMgr.AddMethod(n.Name, func, _currentClass);
+                var func = new TypeFunction(name) { ReturnType = new TypeVoid(), IsConstructor = true, Scope = classScope };
+                _scopeMgr.AddMethod(name, func, _currentClass);
             }
-
-            _scopeMgr.PopScope();
         }
 
         //finds any 'necessary' methods in the parent class and makes sure that this subclass implements them

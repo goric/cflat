@@ -33,7 +33,10 @@ namespace CFlat
 
             var parser = new Parser(scan);
             if (!parser.Parse())
+            {
+                Console.Read();
                 return;
+            }
 
             var root = parser.SyntaxTreeRoot;
 
