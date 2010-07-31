@@ -275,23 +275,13 @@ namespace ILCodeGen
         }
         public override void VisitInstantiateArray (ASTInstantiateArray n)
         {
-            //push upper and lower bounds
+            //push upper
             n.Upper.Visit(this);
-            //n.Lower.Visit(this);
-
-            //subtract to get array size
-            //_gen.Emit(OpCodes.Sub);
-
             
             //get the type and push newarr [type]
             n.Type.Visit(this);
             _gen.Emit(OpCodes.Newarr, _lastWalkedType);
         }
-        
-
-
-
-
 
         /// <summary>
         /// Get class, instantiate and call constructor
@@ -511,43 +501,32 @@ namespace ILCodeGen
         #region types
         public override void VisitTypeInt(ASTTypeInt n)
         {
-            //not sure this is the right way to do this, but it works now for simple examples
-            _lastWalkedType = typeof(System.Int32);
+            _lastWalkedType = GetCilType(n);
         }
         public override void VisitTypeBool(ASTTypeBool n)
         {
-            _lastWalkedType = typeof(System.Boolean);
+            _lastWalkedType = GetCilType(n);
         }
         public override void VisitTypeReal(ASTTypeReal n)
         {
-            _lastWalkedType = typeof(System.Double);
+            _lastWalkedType = GetCilType(n);
         }
         public override void VisitTypeString(ASTTypeString n)
         {
-            _lastWalkedType = typeof(System.String);
+            _lastWalkedType = GetCilType(n);
         }
         public override void VisitTypeVoid(ASTTypeVoid n)
         {
-            //??
-            _lastWalkedType = typeof(void);
+            _lastWalkedType = GetCilType(n);
         }
         public override void VisitTypeName(ASTTypeClass n)
         {
             //??
-            _lastWalkedType = n.GetType();
+            _lastWalkedType = GetCilType(n);
         }
         public override void VisitTypeArray (ASTTypeArray n)
         {
-            if(n.BaseType is ASTTypeInt)
-                _lastWalkedType = typeof(int[]);
-            else if (n.BaseType is ASTTypeString)
-                _lastWalkedType = typeof(string[]);
-            else if (n.BaseType is ASTTypeReal)
-                _lastWalkedType = typeof(double[]);
-            else if (n.BaseType is ASTTypeBool)
-                _lastWalkedType = typeof(bool[]);
-            /*else if (n.BaseType is ASTTypeClass)
-                _lastWalkedType = n.GetType();*/
+            _lastWalkedType = GetCilType(n);
         }
         
         #endregion
@@ -590,8 +569,17 @@ namespace ILCodeGen
             n.Index.Visit(this);
 
             //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
-            if(!_isArrayAssign) 
-                _gen.Emit(OpCodes.Ldelem_I4);
+            if (!_isArrayAssign)
+            {
+                if(_lastWalkedType == typeof(int))
+                    _gen.Emit(OpCodes.Ldelem_I4);
+                if (_lastWalkedType == typeof(double))
+                    _gen.Emit(OpCodes.Ldelem_R4);
+                if (_lastWalkedType == typeof(bool))
+                    _gen.Emit(OpCodes.Ldelem_I4);
+                if (_lastWalkedType == typeof(string))
+                    _gen.Emit(OpCodes.Ldelem, typeof(string));
+            }
         }
 
         #endregion
@@ -937,5 +925,24 @@ namespace ILCodeGen
                 _lastWalkedIdentifier = "";
         }
 
+        private Type GetCilType (ASTType n)
+        {
+            if (n is ASTTypeInt)
+                return typeof(int);
+            if(n is ASTTypeReal)
+                return typeof(double);
+            if(n is ASTTypeString)
+                return typeof(string);
+            if (n is ASTTypeBool)
+                return typeof(bool);
+            if (n is ASTTypeVoid)
+                return typeof(void);
+            if (n is ASTTypeArray)
+                return GetCilType(((ASTTypeArray)n).BaseType);
+            if (n is ASTTypeClass)
+                return _mgr.CFlatTypes[((ASTTypeClass)n).Name].GetType();
+            else
+                return n.GetType();
+        }
     }
 }
