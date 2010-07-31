@@ -9,12 +9,7 @@ class arithmetic
 	{
 		return b + c + d;
 	}
-
-	void func()
-	{
-		println("Testing method call void...");
-	}
-
+	
 	void main()
 	{
 		int x = DoubleMe(1);
@@ -63,5 +58,8 @@ class arithmetic
 		println(e);
 	}
 
-	
+	void func()
+	{
+		println("Testing method call void...");
+	}
 }

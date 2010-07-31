@@ -1,13 +1,12 @@
 class func
 {
-	void main()
-	{
-		print(factorial(5));
-	}
+	
 
 	int factorial(int n)
 	{
-		int fact = 1;
+		/*println("omg");*/
+		return 1;
+		/* int fact = 1;
 		int iterator = 1;
 
 		while(iterator <= n)
@@ -15,7 +14,13 @@ class func
 			fact = fact * iterator;
 			iterator++;
 		}
-
-		return fact;
+		
+		return fact; */
+	}
+	
+	void main()
+	{
+		int result = factorial(5);
+		print(result);
 	}
 }
