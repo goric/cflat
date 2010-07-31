@@ -348,6 +348,12 @@ namespace ILCodeGen
                 _typesOnStack.Push(typeof(string));
                 //_gen.Emit(OpCodes.Stloc_0);
             }
+            else if (n.Method == "parseInt")
+            {
+                _gen.Emit(OpCodes.Call, typeof(Int32).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static,
+                    null, types.ToArray(), null));
+                _typesOnStack.Push(typeof(int));
+            }
             else
             {
 
