@@ -32,6 +32,7 @@ namespace AbstractSyntaxTree
 
         #region Expressions
 
+        public virtual void VisitVoidExpr(ASTVoidExpression n) { }
         public virtual void VisitExpr (ASTExpression n) { }
         public virtual void VisitExprList (ASTExpressionList n)
         {

@@ -95,6 +95,7 @@ statement		: SEMI
 											{ $$ = new ASTForIn(new ASTIdentifier(CurrentLocationSpan, $3.Value), $6, $8, $11); $$.Location = CurrentLocationSpan; }
 				| IF LPAREN expression RPAREN statement			{ $$ = new ASTIfThen($3, $5); $$.Location = CurrentLocationSpan; }
 				| IF LPAREN expression RPAREN statement ELSE statement  { $$ = new ASTIfThenElse($3, $5, $7); $$.Location = CurrentLocationSpan; }
+				| RETURN SEMI											{ $$ = new ASTReturn(new ASTVoidExpression()); $$.Location = CurrentLocationSpan; }
 				| RETURN expression SEMI								{ $$ = new ASTReturn($2); $$.Location = CurrentLocationSpan; }
 				| error SEMI									{ $$ = new ASTNoop(); $$.Location = CurrentLocationSpan; }
 	  			;
