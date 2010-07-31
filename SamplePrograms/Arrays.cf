@@ -2,18 +2,20 @@ class arrays
 {
 	void main()
 	{
-		int[] a = new int[10];
-
-		for(i in [1..10])
+		int[] a = new int[4];
+        a[0] = 8;
+		print(a[0]);
+		/*
+		for(i in [1..8])
 		{
 			a[i] = 0;
 		}
 
-		doSomething(readonly a);
+		doSomething(readonly a);*/
 	}
-
+	/*
 	private readonly void doSomething(int[] p)
 	{
 		p[0] = 6;
-	}
+	}*/
 }
