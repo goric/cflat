@@ -83,9 +83,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>rem cd $(TargetDir)
-rem ..\..\Dependencies\gplex.exe /out:..\..\Scanner.cs ..\..\GeneratorInputFiles\CFlat.lex
-rem ..\..\Dependencies\gppg.exe /gplex /nolines ..\..\GeneratorInputFiles\CFlat.y &gt; ..\..\Parser.cs</PreBuildEvent>
+    <PreBuildEvent>cd $(TargetDir)
+..\..\Dependencies\gplex.exe /out:..\..\Scanner.cs ..\..\GeneratorInputFiles\CFlat.lex
+..\..\Dependencies\gppg.exe /gplex /nolines ..\..\GeneratorInputFiles\CFlat.y &gt; ..\..\Parser.cs</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -56,6 +56,15 @@ namespace CFlat.SemanticPasses
         }
 
         /// <summary>
+        /// Used as the return value for methods that are type void, and have a return statement.
+        /// </summary>
+        /// <param name="n"></param>
+        public override void VisitVoidExpr(ASTVoidExpression n)
+        {
+            n.CFlatType = _lastSeenType = new TypeVoid();
+        }
+
+        /// <summary>
         /// Integer literal
         /// </summary>
         /// <param name="n"></param>
