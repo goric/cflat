@@ -13,7 +13,7 @@ namespace SemanticAnalysis
     {
         public string Name { get; private set; }
 
-        public string Modifier { get; private set; }
+        public string Modifier { get; set; }
 
         public override bool IsType { get { return true; } }
 
