@@ -6,16 +6,16 @@ class fact
 	}
 }
 
-class derivedFact is fact 
+class derivedFact is fact
 {
 	void main() 
 	{
 		int x = factorial(5);
-		/* int y = base.factorial(5);
-		int z = self.factorial(5); */
+		int y = base.factorial(5);
+		int z = self.factorial(5);
 
-		/* print("factorial: " & x & ", base: " & y & ", self: " & z); */
-		println(x);
+		println("factorial: " & x & ", base: " & y & ", self: " & z);
+		
 	}
 
 	int factorial(int n) 
@@ -26,3 +26,4 @@ class derivedFact is fact
 			return n * factorial(n-1);
 	}
 }
+
