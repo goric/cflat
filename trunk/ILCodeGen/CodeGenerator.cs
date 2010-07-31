@@ -69,7 +69,9 @@ namespace ILCodeGen
 
         public void Generate(ASTNode n)
         {
-            n.Visit(this);   
+            n.Visit(this);
+
+            DefineTypes();
         }
 
         #region Declare/Define
@@ -126,14 +128,22 @@ namespace ILCodeGen
                 foreach(AbstractSyntaxTree.ASTDeclarationMethod decl in _mgr.MethodMap[tb.Name])
                 {
                     //TODO:Add Access Modifiers
+                    MethodAttributes attr = MethodAttributes.Public |
+                        MethodAttributes.Static |
+                        MethodAttributes.HideBySig;
 
-                    MethodBuilder mb = tb.DefineMethod(decl.Name, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.Family);
+                    
+                    MethodBuilder mb = tb.DefineMethod(decl.Name,
+                        attr);
+                    
                     _methods[tb.Name].Add(decl.Name, mb);
 
-                    if(!String.IsNullOrEmpty(_mgr.InheritanceMap[tb.Name]))
-                    {
-                        //tb.DefineMethodOverride(
-                    }
+                    //string prnt = _mgr.InheritanceMap[tb.Name];
+                    //if(!String.IsNullOrEmpty(prnt))
+                    //{
+                    //    if(_methods[prnt].ContainsKey(decl.Name))
+                    //        tb.DefineMethodOverride(mb, _methods[prnt][decl.Name]);
+                    //}
                     //_methods[tb.Name][decl.Name].GetILGenerator().Emit(OpCodes.Nop);
                 }
             }
@@ -155,7 +165,7 @@ namespace ILCodeGen
 
             n.Declarations.Visit(this);
 
-            _currentType.CreateType();
+            //_currentType.CreateType();
                                
         }
 
@@ -167,7 +177,7 @@ namespace ILCodeGen
 
             n.Declarations.Visit(this);
 
-            _currentType.CreateType();
+            //_currentType.CreateType();
 
         }
 
