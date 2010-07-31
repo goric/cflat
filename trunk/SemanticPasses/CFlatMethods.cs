@@ -52,6 +52,12 @@ namespace CFlat.SemanticPasses
                        ReturnType = new TypeString(),
                        Formals = new Dictionary<string, CFlatType> { }
                    }));
+            _methods.Add(
+                new Method("parseInt", new TypeFunction("parseInt")
+                {
+                    ReturnType = new TypeInt(),
+                    Formals = new Dictionary<string,CFlatType> { { "value", new TypeString() } }
+                }));
         }
 
         public static void AddToScope(ScopeManager mgr)
