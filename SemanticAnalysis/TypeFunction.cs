@@ -79,7 +79,7 @@ namespace SemanticAnalysis
 
         public bool AllCodePathsReturn()
         {
-            return CurrentBlock.AllCodePathsReturn();
+            return BodyBlock.AllCodePathsReturn();
         }
 
         /// <summary>
