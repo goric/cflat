@@ -126,8 +126,14 @@ namespace ILCodeGen
                 foreach(AbstractSyntaxTree.ASTDeclarationMethod decl in _mgr.MethodMap[tb.Name])
                 {
                     //TODO:Add Access Modifiers
-                    _methods[tb.Name].Add(decl.Name, tb.DefineMethod(decl.Name, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.Family));
 
+                    MethodBuilder mb = tb.DefineMethod(decl.Name, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.Family);
+                    _methods[tb.Name].Add(decl.Name, mb);
+
+                    if(!String.IsNullOrEmpty(_mgr.InheritanceMap[tb.Name]))
+                    {
+                        //tb.DefineMethodOverride(
+                    }
                     //_methods[tb.Name][decl.Name].GetILGenerator().Emit(OpCodes.Nop);
                 }
             }
@@ -206,7 +212,7 @@ namespace ILCodeGen
             MethodBuilder meth = _methods[_currentType.Name][n.Name];
 
             //meth.DefineParameter(0, ParameterAttributes.Retval, String.Empty);
-
+            
             //set il generator to this method
             _gen = meth.GetILGenerator();
 
@@ -237,13 +243,14 @@ namespace ILCodeGen
             
             meth.SetReturnType(_lastWalkedType);
 
-            //meth.SetSignature(_lastWalkedType, null, null, _tmpFormals.ToArray(), null, null);
-
             n.Body.Visit(this);
 
             //return
             _gen.Emit(OpCodes.Ret);
-         }
+
+            //put this back?
+            _methods[_currentType.Name][n.Name] = meth;
+        }
 
         public override void VisitDeclLocal(ASTDeclarationLocal n)
         {
@@ -344,7 +351,11 @@ namespace ILCodeGen
             else
             {
 
-                MethodInfo mi = _methods[_currentType.Name][n.Method].GetBaseDefinition();
+                //MethodInfo mi = _methods[_currentType.Name][n.Method].GetBaseDefinition();
+                MethodInfo mi = _methods[_currentType.Name][n.Method];
+                //mi = _methods[_currentType.Name][n.Method].GetGenericMethodDefinition();
+
+                //mi = _methods[_currentType.Name][n.Method].MakeGenericMethod(_methods[_currentType.Name][n.Method].GetGenericArguments());
                 //mi.GetGenericArguments();                                
 
                 _gen.Emit(OpCodes.Call, mi);
@@ -353,6 +364,10 @@ namespace ILCodeGen
            
         }
 
+        public override void VisitBase(ASTBase n)
+        {
+            _currentType = _mgr.CFlatTypes[_mgr.InheritanceMap[_currentType.Name]];
+        }
         
 
         public override void VisitIfThen(ASTIfThen n)
