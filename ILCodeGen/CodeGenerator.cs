@@ -233,8 +233,8 @@ namespace ILCodeGen
 
             n.Body.Visit(this);
 
-            //bail
-            _gen.Emit(OpCodes.Ret);
+            //bail - movded to visitreturn
+            //_gen.Emit(OpCodes.Ret);
         }
 
         public override void VisitDeclLocal(ASTDeclarationLocal n)
@@ -287,6 +287,8 @@ namespace ILCodeGen
         public override void VisitReturn(ASTReturn n)
         {
             n.ReturnValue.Visit(this);
+
+            _gen.Emit(OpCodes.Ret);
         }
         #endregion
 
@@ -590,6 +592,7 @@ namespace ILCodeGen
 
             _gen.Emit(OpCodes.And);
         }
+
         public override void VisitOr(ASTOr n)
         {
             SetupOperands(n);
