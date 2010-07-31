@@ -476,7 +476,7 @@ namespace ILCodeGen
         public override void VisitString(ASTString n)
         {
             //push string on stack
-            _gen.Emit(OpCodes.Ldstr, n.Value);
+            _gen.Emit(OpCodes.Ldstr, n.Value.Replace("\"",""));
             _typesOnStack.Push(typeof(string));
         }
         public override void VisitBoolean(ASTBoolean n)
@@ -614,6 +614,31 @@ namespace ILCodeGen
 
             LoadLocal(RES_NM);
         }
+
+        public override void VisitConcatenate (ASTConcatenate n)
+        {
+            //push left and right
+            n.Left.Visit(this);
+            n.Right.Visit(this);
+
+            // if not a string we need to box
+            if (_lastWalkedType != typeof(string))
+            {
+                if (_lastWalkedType == typeof(int))
+                    _gen.Emit(OpCodes.Box, typeof(int));
+                else
+                    _gen.Emit(OpCodes.Box, typeof(double));
+            }
+
+            //get our parameter types
+            List<Type> types = _typesOnStack.Take(2).ToList();
+            types.Reverse();
+
+            // now call String.Concat
+            _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Concat", BindingFlags.Public | BindingFlags.Static,
+               null, types.ToArray(), null));
+        }
+
         #endregion
         
         #region unary operators
