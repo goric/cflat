@@ -1,0 +1,12 @@
+class program
+{
+	void main()
+	{
+		print("Enter a number: ");
+		string input = readln();
+		int x = parseInt(input);
+		println(input);
+		/*string s = "You entered: " & x;
+		println(s);*/
+	}
+}
