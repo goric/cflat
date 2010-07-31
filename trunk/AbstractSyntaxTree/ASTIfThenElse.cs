@@ -7,12 +7,17 @@ namespace AbstractSyntaxTree
 {
     public class ASTIfThenElse : ASTIfThen
     {
-        public ASTStatement Else { get; set; }
+        public ASTBlock Else { get; set; }
 
         public ASTIfThenElse (ASTExpression condition, ASTStatement then, ASTStatement elseStatement)
             : base(condition, then)
         {
-            Else = elseStatement;
+            if (elseStatement is ASTBlock)
+                Else = (ASTBlock)elseStatement;
+            else
+                Else = new ASTBlock(elseStatement);
+
+            Else.IsBranch = true;
         }
         
         public override String Print(int depth)

@@ -9,10 +9,12 @@ namespace SemanticAnalysis
     {
         public override bool IsFunction { get { return true; } }
         public bool IsConstructor { get; set; }
-        public bool HasReturnStatement { get; set; }
         public Scope Scope { get; set; }
         public CFlatType ReturnType { get; set; }
         public string Name { get; private set; }
+
+        public Block BodyBlock { get; set; }
+        public Block CurrentBlock { get; set; }
 
         public Dictionary<string, CFlatType> Formals;
         public Dictionary<string, CFlatType> Locals;
@@ -28,6 +30,9 @@ namespace SemanticAnalysis
             IsConstructor = isCtor;
             Formals = new Dictionary<string, CFlatType>();
             Locals = new Dictionary<string, CFlatType>();
+
+            BodyBlock = new Block(false);
+            CurrentBlock = BodyBlock;
         }
 
         public void AddFormal(string name, CFlatType type)
@@ -37,7 +42,44 @@ namespace SemanticAnalysis
 
         public void AddLocal(string name, CFlatType type)
         {
-            Locals.Add(name, type);
+            CurrentBlock.AddLocal(name, type);
+        }
+
+        public void AddBlock(bool branchStatement)
+        {
+            Block b = new Block(branchStatement);
+            CurrentBlock.AddBlock(b);
+            CurrentBlock = b;
+        }
+
+        public void LeaveBlock()
+        {
+            CurrentBlock = CurrentBlock.Parent;
+        }
+        
+        public bool HasLocal(string name)
+        {
+            Block tempBlock = CurrentBlock;
+            do
+            {
+                if (tempBlock.HasLocal(name))
+                    return true;
+                else
+                    tempBlock = tempBlock.Parent;
+            }
+            while (tempBlock != null);
+
+            return false;
+        }
+
+        public void RegisterReturnStatement()
+        {
+            CurrentBlock.HasReturnStatement = true;
+        }
+
+        public bool AllCodePathsReturn()
+        {
+            return CurrentBlock.AllCodePathsReturn();
         }
 
         /// <summary>

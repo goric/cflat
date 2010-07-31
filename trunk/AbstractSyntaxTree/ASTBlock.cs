@@ -8,6 +8,7 @@ namespace AbstractSyntaxTree
     public class ASTBlock : ASTStatement
     {
         public ASTStatement Body { get; set; }
+        public bool IsBranch { get; set; }
 
         public ASTBlock (ASTStatement body)
         {

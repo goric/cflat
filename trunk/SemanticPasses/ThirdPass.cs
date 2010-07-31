@@ -12,6 +12,7 @@ namespace CFlat.SemanticPasses
     public class ThirdPass : SecondPass, ICompilerPass
     {
         private TypeFunction _currentMethod;
+        private bool _skipNextBlockScope;
 
         public ThirdPass(ASTNode treeNode, ScopeManager mgr)
             : base(treeNode, mgr)
@@ -301,6 +302,9 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitFor(ASTFor n)
         {
+            //define the block scope now to incapsulate the declared variable.
+            BeginForLoopBlock();
+
             CFlatType initType = CheckSubTree(n.InitialExpr);
             n.InitialExpr.CFlatType = initType;
 
@@ -310,6 +314,8 @@ namespace CFlat.SemanticPasses
                 n.Conditional.CFlatType = condition;
                 CFlatType loopType = CheckSubTree(n.LoopExpr);
                 n.LoopExpr.CFlatType = loopType;
+
+                CheckSubTree(n.Body);
             }
             else
             {
@@ -319,6 +325,9 @@ namespace CFlat.SemanticPasses
 
         public override void VisitForIn(ASTForIn n)
         {
+            //define the block scope now to incapsulate the declared variable.
+            BeginForLoopBlock();
+
             n.Lower.CFlatType = CheckSubTree(n.Lower);
             n.Upper.CFlatType = CheckSubTree(n.Upper);
 
@@ -328,9 +337,9 @@ namespace CFlat.SemanticPasses
                 if (!_scopeMgr.HasSymbol(n.TempVariable.ID))
                 {
                     //we're good
+                    _scopeMgr.AddLocal(n.TempVariable.ID, new TypeInt(), _currentMethod);
 
-                    //now I need to record the precense of the temp variable and add it to the scope of the block of the body
-                    //of the loop...
+                    CheckSubTree(n.Body);
                 }
                 else
                 {
@@ -352,7 +361,7 @@ namespace CFlat.SemanticPasses
                 n.CFlatType = expected;
                 _lastSeenType = expected;
 
-                _currentMethod.HasReturnStatement = true;
+                _currentMethod.RegisterReturnStatement();
             }
             else
             {
@@ -366,8 +375,17 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitBlock(ASTBlock n)
         {
-            _scopeMgr.PushScope("block");
+            //a hack to get around scoping declared variables properly in for loops
+            if (!_skipNextBlockScope)
+            {
+                _scopeMgr.PushScope("block");
+                _currentMethod.AddBlock(n.IsBranch);
+                _skipNextBlockScope = false;
+            }
+
             CheckSubTree(n.Body);
+
+            _currentMethod.LeaveBlock();
             _scopeMgr.PopScope();
         }
 
@@ -701,13 +719,10 @@ namespace CFlat.SemanticPasses
 
             VisitMethodBody(string.Format("body {0}", n.Name), n.Body, n.Type as TypeFunction);
 
-            //make sure there is a return statement if it's required.
-            //This is pretty weak, because you could have an arbitrary return statement in a single block, and this would not catch it.
-            //To make this actually work, a function would need to keep track of its block, and each block would keep track of it's child blocks and whether or not it contains a return
-            //Then, we would check if the main block has a return statement, or if all inner branching blocks have a return.
-            if ((_currentMethod.ReturnType is TypeVoid == false) && (!_currentMethod.HasReturnStatement))
+           
+            if ((_currentMethod.ReturnType is TypeVoid == false) && (!_currentMethod.AllCodePathsReturn()))
             {
-                ReportError(n.Location, "Method '{0}' does not have a return statement.", n.Name);
+                ReportError(n.Location, "Not all code paths of method '{0}' return a value.", n.Name);
             }
         }
 
@@ -880,6 +895,16 @@ namespace CFlat.SemanticPasses
             {
                 ReportError(n.Location, errorMessage);
             }
+        }
+
+        /// <summary>
+        /// A hack to scope the declared variable in a for loop to inside the block of the for loop properly.
+        /// </summary>
+        private void BeginForLoopBlock()
+        {
+            _skipNextBlockScope = true;
+            _scopeMgr.PushScope("block");
+            _currentMethod.AddBlock(false);
         }
 
         private void TypeCheckEquality(ASTBinary n)
