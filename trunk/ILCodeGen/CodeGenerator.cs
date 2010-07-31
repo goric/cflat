@@ -56,7 +56,7 @@ namespace ILCodeGen
                 new AssemblyName(_assemblyName),
                 AssemblyBuilderAccess.RunAndSave);
             //Create Module
-            string exeName = _assemblyName + ".dll";
+            string exeName = _assemblyName + ".exe";
             _mod = _asm.DefineDynamicModule(exeName, exeName);
 
             DefineClasses();
@@ -217,9 +217,9 @@ namespace ILCodeGen
 
             for (int i = 0; i < _tmpFormals.Count; i++)
             {
-                LocalBuilder lb = _gen.DeclareLocal(_tmpFormals[0]);
-                _gen.Emit(OpCodes.Ldloc, lb.LocalIndex);
-                //_gen.Emit(OpCodes.Ldarg, i);
+                //LocalBuilder lb = _gen.DeclareLocal(_tmpFormals[0]);
+                //_gen.Emit(OpCodes.Ldloc, lb.LocalIndex);
+                _gen.Emit(OpCodes.Ldarg, i);
                 //_gen.Emit(OpCodes.Ldloc, i);
             }
 
@@ -259,12 +259,39 @@ namespace ILCodeGen
         }
         public override void VisitDeclConstructor(ASTDeclarationCtor n)
         {
-            //ConstructorBuilder cb = _currentType.DefineConstructor(MethodAttributes...);
+           n.Formals.Visit(this);
+            
+           ConstructorBuilder cb = _currentType.DefineConstructor(MethodAttributes.Public, CallingConventions.Any, _tmpFormals.ToArray());
+         
+            
         }
-        
+
+        /// <summary>
+        /// Get class, instantiate and call constructor
+        /// </summary>
+        /// <param name="n"></param>
+        public override void VisitInstantiateClass(ASTInstantiateClass n)
+        {
+            n.Actuals.Visit(this);
+
+            TypeBuilder tb = _mgr.CFlatTypes[n.ClassName];
+
+            List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
+            types.Reverse();
+
+            //not sure this is right
+            _gen.Emit(OpCodes.Newobj, tb.GetConstructor(types.ToArray()));
+
+        }
+
+        public override void VisitReturn(ASTReturn n)
+        {
+            n.ReturnValue.Visit(this);
+        }
         #endregion
 
         #region control/invoke
+
         public override void VisitInvoke(ASTInvoke n)
         {
             
@@ -306,6 +333,8 @@ namespace ILCodeGen
             
            
         }
+
+        
 
         public override void VisitIfThen(ASTIfThen n)
         {
@@ -559,7 +588,7 @@ namespace ILCodeGen
         {
             SetupOperands(n);
 
-            //what to do here?  Opcodes.And is bitwise, should have 2 bool at top of stack
+            _gen.Emit(OpCodes.And);
         }
         public override void VisitOr(ASTOr n)
         {
@@ -826,5 +855,6 @@ namespace ILCodeGen
             else //??
                 _lastWalkedIdentifier = "";
         }
+
     }
 }
