@@ -102,11 +102,17 @@ namespace ILCodeGen
             }
 
             //add type - add parent if it is not null
-            if(String.IsNullOrEmpty(_mgr.InheritanceMap[className]))
-                _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Class | TypeAttributes.Public));
+            if (String.IsNullOrEmpty(_mgr.InheritanceMap[className]))
+            {
+                if(!_mgr.CFlatTypes.ContainsKey(className))
+                    _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Class | TypeAttributes.Public));
+            }
             else
-                _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Public | TypeAttributes.Class,
-                    _mgr.CFlatTypes[_mgr.InheritanceMap[className]]));
+            {
+                if(!_mgr.CFlatTypes.ContainsKey(className))
+                    _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Public | TypeAttributes.Class,
+                        _mgr.CFlatTypes[_mgr.InheritanceMap[className]]));
+            }
         }
 
         //This stubs out all the methods so you don't get odd invoke errors
@@ -120,7 +126,7 @@ namespace ILCodeGen
                 foreach(AbstractSyntaxTree.ASTDeclarationMethod decl in _mgr.MethodMap[tb.Name])
                 {
                     //TODO:Add Access Modifiers
-                    _methods[tb.Name].Add(decl.Name, tb.DefineMethod(decl.Name, MethodAttributes.Public | MethodAttributes.Static));
+                    _methods[tb.Name].Add(decl.Name, tb.DefineMethod(decl.Name, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.Family));
 
                     //_methods[tb.Name][decl.Name].GetILGenerator().Emit(OpCodes.Nop);
                 }
@@ -230,13 +236,14 @@ namespace ILCodeGen
             meth.SetParameters(_tmpFormals.ToArray());
             
             meth.SetReturnType(_lastWalkedType);
+
             //meth.SetSignature(_lastWalkedType, null, null, _tmpFormals.ToArray(), null, null);
 
             n.Body.Visit(this);
 
             //return
             _gen.Emit(OpCodes.Ret);
-        }
+         }
 
         public override void VisitDeclLocal(ASTDeclarationLocal n)
         {
