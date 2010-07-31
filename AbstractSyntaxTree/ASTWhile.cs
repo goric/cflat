@@ -8,12 +8,12 @@ namespace AbstractSyntaxTree
     public class ASTWhile : ASTStatement
     {
         public ASTExpression Condition { get; set; }
-        public ASTStatement Body { get; set; }
+        public ASTBlock Body { get; set; }
 
         public ASTWhile (ASTExpression condition, ASTStatement body)
         {
             Condition = condition;
-            Body = body;
+            Body = body.WrapInBlock();
         }
         
         public override String Print(int depth)

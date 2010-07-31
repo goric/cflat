@@ -10,14 +10,14 @@ namespace AbstractSyntaxTree
         public ASTIdentifier TempVariable { get; set; }
         public ASTExpression Lower { get; set; }
         public ASTExpression Upper { get; set; }
-        public ASTStatement Body { get; set; }
+        public ASTBlock Body { get; set; }
 
         public ASTForIn (ASTIdentifier variable, ASTExpression lower, ASTExpression upper, ASTStatement body)
         {
             TempVariable = variable;
             Lower = lower;
             Upper = upper;
-            Body = body;
+            Body = body.WrapInBlock();
         }
 
         public override string Print (int depth)

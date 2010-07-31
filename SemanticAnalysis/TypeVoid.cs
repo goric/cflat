@@ -9,10 +9,7 @@ namespace SemanticAnalysis
     {
         public override int Size
         {
-            get
-            {
-                return 0;
-            }
+            get { return 0; }
         }
 
         public override bool IsSupertype(TypeVoid checkType)
