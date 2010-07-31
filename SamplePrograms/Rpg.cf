@@ -4,20 +4,26 @@ class RPG{
 	{
 		println("You are standing in front of RPI, it's a nice Saturday.  1) Enter 2)Leave");
 		string x = readln();
+		println("You entered " & x);
 		if(x == "2")
 		{
 			Grue();
 			return;
 		}
+		
 
 		println("You are at the door. 1) Use keycard 2) Leave");
 		x = readln();
+		println("You entered " & x);
+		
 		if(x != "1")
 		{
 			Grue();
 			return;
 		}
+		
 
+		/* Certain doom */
 		println("You are inside, facing north.  There is a cafe to your left and elevators to your right.");
 		println("Oh nevermind, ");
 		Grue();

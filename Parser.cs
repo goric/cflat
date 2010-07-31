@@ -3,9 +3,9 @@
 // (see accompanying GPPGcopyright.rtf)
 
 // GPPG version 1.4.0
-// Machine:  WILL-LAPTOP
-// DateTime: 7/31/2010 11:48:45 AM
-// UserName: Will
+// Machine:  MANDOS
+// DateTime: 7/31/2010 12:11:59 PM
+// UserName: Matt
 // Input file <..\..\GeneratorInputFiles\CFlat.y>
 
 // options: no-lines gplex

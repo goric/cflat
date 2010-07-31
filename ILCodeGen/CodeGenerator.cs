@@ -233,8 +233,8 @@ namespace ILCodeGen
 
             n.Body.Visit(this);
 
-            //bail - movded to visitreturn
-            //_gen.Emit(OpCodes.Ret);
+            //return
+            _gen.Emit(OpCodes.Ret);
         }
 
         public override void VisitDeclLocal(ASTDeclarationLocal n)
@@ -760,8 +760,17 @@ namespace ILCodeGen
         public override void VisitEqual(ASTEqual n)
         {
             SetupOperands(n);
+            //string equality, good times
+            if (_lastWalkedType == typeof(String))
+            {
+                _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Equals", BindingFlags.Public | BindingFlags.Static, null,
+                    new Type[]{ typeof(string), typeof(string) }, null));
 
-            _gen.Emit(OpCodes.Ceq);
+            }
+            else
+            {
+                _gen.Emit(OpCodes.Ceq);
+            }
         }
 
         public override void VisitSmallerEqual(ASTSmallerEqual n)
@@ -796,8 +805,18 @@ namespace ILCodeGen
         {
             SetupOperands(n);
 
-            //check eq and negate
-            _gen.Emit(OpCodes.Ceq);
+            //string equality, good times
+            if (_lastWalkedType == typeof(String))
+            {
+                _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Equals", BindingFlags.Public | BindingFlags.Static, null,
+                    new Type[]{ typeof(string), typeof(string) }, null));
+                                
+            }
+            else
+            {
+                _gen.Emit(OpCodes.Ceq);
+            }
+                        
             _gen.Emit(OpCodes.Not);
         }
 

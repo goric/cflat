@@ -34,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SamplePrograms", "SamplePro
 		SamplePrograms\Input.cf = SamplePrograms\Input.cf
 		SamplePrograms\Necessary.cf = SamplePrograms\Necessary.cf
 		SamplePrograms\Readonly.cf = SamplePrograms\Readonly.cf
+		Rpg.cf = Rpg.cf
 		SamplePrograms\Undeclared.cf = SamplePrograms\Undeclared.cf
 	EndProjectSection
 EndProject
