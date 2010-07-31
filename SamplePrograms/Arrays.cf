@@ -4,18 +4,32 @@ class arrays
 	{
 		int[] a = new int[4];
         a[0] = 8;
-		print(a[0]);
-		/*
-		for(i in [1..8])
-		{
-			a[i] = 0;
-		}
+		a[1] = 5;
+		a[3] = 2;
 
-		doSomething(readonly a);*/
+		int index = 0;
+		while(index < 4)
+		{
+			println(a[index]);
+			index++;
+		}
+		
+		string[] b = new string[0..10];
+		b[0] = "this";
+		b[1] = "is";
+		b[2] = "an";
+		b[3] = "array";
+
+		println(b[0]);
+		println(b[1]);
+		println(b[2]);
+		println(b[3]);
+		/*
+		index = 0;
+		while(index < 9)
+		{
+			println(b[index]);
+			index++;
+		}*/
 	}
-	/*
-	private readonly void doSomething(int[] p)
-	{
-		p[0] = 6;
-	}*/
 }
