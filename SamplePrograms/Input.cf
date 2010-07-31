@@ -1,0 +1,8 @@
+class input
+{
+	void main()
+	{
+		string test = readln();
+		print("\n" & test);
+	}
+}

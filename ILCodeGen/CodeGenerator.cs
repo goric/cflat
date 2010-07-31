@@ -56,7 +56,7 @@ namespace ILCodeGen
                 new AssemblyName(_assemblyName),
                 AssemblyBuilderAccess.RunAndSave);
             //Create Module
-            string exeName = _assemblyName + ".exe";
+            string exeName = _assemblyName + ".dll";
             _mod = _asm.DefineDynamicModule(exeName, exeName);
 
             DefineClasses();
@@ -245,7 +245,8 @@ namespace ILCodeGen
             LocalBuilder lb = _gen.DeclareLocal(_lastWalkedType);
 
             //set value
-            n.InitialValue.Visit(this);
+            if(n.InitialValue != null)
+                n.InitialValue.Visit(this);
 
             StoreLocal(n.ID, lb.LocalIndex);
             
@@ -276,17 +277,31 @@ namespace ILCodeGen
 
             List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
             types.Reverse();
-                        
-            if (n.Method == "print")
+
+            if (n.Method == "println")
+            {
                 _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
-               null, types.ToArray(), null));
+                    null, types.ToArray(), null));
+            }
+            else if (n.Method == "print")
+            {
+                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("Write", BindingFlags.Public | BindingFlags.Static,
+                    null, types.ToArray(), null));
+            }
+            else if (n.Method == "readln")
+            {
+                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static,
+                    null, System.Type.EmptyTypes, null));
+                _typesOnStack.Push(typeof(string));
+                //_gen.Emit(OpCodes.Stloc_0);
+            }
             else
             {
-                
+
                 MethodInfo mi = _methods[_currentType.Name][n.Method].GetBaseDefinition();
                 //mi.GetGenericArguments();                                
-                
-                _gen.Emit(OpCodes.Call,  mi);
+
+                _gen.Emit(OpCodes.Call, mi);
             }
             
            
@@ -456,7 +471,7 @@ namespace ILCodeGen
         public override void VisitTypeVoid(ASTTypeVoid n)
         {
             //??
-            _lastWalkedType = null;
+            _lastWalkedType = typeof(void);
         }
         public override void VisitTypeName(ASTTypeClass n)
         {
@@ -476,7 +491,7 @@ namespace ILCodeGen
         public override void VisitString(ASTString n)
         {
             //push string on stack
-            _gen.Emit(OpCodes.Ldstr, n.Value.Replace("\"",""));
+            _gen.Emit(OpCodes.Ldstr, n.Value.Replace("\"", "").Replace("\\n", "\n").Replace("\\t", "\t"));
             _typesOnStack.Push(typeof(string));
         }
         public override void VisitBoolean(ASTBoolean n)
@@ -626,7 +641,7 @@ namespace ILCodeGen
             {
                 if (_lastWalkedType == typeof(int))
                     _gen.Emit(OpCodes.Box, typeof(int));
-                else
+                else if (_lastWalkedType == typeof(double))
                     _gen.Emit(OpCodes.Box, typeof(double));
             }
 
