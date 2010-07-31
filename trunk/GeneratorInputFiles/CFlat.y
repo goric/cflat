@@ -144,7 +144,7 @@ expression		: expression AND  expression		{ $$ = new ASTAnd($1, $3); $$.Location
 				| NEW IDENTIFIER LPAREN actuals RPAREN		{ $$ = new ASTInstantiateClass($2.Value, $4); $$.Location = CurrentLocationSpan; }
 				| NEW type LBRACKET expression DOTDOT expression RBRACKET 
 						{ $$ = new ASTInstantiateArray($2, $4, $6); $$.Location = CurrentLocationSpan; }
-				| NEW type LBRACKET expression RBRACKET { $$ = new ASTInstantiateArray($2, $4, new ASTInteger(0)); $$.Location = CurrentLocationSpan; }
+				| NEW type LBRACKET expression RBRACKET { $$ = new ASTInstantiateArray($2, new ASTInteger(0), $4); $$.Location = CurrentLocationSpan; }
 				;
 	     
 

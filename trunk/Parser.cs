@@ -3,9 +3,9 @@
 // (see accompanying GPPGcopyright.rtf)
 
 // GPPG version 1.4.0
-// Machine:  MANDOS
-// DateTime: 7/31/2010 12:11:59 PM
-// UserName: Matt
+// Machine:  VOSTRO
+// DateTime: 7/31/2010 12:37:56 PM
+// UserName: Tim
 // Input file <..\..\GeneratorInputFiles\CFlat.y>
 
 // options: no-lines gplex
@@ -541,7 +541,7 @@ internal class Parser: ShiftReduceParser<SemanticValue, LexLocation>
 { CurrentSemanticValue.Expression = new ASTInstantiateArray(ValueStack[ValueStack.Depth-6].Type, ValueStack[ValueStack.Depth-4].Expression, ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 67: // expression -> NEW, type, LBRACKET, expression, RBRACKET
-{ CurrentSemanticValue.Expression = new ASTInstantiateArray(ValueStack[ValueStack.Depth-4].Type, ValueStack[ValueStack.Depth-2].Expression, new ASTInteger(0)); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
+{ CurrentSemanticValue.Expression = new ASTInstantiateArray(ValueStack[ValueStack.Depth-4].Type, new ASTInteger(0), ValueStack[ValueStack.Depth-2].Expression); CurrentSemanticValue.Expression.Location = CurrentLocationSpan; }
         break;
       case 68: // lvalue -> IDENTIFIER
 { CurrentSemanticValue.LValue = new ASTIdentifier(CurrentLocationSpan, ValueStack[ValueStack.Depth-1].Token.Value); CurrentSemanticValue.LValue.Location = CurrentLocationSpan; }

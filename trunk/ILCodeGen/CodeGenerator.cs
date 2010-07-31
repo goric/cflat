@@ -28,6 +28,7 @@ namespace ILCodeGen
         protected TypeManager _mgr;
         private Stack<Type> _typesOnStack;
         private List<Type> _tmpFormals;
+        private bool _isArrayAssign;
         
         //i heard you like dictionaries, so i put a dictionary in your dictionary
         private Dictionary<string, Dictionary<string, MethodBuilder>> _methods;
@@ -265,6 +266,25 @@ namespace ILCodeGen
          
             
         }
+        public override void VisitInstantiateArray (ASTInstantiateArray n)
+        {
+            //push upper and lower bounds
+            n.Upper.Visit(this);
+            //n.Lower.Visit(this);
+
+            //subtract to get array size
+            //_gen.Emit(OpCodes.Sub);
+
+            
+            //get the type and push newarr [type]
+            n.Type.Visit(this);
+            _gen.Emit(OpCodes.Newarr, _lastWalkedType);
+        }
+        
+
+
+
+
 
         /// <summary>
         /// Get class, instantiate and call constructor
@@ -509,6 +529,19 @@ namespace ILCodeGen
             //??
             _lastWalkedType = n.GetType();
         }
+        public override void VisitTypeArray (ASTTypeArray n)
+        {
+            if(n.BaseType is ASTTypeInt)
+                _lastWalkedType = typeof(int[]);
+            else if (n.BaseType is ASTTypeString)
+                _lastWalkedType = typeof(string[]);
+            else if (n.BaseType is ASTTypeReal)
+                _lastWalkedType = typeof(double[]);
+            else if (n.BaseType is ASTTypeBool)
+                _lastWalkedType = typeof(bool[]);
+            /*else if (n.BaseType is ASTTypeClass)
+                _lastWalkedType = n.GetType();*/
+        }
         
         #endregion
 
@@ -544,6 +577,16 @@ namespace ILCodeGen
         {
             LoadLocal(n.ID);
         }
+        public override void VisitDerefArray (ASTDereferenceArray n)
+        {
+            LoadLocal(((ASTIdentifier)n.Array).ID);
+            n.Index.Visit(this);
+
+            //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
+            if(!_isArrayAssign) 
+                _gen.Emit(OpCodes.Ldelem_I4);
+        }
+
         #endregion
         
         #region Binary Operators
@@ -824,11 +867,20 @@ namespace ILCodeGen
 
         public override void VisitAssign(ASTAssign n)
         {
+            //for arrays we need to visit the left side first, then the expression,
+            // making sure not to emit a ldelem for the LHS array dereference,
+            // and also emit a stelem command
+            if (n.LValue is ASTDereferenceArray)
+            {
+                _isArrayAssign = true;
+                n.LValue.Visit(this);
+                _isArrayAssign = false;
+                n.Expr.Visit(this);
+                _gen.Emit(OpCodes.Stelem_I4);
+                return;
+            }
             n.Expr.Visit(this);
-
-
             n.LValue.Visit(this);
-
         }
         
         public override void VisitStatementExpr(ASTStatementExpr n)
