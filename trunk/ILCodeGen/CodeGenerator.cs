@@ -28,7 +28,7 @@ namespace ILCodeGen
         protected Dictionary<string, int> _locals;
         protected TypeManager _mgr;
         private Stack<Type> _typesOnStack;
-        private List<Type> _tmpFormals;
+        private List<ASTFormal> _tmpFormals;
         private bool _isArrayAssign;
         
         //i heard you like dictionaries, so i put a dictionary in your dictionary
@@ -136,6 +136,19 @@ namespace ILCodeGen
                     
                     MethodBuilder mb = tb.DefineMethod(decl.Name,
                         attr);
+
+                    //Define method signature - once an invoke is run, you can no longer change method signatures
+                    _tmpFormals = new List<ASTFormal>();
+                    decl.Formals.Visit(this);
+
+                    decl.ReturnType.Visit(this);
+
+                    List<Type> formalTypes = new List<Type>();
+                    formalTypes.AddRange(_tmpFormals.ConvertAll<Type>(m => { return GetCilType(m.CFlatType); }));
+
+                    mb.SetParameters(formalTypes.ToArray());
+
+                    mb.SetReturnType(_lastWalkedType);
                     
                     _methods[tb.Name].Add(decl.Name, mb);
 
@@ -213,7 +226,7 @@ namespace ILCodeGen
         public override void VisitFormal(ASTFormal n)
         {
             n.Type.Visit(this);
-            _tmpFormals.Add(_lastWalkedType);
+            _tmpFormals.Add(n);
         }
 
         public override void VisitDeclMethod(ASTDeclarationMethod n)
@@ -236,23 +249,18 @@ namespace ILCodeGen
             //reset attrs
             _tmpAttr = 0;
 
-            _tmpFormals = new List<Type>();
-            n.Formals.Visit(this);
-
-            for (int i = 0; i < _tmpFormals.Count; i++)
-            {
-                //LocalBuilder lb = _gen.DeclareLocal(_tmpFormals[0]);
-                //_gen.Emit(OpCodes.Ldloc, lb.LocalIndex);
-                _gen.Emit(OpCodes.Ldarg, i);
-                //_gen.Emit(OpCodes.Ldloc, i);
-            }
-
-            n.ReturnType.Visit(this);
-
-            //This generates args (A_0, A_1, etc... which i don't think i want, not sure how to get around it
-            meth.SetParameters(_tmpFormals.ToArray());
+            //seems silly to visit this just to get count, but it's ok
+            _tmpFormals = new List<ASTFormal>();
+            n.Formals.Visit(this);         
             
-            meth.SetReturnType(_lastWalkedType);
+            //put formals into local storage
+            foreach (ASTFormal f in _tmpFormals)
+            {
+                _gen.Emit(OpCodes.Ldarg, _tmpFormals.IndexOf(f));
+
+                LocalBuilder lb = _gen.DeclareLocal(GetCilType(f.CFlatType));
+                StoreLocal(f.Name, lb.LocalIndex);
+            }
 
             n.Body.Visit(this);
 
@@ -286,8 +294,10 @@ namespace ILCodeGen
         public override void VisitDeclConstructor(ASTDeclarationCtor n)
         {
            n.Formals.Visit(this);
-            
-           ConstructorBuilder cb = _currentType.DefineConstructor(MethodAttributes.Public, CallingConventions.Any, _tmpFormals.ToArray());
+           List<Type> formalTypes = new List<Type>();
+           formalTypes.AddRange(_tmpFormals.ConvertAll<Type>(m => { return GetCilType(m.CFlatType); }));
+
+           ConstructorBuilder cb = _currentType.DefineConstructor(MethodAttributes.Public, CallingConventions.Any, formalTypes.ToArray());
          
             
         }
@@ -479,7 +489,9 @@ namespace ILCodeGen
             //loop label
             _gen.MarkLabel(loop);
 
-            //load value into temp variable
+            //load value into temp variable - set type so GetCilType()
+            //doesn't get confused
+            n.TempVariable.CFlatType = new TypeInt();
             n.TempVariable.Visit(this);
 
             //visit upper bound
