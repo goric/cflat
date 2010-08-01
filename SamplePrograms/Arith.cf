@@ -44,11 +44,13 @@ class arithmetic
 			println(high);
 			high--;
 		}
-
+		
+		
 		for(a in [-10..5])
 		{
 			println(a);
 		}
+		
 
 		int exp = 2 ^ 15;
 		println(exp);
