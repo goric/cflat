@@ -2,13 +2,6 @@ class guesser
 {
 	void main()
 	{
-		println("Think of a letter, and I will try to guess it.");
-		println("Enter 'before' or 'after' as clues.  Enter 'yes' when correct.");
-		string actual = readln();
-
-		int guessIndex = 12;
-		bool right = false;
-
 		string[] letters = new string[26];
 		letters[0] = "a";
 		letters[1] = "b";
@@ -36,26 +29,44 @@ class guesser
 		letters[23] = "x";
 		letters[24] = "y";
 		letters[25] = "z";
+		
+		println("Think of a letter, and I will try to guess it.");
+		println("Enter 'before' or 'after' as clues.  Enter 'yes' when correct.");
 
-		while(right == false)
+		bool accepted = false;
+
+		int guess = 12;
+		int last = guess;
+		int upper = 26;
+		int lower = 0;
+
+		while(accepted == false)
 		{
-			println(letters[guessIndex] & "?");
+			print(letters[guess]);
+			println("?");
 			string answer = readln();
-
+			
 			if(answer == "yes")
 			{
-				right = true;
+				accepted = true;
 			}
-			else if (answer == "before")
+			if (answer == "before")
 			{
-				guessIndex = guessIndex / 2;
+				upper = guess;
+				guess = guess - ((upper-lower) / 2);
 			}
-			else if (answer == "after")
+			if (answer == "after")
 			{
-				guessIndex = guessIndex + (26 - guessIndex) / 2;
+				lower = guess;
+				guess = lower + ((upper-lower) / 2);
+			}
+			if((last == guess) && (accepted != true))
+			{
+				println("Impossible. You lied about an answer. I quit.");
+				accepted = true;
 			}
 		}
-
+		
 		print("I guessed it!");
 	}
 }

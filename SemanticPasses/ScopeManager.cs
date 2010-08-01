@@ -85,6 +85,13 @@ namespace CFlat.SemanticPasses
             return descriptior;
         }
 
+        public ArrayDescriptor AddArray (string name, CFlatType type, CFlatType baseType, int lower, int upper)
+        {
+            var descriptor = new ArrayDescriptor(type, baseType, name, lower, upper);
+            CurrentScope.Descriptors.Add(name, descriptor);
+            return descriptor;
+        }
+
         #region Scope Traversal
 
         /// <summary>
