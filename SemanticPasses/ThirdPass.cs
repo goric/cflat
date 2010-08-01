@@ -522,7 +522,9 @@ namespace CFlat.SemanticPasses
                 //check if a method with the given name exists in the scope.
                 //This needs to check not only the class's shallow scope, but all the parents as well.
                 MethodDescriptor methodDesc = _scopeMgr.Find(n.Method, d => d is MethodDescriptor, descriptor.Scope) as MethodDescriptor;
-                if (methodDesc != null && (descriptor.Methods.Contains(methodDesc) || methodDesc.IsCFlatMethod))
+                
+                //if (methodDesc != null && (descriptor.Methods.Contains(methodDesc) || methodDesc.IsCFlatMethod))
+                if (methodDesc != null)
                 {
                     if (methodDesc.Modifiers.Contains(PRIVATE_MODIFIER, StringComparer.InvariantCultureIgnoreCase))
                         if (!_scopeMgr.HasSymbol(n.Method, _currentClass.Scope))
