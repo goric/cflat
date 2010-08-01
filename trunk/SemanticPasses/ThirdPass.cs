@@ -674,6 +674,7 @@ namespace CFlat.SemanticPasses
             if (arrType.IsArray && index is TypeInt)
             {
                 _lastSeenType = n.CFlatType = ((TypeArray)arrType).BaseType;
+
             }
             else
             {

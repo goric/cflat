@@ -629,7 +629,7 @@ namespace ILCodeGen
                 if (_lastWalkedType == typeof(int))
                     _gen.Emit(OpCodes.Ldelem_I4);
                 if (_lastWalkedType == typeof(double))
-                    _gen.Emit(OpCodes.Ldelem, typeof(double));
+                    _gen.Emit(OpCodes.Ldelem_R4);
                 if (_lastWalkedType == typeof(bool))
                     _gen.Emit(OpCodes.Ldelem_I4);
                 if (_lastWalkedType == typeof(string))
@@ -935,6 +935,14 @@ namespace ILCodeGen
                 _isArrayAssign = false;
                 n.Expr.Visit(this);
                 _gen.Emit(OpCodes.Stelem_I4);
+                return;
+            }
+            //default behavior was just to push expr and lvalue onto the stack, but if we're assigning
+            // to an identifier we need to issue a stloc as well
+            if (n.LValue is ASTIdentifier)
+            {
+                n.Expr.Visit(this);
+                StoreLocal(((ASTIdentifier)n.LValue).ID, _locals[((ASTIdentifier)n.LValue).ID]);
                 return;
             }
             n.Expr.Visit(this);

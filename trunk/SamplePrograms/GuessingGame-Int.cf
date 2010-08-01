@@ -6,26 +6,37 @@ class guessInt
 		println("Each time I guess, enter 'higher', 'lower' or 'yes'.");
 		
 		string input = readln();
-		int x = parseInt(input);
 
 		bool accepted = false;
 		int guess = 50;
+		int last = guess;
+		int upper = 100;
+		int lower = 0;
 		while(accepted == false)
 		{
-			print(guess & "?");
+			last = guess;
+			
+			println(guess & "?");
 			string response = readln();
-
-			if(response == "yes");
+			
+			if(response == "yes")
 			{
 				accepted = true;
 			}
 			if(response == "lower")
 			{
-				guess = guess / 2;
+				upper = guess;
+				guess = guess - ((upper-lower) / 2);
 			}
 			if(response == "higher")
 			{
-				guess = guess + ((100 - guess) / 2);
+				lower = guess;
+				guess = lower + ((upper-lower) / 2);
+			}
+			if((last == guess) && (accepted != true))
+			{
+				println("Impossible. You lied about an answer. I quit.");
+				accepted = true;
 			}
 		}
 

@@ -9,6 +9,8 @@ namespace AbstractSyntaxTree
     {
         public ASTExpression Array { get;set; }
         public ASTExpression Index { get; set; }
+        public int ArrayLowerUpper { get; set; }
+        public int ArrayLowerBound { get; set; }
 
         public ASTDereferenceArray(ASTExpression array, ASTExpression index)
         {
