@@ -55,6 +55,9 @@ namespace CFlat.SemanticPasses
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
             var parent = (ClassDescriptor)_scopeMgr.Find(n.Parent, p => p is ClassDescriptor);
+            //need to restore the parent class's scope so that inheritance can pass semantic analysis
+            _scopeMgr.RestoreScope(parent.Scope);
+
             _currentClass = new TypeClass(n.Name, parent);
             var classScope = _scopeMgr.PushScope(string.Format("subclass {0}", _currentClass.ClassName));
 
@@ -69,6 +72,8 @@ namespace CFlat.SemanticPasses
 
             AddCtorIfNone(classScope, n.Name);
 
+            //pop the sub class scope and the parent class
+            _scopeMgr.PopScope();
             _scopeMgr.PopScope();
         }
 
