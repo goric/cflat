@@ -55,7 +55,7 @@ namespace SemanticAnalysis
             if (HasReturnStatement)
                 return true;
             else
-                return _childBlocks.Where(b => b.IsBranch).All(b => b.HasReturnStatement);
+                return _childBlocks.Where(b => b.IsBranch).All(b => b.AllCodePathsReturn());
         }
     }
 }
