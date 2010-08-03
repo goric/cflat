@@ -54,6 +54,8 @@ namespace SemanticAnalysis
         {
             if (HasReturnStatement)
                 return true;
+            else if (_childBlocks.Count == 0)
+                return false;
             else
                 return _childBlocks.Where(b => b.IsBranch).All(b => b.AllCodePathsReturn());
         }
