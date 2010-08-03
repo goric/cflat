@@ -13,10 +13,10 @@ class RPG{
 		
 
 		println("You are at the door. 1) Use keycard 2) Leave");
-		string y = readln();
-		println("You entered " & y);
+		x = readln();
+		println("You entered " & x);
 		
-		if(y != "1")
+		if(x == "2")
 		{
 			Grue();
 			return;
