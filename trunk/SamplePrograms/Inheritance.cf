@@ -15,7 +15,6 @@ class derivedFact is fact
 		int z = self.factorial(5);
 
 		println("factorial: " & x & ", base: " & y & ", self: " & z);
-		
 	}
 
 	int factorial(int n) 

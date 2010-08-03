@@ -23,16 +23,22 @@ class guessInt
 			{
 				accepted = true;
 			}
-			if(response == "lower")
+			else if(response == "lower")
 			{
 				upper = guess;
 				guess = guess - ((upper-lower) / 2);
 			}
-			if(response == "higher")
+			else if(response == "higher")
 			{
 				lower = guess;
 				guess = lower + ((upper-lower) / 2);
 			}
+			else
+			{
+				println("Invalid input.  Please try again.");
+				last++;
+			}
+
 			if((last == guess) && (accepted != true))
 			{
 				println("Impossible. You lied about an answer. I quit.");

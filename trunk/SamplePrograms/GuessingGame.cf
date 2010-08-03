@@ -42,6 +42,7 @@ class guesser
 
 		while(accepted == false)
 		{
+			last = guess;
 			print(letters[guess]);
 			println("?");
 			string answer = readln();
@@ -50,16 +51,22 @@ class guesser
 			{
 				accepted = true;
 			}
-			if (answer == "before")
+			else if (answer == "before")
 			{
 				upper = guess;
 				guess = guess - ((upper-lower) / 2);
 			}
-			if (answer == "after")
+			else if (answer == "after")
 			{
 				lower = guess;
 				guess = lower + ((upper-lower) / 2);
 			}
+			else
+			{
+				println("Invalid input.  Please try again.");
+				last++;
+			}
+
 			if((last == guess) && (accepted != true))
 			{
 				println("Impossible. You lied about an answer. I quit.");
