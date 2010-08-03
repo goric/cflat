@@ -1,0 +1,40 @@
+class ReturnStatements
+{
+	void Main()
+	{
+		int value = Foo(66);
+	}
+
+	int Foo(int x)
+	{
+		
+		if (x == 5)
+		{
+			int i = 10;
+			return x * i;
+		}
+		else
+		{
+			if (x % 5 == 0)
+			{
+				return 0;
+			}
+			else
+			{
+				return 1;
+			}
+		}
+	}
+
+	int Bar(int x)
+	{
+		if (x > 0)
+		{
+			return 1;
+		}
+		else
+		{
+			x = x * -1;
+		}
+	}
+}
