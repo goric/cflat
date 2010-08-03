@@ -2,7 +2,7 @@ class animal
 {
 	necessary public void speak()
 	{
-		println("Hello, I have " & numLegs & " legs");
+		println("Hello");
 	}
 }
 
@@ -16,6 +16,12 @@ class cat is animal
 
 class dog is animal
 {
+	void main()
+	{
+		speak();
+		base.speak();
+	}
+
 	/* semantic error - dog is a subclass of animal but does not implement speak() */
 	public void sayhi()
 	{
