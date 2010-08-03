@@ -1,22 +1,47 @@
-class Program
+class Parent
 {
-	int x;
+	string name;
+
+	Parent(string n)
+	{
+		name = n;
+	}
+	
+	void PrintName()
+	{
+		println(name);
+	}
+}
+
+class Child is Parent
+{
+	void SayHello()
+	{
+		println("Hello, my name is " & name);
+	}
+}
+
+class program
+{
 	void main()
+	{
+		Child c = new Child();
+		GreetParent(c, "child", 666);
+		GreetChild(c);
+
+		Parent p = new Parent();
+
+		GreetParent(p, "parent", 5);
+		GreetChild(p); /* fails here because Child is not a superclass of Parent */
+	}
+
+	void GreetParent(Parent p, string s, real x)
 	{
 		
 	}
 
-	int Test()
+	void GreetChild(Child c)
 	{
-		if (x == 5)
-		{
-			return x * 3;
-		}
-		else
-		{
-			
-		}
-
-		return 666;
+		
 	}
 }
