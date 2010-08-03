@@ -2,16 +2,17 @@ class forLoop
 {
 	void main()
 	{
-		int x; /* we'll initialize locals to their default values */
+		int x=0;
 
 		for(int i = 0; i < 10; i++)
 			x++;
 
-		print(x & " should be 10");
+		println(x & " should be 10");
 
 		for(a in [0..9])
 			x--;
+		
 
-		print(x & " should be 0");
+		println(x & " should be 0");
 	}
 }

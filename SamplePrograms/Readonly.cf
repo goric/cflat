@@ -27,8 +27,8 @@ class bar
 	/* readonly can also be a method modifier.  That is the same as setting all parameters to readonly */
 	public void changeAgain(readonly holder h, int n)
 	{
-		sneakyFunc(h,n);
-		h.x = n; /* semantic error, cannot modify a field on a readonly parameter */
+		/*sneakyFunc(h,n);
+		h.x = n;*/
 	}
 	
 	public void sneakyFunc(holder h, int n)
