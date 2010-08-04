@@ -12,9 +12,7 @@ namespace ILCodeGen
 {
     /// <summary>
     /// This class generates CIL by walking a syntax tree.  This assumes that semantic checking has already
-    /// been done.  Single Pass for now.
-    /// TODO:Needs to be multiple-pass, can't invoke a method until it's defined, can't create a type until its methods are defined...
-    /// weird
+    /// been done.  
     /// </summary>
     public class CodeGenerator : Visitor
     {
@@ -31,7 +29,7 @@ namespace ILCodeGen
         private List<ASTFormal> _tmpFormals;
         private bool _isArrayAssign;
         
-        //i heard you like dictionaries, so i put a dictionary in your dictionary
+        //i heard you like dictionaries, so i put a dictionary in your dictionary so you can lookup values while you lookup values
         private Dictionary<string, Dictionary<string, MethodBuilder>> _methods;
 
         private MethodAttributes _tmpAttr;
