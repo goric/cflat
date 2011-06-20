@@ -52,11 +52,19 @@ namespace CFlat.SemanticPasses
                        ReturnType = new TypeString(),
                        Formals = new Dictionary<string, CFlatType> { }
                    }));
+
             _methods.Add(
                 new Method("parseInt", new TypeFunction("parseInt")
                 {
                     ReturnType = new TypeInt(),
                     Formals = new Dictionary<string,CFlatType> { { "value", new TypeString() } }
+                }));
+
+            _methods.Add(
+                new Method("readFile", new TypeFunction("readFile")
+                {
+                    ReturnType = new TypeArray(new TypeString()),
+                    Formals = new Dictionary<string, CFlatType> { { "path", new TypeString() } }
                 }));
         }
 

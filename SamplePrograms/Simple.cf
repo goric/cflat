@@ -1,0 +1,11 @@
+class program
+{
+	void main()
+	{
+		string[] lines = readFile("C:\test.txt");
+		string first = lines[0];
+		println(first);
+		int x = 1;
+		println(lines[x]);
+	}
+}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,6 @@ using AbstractSyntaxTree;
 using System.Reflection.Emit;
 using System.Reflection;
 using SemanticAnalysis;
-
 
 namespace ILCodeGen
 {
@@ -339,17 +339,12 @@ namespace ILCodeGen
 
         public override void VisitInvoke(ASTInvoke n)
         {
-            
             n.Actuals.Visit(this);
-
-            //for(int i = n.Actuals.Length; i > 0; i--)
-            //{
-            //    _gen.Emit(OpCodes.Starg, i - 1);
-            //}
 
             List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
             types.Reverse();
 
+            //wow...this goes on the shit list to refactor.
             if (n.Method == "println")
             {
                 _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
@@ -372,6 +367,13 @@ namespace ILCodeGen
                 _gen.Emit(OpCodes.Call, typeof(Int32).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static,
                     null, types.ToArray(), null));
                 _typesOnStack.Push(typeof(int));
+            }
+            else if (n.Method == "readFile")
+            {
+                _gen.Emit(OpCodes.Call, typeof(File).GetMethod("ReadAllLines", BindingFlags.Public | BindingFlags.Static,
+                    null, types.ToArray(), null));
+                var returnType = new TypeArray(new TypeString());
+                _typesOnStack.Push(GetCilType(returnType));
             }
             else
             {
@@ -587,8 +589,9 @@ namespace ILCodeGen
         }
         public override void VisitString(ASTString n)
         {
-            //push string on stack
-            _gen.Emit(OpCodes.Ldstr, n.Value.Replace("\"", "").Replace("\\n", "\n").Replace("\\t", "\t"));
+            //push string on stack, we need to trim off the two "s that our grammar adds
+            string escaped = n.Value.Substring(1, n.Value.Length - 2); 
+            _gen.Emit(OpCodes.Ldstr, escaped);
             _typesOnStack.Push(typeof(string));
             _lastWalkedType = typeof(string);
         }
@@ -619,18 +622,19 @@ namespace ILCodeGen
         public override void VisitDerefArray (ASTDereferenceArray n)
         {
             LoadLocal(((ASTIdentifier)n.Array).ID);
+            Type elementType = _lastWalkedType; //we need a reference to the type of the array, because visiting the index will push an integer on the _typesOnStack stack
             n.Index.Visit(this);
             _typesOnStack.Push(GetCilType(n.CFlatType));
             //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
             if (!_isArrayAssign)
             {
-                if (_lastWalkedType == typeof(int))
+                if (elementType == typeof(int))
                     _gen.Emit(OpCodes.Ldelem_I4);
-                if (_lastWalkedType == typeof(double))
+                if (elementType == typeof(double))
                     _gen.Emit(OpCodes.Ldelem_R4);
-                if (_lastWalkedType == typeof(bool))
+                if (elementType == typeof(bool))
                     _gen.Emit(OpCodes.Ldelem_I4);
-                if (_lastWalkedType == typeof(string))
+                if (elementType == typeof(string))
                     _gen.Emit(OpCodes.Ldelem, typeof(string));
             }
         }
@@ -1007,7 +1011,7 @@ namespace ILCodeGen
             if (n is ASTTypeVoid)
                 return typeof(void);
             if (n is ASTTypeArray)
-                return GetCilType(((ASTTypeArray)n).BaseType);
+                return GetCilType((n as ASTTypeArray).BaseType).MakeArrayType();
             if (n is ASTTypeClass)
                 return _mgr.CFlatTypes[((ASTTypeClass)n).Name].GetType();
             else
@@ -1026,7 +1030,7 @@ namespace ILCodeGen
             if (t is TypeVoid)
                 return typeof(void);
             if (t is TypeArray)
-                return GetCilType(((TypeArray)t).BaseType);
+                return GetCilType(((TypeArray)t).BaseType).MakeArrayType();
             else
                 return t.GetType();
         }

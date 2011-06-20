@@ -64,8 +64,8 @@ namespace CFlat
             }
 
 #if DEBUG
-            Console.Write("Press any key to exit...");
-            Console.ReadKey();
+            //Console.Write("Press any key to exit...");
+            //Console.ReadKey();
 #endif
         }
 
