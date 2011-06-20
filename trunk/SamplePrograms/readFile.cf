@@ -1,0 +1,13 @@
+class program
+{
+	void main()
+	{
+		string[] lines = readFile("C:\test.txt");
+		int total = 5;
+		for (int i = 0; i < total; i++)
+		{
+			string line = lines[i];
+			println(line);
+		}
+	}
+}
