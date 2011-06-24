@@ -50,6 +50,7 @@
     <Compile Include="ASTBinary.cs" />
     <Compile Include="ASTBlock.cs" />
     <Compile Include="ASTBoolean.cs" />
+    <Compile Include="ASTChar.cs" />
     <Compile Include="ASTClassDefinition.cs" />
     <Compile Include="ASTConcatenate.cs" />
     <Compile Include="ASTDeclaration.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="ASTType.cs" />
     <Compile Include="ASTTypeArray.cs" />
     <Compile Include="ASTTypeBool.cs" />
+    <Compile Include="ASTTypeChar.cs" />
     <Compile Include="ASTTypeInt.cs" />
     <Compile Include="ASTTypeClass.cs" />
     <Compile Include="ASTTypeReal.cs" />

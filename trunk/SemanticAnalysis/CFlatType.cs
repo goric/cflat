@@ -23,6 +23,7 @@ namespace SemanticAnalysis
         public virtual bool IsSupertype(TypeReal checkType) { return false; }
         public virtual bool IsSupertype(TypeString checkType) { return false; }
         public virtual bool IsSupertype(TypeVoid checkType) { return false; }
+        public virtual bool IsSupertype(TypeChar checkType) { return false; }
         
         public virtual bool IsArray { get{ return false; } }
         public virtual bool IsInstance { get { return false; } }
@@ -30,8 +31,11 @@ namespace SemanticAnalysis
         public virtual bool IsClass { get { return false; } }
         public virtual bool IsNumeric { get { return false; } }
         public virtual bool IsString { get { return false; } }
+        public virtual bool IsChar { get { return false; } }
 
         public virtual int Size { get { return 0; } }
+
+        public abstract Type CilType { get; }
 
         public virtual CFlatType BaseType { get { return this; } set { /* do nothing */} }
 

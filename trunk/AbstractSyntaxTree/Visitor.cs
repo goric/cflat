@@ -21,12 +21,14 @@ namespace AbstractSyntaxTree
         public virtual void VisitTypeReal (ASTTypeReal n) { }
         public virtual void VisitTypeName (ASTTypeClass n) { }
         public virtual void VisitTypeVoid (ASTTypeVoid n) { }
+        public virtual void VisitTypeChar(ASTTypeChar n) { }
         /* Literals */
         public virtual void VisitIdentifier (ASTIdentifier n) { }
         public virtual void VisitInteger (ASTInteger n) { }
         public virtual void VisitReal (ASTReal n) { }
         public virtual void VisitString (ASTString n) { }
         public virtual void VisitBoolean (ASTBoolean n) { }
+        public virtual void VisitChar(ASTChar n) { }
 
         #endregion
 

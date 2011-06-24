@@ -32,5 +32,10 @@ namespace SemanticAnalysis
         }
 
         public override string ToString() { return "string"; }
+
+        public override Type CilType
+        {
+            get { return typeof(string); }
+        }
     }
 }

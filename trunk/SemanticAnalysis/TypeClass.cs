@@ -57,5 +57,10 @@ namespace SemanticAnalysis
             else
                 return false;
         }
+
+        public override Type CilType
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

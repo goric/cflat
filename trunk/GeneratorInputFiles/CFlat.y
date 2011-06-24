@@ -10,9 +10,9 @@
 
 /* Terminals */
 %token<Token> SEMI RPAREN LBRACE RBRACE RBRACKET PBRACKET DOT DOTDOT COMMA IN BASE
-%token<Token> TINT TREAL TSTRING TBOOL TVOID WHILE FOR IF ELSE SELF CLASS EXTENDS NEW RETURN 
+%token<Token> TINT TREAL TSTRING TBOOL TVOID TCHAR WHILE FOR IF ELSE SELF CLASS EXTENDS NEW RETURN 
 %token<Token> TRUE FALSE READONLY NECESSARY PRIVATE PUBLIC AMP
-%token<Token> LITERAL_INT LITERAL_REAL LITERAL_STRING IDENTIFIER
+%token<Token> LITERAL_INT LITERAL_REAL LITERAL_STRING LITERAL_CHAR IDENTIFIER
 
 /* Precedence rules */
 %right ASSIGN
@@ -183,12 +183,14 @@ integralType	: TINT			{ $$ = new ASTTypeInt(); $$.Location = CurrentLocationSpan
 				| TSTRING		{ $$ = new ASTTypeString(); $$.Location = CurrentLocationSpan; }
 				| TREAL			{ $$ = new ASTTypeReal(); $$.Location = CurrentLocationSpan; }
 				| IDENTIFIER	{ $$ = new ASTTypeClass($1.Value); $$.Location = CurrentLocationSpan; }
+				| TCHAR			{ $$ = new ASTTypeChar(); $$.Location = CurrentLocationSpan; }
 				;
 
 
 literal			: LITERAL_INT		{ $$ = new ASTInteger(Int32.Parse($1.Value)); $$.Location = CurrentLocationSpan; } 
 				| LITERAL_REAL		{ $$ = new ASTReal(Double.Parse($1.Value)); $$.Location = CurrentLocationSpan; } 
-				| LITERAL_STRING	{ $$ = new ASTString($1.Value); $$.Location = CurrentLocationSpan; } 
+				| LITERAL_STRING	{ $$ = new ASTString($1.Value); $$.Location = CurrentLocationSpan; }
+				| LITERAL_CHAR		{ $$ = new ASTChar($1.Value); $$.Location = CurrentLocationSpan; }
 				| TRUE				{ $$ = new ASTBoolean(true); $$.Location = CurrentLocationSpan; }
 				| FALSE				{ $$ = new ASTBoolean(false); $$.Location = CurrentLocationSpan; }
 				;

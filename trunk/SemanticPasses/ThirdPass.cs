@@ -100,6 +100,11 @@ namespace CFlat.SemanticPasses
             n.CFlatType = _lastSeenType = new TypeBool();
         }
 
+        public override void VisitChar(ASTChar n)
+        {
+            n.CFlatType = _lastSeenType = new TypeChar();
+        }
+
         #endregion
 
         #region Binary Operators

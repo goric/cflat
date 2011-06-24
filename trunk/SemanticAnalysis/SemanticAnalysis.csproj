@@ -54,6 +54,7 @@
     <Compile Include="Scope.cs" />
     <Compile Include="TypeArray.cs" />
     <Compile Include="TypeBool.cs" />
+    <Compile Include="TypeChar.cs" />
     <Compile Include="TypeClass.cs" />
     <Compile Include="TypeFunction.cs" />
     <Compile Include="TypeInt.cs" />
