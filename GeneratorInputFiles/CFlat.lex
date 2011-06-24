@@ -12,6 +12,7 @@ Real		{Integer}("."{Integer})?{Exponent}?
 Comment		(\/\*)([^\*]*|\*+[^\/\*])*(\*+\/)
 Identifier	[a-zA-Z][a-zA-Z0-9]*
 String		\"(\\.|[^"])*\"
+Character	'(.|\n)'
 
 
 %%
@@ -52,6 +53,7 @@ String		\"(\\.|[^"])*\"
 "real"              { yylval.Token = new Token(Tokens.TREAL, yytext, yyline, yycol); return (int)Tokens.TREAL; }
 "string"			{ yylval.Token = new Token(Tokens.TSTRING, yytext, yyline, yycol); return (int)Tokens.TSTRING; }
 "bool"             	{ yylval.Token = new Token(Tokens.TBOOL, yytext, yyline, yycol); return (int)Tokens.TBOOL; }
+"char"             	{ yylval.Token = new Token(Tokens.TCHAR, yytext, yyline, yycol); return (int)Tokens.TCHAR; }
 "void"             	{ yylval.Token = new Token(Tokens.TVOID, yytext, yyline, yycol); return (int)Tokens.TVOID; }
 "while"            	{ yylval.Token = new Token(Tokens.WHILE, yytext, yyline, yycol); return (int)Tokens.WHILE; }
 "for"				{ yylval.Token = new Token(Tokens.FOR, yytext, yyline, yycol); return (int)Tokens.FOR; }
@@ -77,6 +79,7 @@ String		\"(\\.|[^"])*\"
 {Integer}	 		{ yylval.Token = new Token(Tokens.LITERAL_INT, yytext, yyline, yycol); return (int)Tokens.LITERAL_INT; }
 {Real}	 			{ yylval.Token = new Token(Tokens.LITERAL_REAL, yytext, yyline, yycol); return (int)Tokens.LITERAL_REAL; }
 {String}			{ yylval.Token = new Token(Tokens.LITERAL_STRING, yytext, yyline, yycol); return (int)Tokens.LITERAL_STRING; }
+{Character}			{ yylval.Token = new Token(Tokens.LITERAL_CHAR, yytext, yyline, yycol); return (int)Tokens.LITERAL_CHAR; }
 {Identifier}		{ yylval.Token = new Token(Tokens.IDENTIFIER, yytext); return (int)Tokens.IDENTIFIER; }
 {WhiteSpace}		{ /* Whitespace - Do Nothing */ }
 {Comment}			{ /* Comment - Do Nothing */ }

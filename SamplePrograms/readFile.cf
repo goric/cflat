@@ -6,8 +6,7 @@ class program
 		int total = 5;
 		for (int i = 0; i < total; i++)
 		{
-			string line = lines[i];
-			println(line);
+			println(lines[i]);
 		}
 	}
 }

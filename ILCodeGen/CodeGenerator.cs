@@ -609,6 +609,12 @@ namespace ILCodeGen
             _typesOnStack.Push(typeof(double));
             _lastWalkedType = typeof(double);
         }
+        public override void VisitChar(ASTChar n)
+        {
+            _gen.Emit(OpCodes.Ldc_I4_S, n.Val);
+            _typesOnStack.Push(typeof(char));
+            _lastWalkedType = typeof(char);
+        }
         #endregion
 
         #region deref
@@ -622,19 +628,20 @@ namespace ILCodeGen
         public override void VisitDerefArray (ASTDereferenceArray n)
         {
             LoadLocal(((ASTIdentifier)n.Array).ID);
-            Type elementType = _lastWalkedType; //we need a reference to the type of the array, because visiting the index will push an integer on the _typesOnStack stack
             n.Index.Visit(this);
-            _typesOnStack.Push(GetCilType(n.CFlatType));
+            var type = GetCilType(n.CFlatType);
+            _typesOnStack.Push(type);
+            _lastWalkedType = type;
             //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
             if (!_isArrayAssign)
             {
-                if (elementType == typeof(int))
+                if (_lastWalkedType == typeof(int))
                     _gen.Emit(OpCodes.Ldelem_I4);
-                if (elementType == typeof(double))
+                if (_lastWalkedType == typeof(double))
                     _gen.Emit(OpCodes.Ldelem_R4);
-                if (elementType == typeof(bool))
+                if (_lastWalkedType == typeof(bool))
                     _gen.Emit(OpCodes.Ldelem_I4);
-                if (elementType == typeof(string))
+                if (_lastWalkedType == typeof(string))
                     _gen.Emit(OpCodes.Ldelem, typeof(string));
             }
         }
@@ -1000,39 +1007,15 @@ namespace ILCodeGen
 
         private Type GetCilType (ASTType n)
         {
-            if (n is ASTTypeInt)
-                return typeof(int);
-            if (n is ASTTypeReal)
-                return typeof(double);
-            if (n is ASTTypeString)
-                return typeof(string);
-            if (n is ASTTypeBool)
-                return typeof(bool);
-            if (n is ASTTypeVoid)
-                return typeof(void);
-            if (n is ASTTypeArray)
-                return GetCilType((n as ASTTypeArray).BaseType).MakeArrayType();
-            if (n is ASTTypeClass)
-                return _mgr.CFlatTypes[((ASTTypeClass)n).Name].GetType();
-            else
-                return n.GetType();
+            return GetCilType(n.Type);
         }
+
         private Type GetCilType (CFlatType t)
         {
-            if (t is TypeInt)
-                return typeof(int);
-            if (t is TypeString)
-                return typeof(string);
-            if (t is TypeBool)
-                return typeof(bool);
-            if (t is TypeReal)
-                return typeof(double);
-            if (t is TypeVoid)
-                return typeof(void);
-            if (t is TypeArray)
-                return GetCilType(((TypeArray)t).BaseType).MakeArrayType();
+            if (t is TypeClass)
+                return _mgr.CFlatTypes[(t as TypeClass).ClassName].GetType();
             else
-                return t.GetType();
+                return t.CilType;
         }
     }
 }

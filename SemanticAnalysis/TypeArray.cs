@@ -40,5 +40,10 @@ namespace SemanticAnalysis
         }
 
         public virtual CFlatType BaseType { get { return _baseType; } set { /* do nothing */} }
+
+        public override Type CilType
+        {
+            get { return BaseType.CilType.MakeArrayType(); }
+        }
     }
 }

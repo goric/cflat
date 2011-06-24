@@ -18,5 +18,10 @@ namespace SemanticAnalysis
         public override bool IsSupertype (TypeReal checkType) { return true; }
         public override bool IsSupertype (TypeString checkType) { return true; }
         public override bool IsSupertype (TypeVoid checkType) { return true; }
+
+        public override Type CilType
+        {
+            get { return typeof(object); }
+        }
     }
 }

@@ -18,5 +18,10 @@ namespace SemanticAnalysis
         }
 
         public override string ToString() { return "void"; }
+
+        public override Type CilType
+        {
+            get { return typeof(void); }
+        }
     }
 }

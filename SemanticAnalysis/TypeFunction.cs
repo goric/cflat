@@ -112,5 +112,10 @@ namespace SemanticAnalysis
 
 
         public override string ToString() { return ""; }
+
+        public override Type CilType
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

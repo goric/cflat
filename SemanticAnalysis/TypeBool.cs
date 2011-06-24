@@ -12,5 +12,10 @@ namespace SemanticAnalysis
         public override String ToString() { return "bool"; }
 
         public override int Size { get { return 1; } }
+
+        public override Type CilType
+        {
+            get { return typeof(bool); }
+        }
     }
 }

@@ -247,5 +247,10 @@ namespace CFlat.SemanticPasses
         {
             n.Type = _lastSeenType = new TypeString();
         }
+
+        public override void VisitTypeChar(ASTTypeChar n)
+        {
+            n.Type = _lastSeenType = new TypeChar();
+        }
     }
 }
