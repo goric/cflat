@@ -9,9 +9,10 @@ namespace AbstractSyntaxTree
     {
         public char Val { get; protected set; }
 
-        public ASTChar(char value)
+        public ASTChar(string value)
         {
-            Val = value;
+            //incoming string will hold '\uhhh' where h is a hex digit.
+            Val = (char)Convert.ToInt32(value.Substring(3, 4), 16);
         }
         
         public override String Print(int depth)

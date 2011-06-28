@@ -17,5 +17,10 @@ namespace SemanticAnalysis
         {
             get { return typeof(bool); }
         }
+
+        public override bool NeedsBoxing
+        {
+            get { return true; }
+        }
     }
 }

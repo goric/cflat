@@ -66,6 +66,18 @@ namespace CFlat.SemanticPasses
                     ReturnType = new TypeArray(new TypeString()),
                     Formals = new Dictionary<string, CFlatType> { { "path", new TypeString() } }
                 }));
+            _methods.Add(
+                new Method("slen", new TypeFunction("slen")
+                {
+                    ReturnType = new TypeArray(new TypeInt()),
+                    Formals = new Dictionary<string, CFlatType> { { "value", new TypeString() } }
+                }));
+            _methods.Add(
+                new Method("charAt", new TypeFunction("charAt")
+                {
+                    ReturnType = new TypeArray(new TypeChar()),
+                    Formals = new Dictionary<string, CFlatType> { { "source", new TypeString() }, { "index", new TypeInt() } }
+                }));
         }
 
         public static void AddToScope(ScopeManager mgr)

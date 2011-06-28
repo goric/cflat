@@ -32,6 +32,8 @@ namespace SemanticAnalysis
         public virtual bool IsNumeric { get { return false; } }
         public virtual bool IsString { get { return false; } }
         public virtual bool IsChar { get { return false; } }
+        public virtual bool IsConcatenatable { get { return false; } }
+        public virtual bool NeedsBoxing { get { return false; } }
 
         public virtual int Size { get { return 0; } }
 

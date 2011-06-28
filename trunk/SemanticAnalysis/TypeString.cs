@@ -37,5 +37,10 @@ namespace SemanticAnalysis
         {
             get { return typeof(string); }
         }
+
+        public override bool IsConcatenatable
+        {
+            get { return true; }
+        }
     }
 }
