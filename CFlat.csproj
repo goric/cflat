@@ -53,7 +53,6 @@
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="InternalCompilerException.cs" />
     <Compile Include="SemanticPasses\ActualBuilder.cs" />
-    <Compile Include="SemanticPasses\CFlatMethods.cs" />
     <Compile Include="SemanticPasses\FirstPass.cs" />
     <Compile Include="SemanticPasses\FormalBuilder.cs" />
     <Compile Include="SemanticPasses\ICompilerPass.cs" />

@@ -7,6 +7,7 @@ using AbstractSyntaxTree;
 using System.Reflection.Emit;
 using System.Reflection;
 using SemanticAnalysis;
+using ILCodeGen.SystemMethods;
 
 namespace ILCodeGen
 {
@@ -341,58 +342,25 @@ namespace ILCodeGen
         {
             n.Actuals.Visit(this);
 
+            //get the arguments to the method in the correct order
             List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
             types.Reverse();
 
-            //wow...this goes on the shit list to refactor.
-            if (n.Method == "println")
+            if (SystemMethodManager.IsSystemMethod(n.Method))
             {
-                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", BindingFlags.Public | BindingFlags.Static,
-                    null, types.ToArray(), null));
-            }
-            else if (n.Method == "print")
-            {
-                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("Write", BindingFlags.Public | BindingFlags.Static,
-                    null, types.ToArray(), null));
-            }
-            else if (n.Method == "readln")
-            {
-                _gen.Emit(OpCodes.Call, typeof(Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static,
-                    null, System.Type.EmptyTypes, null));
-                _typesOnStack.Push(typeof(string));
-                //_gen.Emit(OpCodes.Stloc_0);
-            }
-            else if (n.Method == "parseInt")
-            {
-                _gen.Emit(OpCodes.Call, typeof(Int32).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static,
-                    null, types.ToArray(), null));
-                _typesOnStack.Push(typeof(int));
-            }
-            else if (n.Method == "readFile")
-            {
-                _gen.Emit(OpCodes.Call, typeof(File).GetMethod("ReadAllLines", BindingFlags.Public | BindingFlags.Static,
-                    null, types.ToArray(), null));
-                var returnType = new TypeArray(new TypeString());
-                _typesOnStack.Push(GetCilType(returnType));
+                SystemMethod method = SystemMethodManager.Lookup(n.Method);
+                method.Emit(_gen, types);
             }
             else
             {
                 TypeBuilder b4 = _currentType;
                 n.Object.Visit(this);
 
-                //MethodInfo mi = _methods[_currentType.Name][n.Method].GetBaseDefinition();
-                MethodInfo mi = _methods[_currentType.Name][n.Method];
-                //mi = _methods[_currentType.Name][n.Method].GetGenericMethodDefinition();
-
-                //mi = _methods[_currentType.Name][n.Method].MakeGenericMethod(_methods[_currentType.Name][n.Method].GetGenericArguments());
-                //mi.GetGenericArguments();                                
+                MethodInfo mi = _methods[_currentType.Name][n.Method];                           
 
                 _gen.Emit(OpCodes.Call, mi);
-
                 _currentType = b4;
             }
-            
-           
         }
 
         public override void VisitBase(ASTBase n)

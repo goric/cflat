@@ -48,6 +48,15 @@
     <Compile Include="CodeGenerator.cs" />
     <Compile Include="MethodPass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SystemMethods\CharAt.cs" />
+    <Compile Include="SystemMethods\ParseInt.cs" />
+    <Compile Include="SystemMethods\Print.cs" />
+    <Compile Include="SystemMethods\Println.cs" />
+    <Compile Include="SystemMethods\ReadFile.cs" />
+    <Compile Include="SystemMethods\Readln.cs" />
+    <Compile Include="SystemMethods\Slen.cs" />
+    <Compile Include="SystemMethods\SystemMethod.cs" />
+    <Compile Include="SystemMethods\SystemMethodManager.cs" />
     <Compile Include="TypeManager.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +65,7 @@
       <Name>AbstractSyntaxTree</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
