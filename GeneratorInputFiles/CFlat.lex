@@ -12,7 +12,7 @@ Real		{Integer}("."{Integer})?{Exponent}?
 Comment		(\/\*)([^\*]*|\*+[^\/\*])*(\*+\/)
 Identifier	[a-zA-Z][a-zA-Z0-9]*
 String		\"(\\.|[^"])*\"
-Character	'(.|\n)'
+Character	'\\u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]'
 
 
 %%

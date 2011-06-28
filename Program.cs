@@ -55,18 +55,22 @@ namespace CFlat
 
                 MethodPass mp = new MethodPass(tm);
                 mp.Run(root);
-                
+
                 CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""), tm);
 
                 cg.Generate(root);
 
                 cg.WriteAssembly();
             }
-
+            else
+            {
 #if DEBUG
-            //Console.Write("Press any key to exit...");
-            //Console.ReadKey();
+                Console.Write("Press any key to exit...");
+                Console.ReadKey();
 #endif
+            }
+
+
         }
 
         private static void PrintUsage ()

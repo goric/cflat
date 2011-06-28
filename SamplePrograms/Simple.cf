@@ -2,19 +2,9 @@ class program
 {
 	void main()
 	{
-		int x = 5;
-		string s = "poop";
-		write(x);
-		write(s);
-	}
-
-	void write(int x)
-	{
-		println("Calling integer overload");
-	}
-
-	void write(string s)
-	{
-		println("Calling string overload");
+		string start = "hell";
+		char last = '\u006f';
+		string total = start & last;
+		println(total);
 	}
 }

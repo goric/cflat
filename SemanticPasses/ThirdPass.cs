@@ -169,10 +169,10 @@ namespace CFlat.SemanticPasses
             CFlatType rhs = CheckSubTree(n.Right);
 
             // we'll allow for implicit conversion from numeric types to strings for concat purposes
-            if ((lhs.IsString || lhs.IsNumeric) && (rhs.IsString || rhs.IsNumeric))
-                _lastSeenType = n.CFlatType = lhs;
+            if ((lhs.IsConcatenatable) && (rhs.IsConcatenatable))
+                _lastSeenType = n.CFlatType = new TypeString();
             else
-                ReportError(n.Location, "Operands for concatenation must be strings");
+                ReportError(n.Location, "Operands for concatenation must be strings, characters, or integers.");
         }
 
         public override void VisitSub(ASTSubtract n)

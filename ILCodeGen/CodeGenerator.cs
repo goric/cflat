@@ -768,9 +768,9 @@ namespace ILCodeGen
         {
             //push left and right
             n.Left.Visit(this);
-            BoxIfNecessary(_lastWalkedType);
+            BoxIfNeeded(n.Left.CFlatType);
             n.Right.Visit(this);
-            BoxIfNecessary(_lastWalkedType);
+            BoxIfNeeded(n.Right.CFlatType);
             
             //get our parameter types
             List<Type> types = _typesOnStack.Take(2).ToList();
@@ -780,20 +780,14 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Concat", BindingFlags.Public | BindingFlags.Static,
                null, types.ToArray(), null));
 
-            //hacky, but we know the last type was a string since we're calling Concat...
-            _lastWalkedType = typeof(string);
-            _typesOnStack.Push(typeof(string));
+            _lastWalkedType = n.CFlatType.CilType;
+            _typesOnStack.Push(n.CFlatType.CilType);
         }
-        private void BoxIfNecessary (Type t)
+
+        private void BoxIfNeeded(CFlatType t)
         {
-            // if not a string we need to box
-            if (t != typeof(string))
-            {
-                if (_lastWalkedType == typeof(int))
-                    _gen.Emit(OpCodes.Box, typeof(int));
-                else if (_lastWalkedType == typeof(double))
-                    _gen.Emit(OpCodes.Box, typeof(double));
-            }
+            if (t.NeedsBoxing)
+                _gen.Emit(OpCodes.Box, t.CilType);
         }
 
         #endregion

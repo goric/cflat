@@ -30,5 +30,15 @@ namespace SemanticAnalysis
         {
             get { return typeof(int); }
         }
+
+        public override bool IsConcatenatable
+        {
+            get { return true; }
+        }
+
+        public override bool NeedsBoxing
+        {
+            get { return true; }
+        }
     }
 }
