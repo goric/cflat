@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using AbstractSyntaxTree;
 using SemanticAnalysis;
+using ILCodeGen;
+using ILCodeGen.SystemMethods;
 
 using QUT.Gppg;
 
@@ -21,15 +23,24 @@ namespace CFlat.SemanticPasses
         protected TypeClass _currentClass;
         protected CFlatType _lastSeenType;
 
+        private const string GlobalScopeName = "__global";
+
         public FirstPass(ASTNode treeNode, ScopeManager mgr)
         {
             _treeNode = treeNode;
             _scopeMgr = mgr;
 
-            if (!_scopeMgr.CurrentScope.HasSymbol("__global"))
+            if (!_scopeMgr.CurrentScope.HasSymbol(GlobalScopeName))
             {
-                _scopeMgr.AddClass("__global", new TypeClass("__global"), null);
-                CFlatMethods.AddToScope(_scopeMgr);
+                TypeClass globalClass = new TypeClass(GlobalScopeName);
+                globalClass.Descriptor = _scopeMgr.AddClass(globalClass.ClassName, globalClass, null);
+                
+                //setup built in system methods
+                foreach (SystemMethod m in SystemMethodManager.Methods())
+                {
+                    m.FuncInfo.Scope = _scopeMgr.TopScope;
+                    _scopeMgr.AddMethod(m.Name, m.FuncInfo, globalClass, null, true);
+                }
             }
         }
 
@@ -88,8 +99,7 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitClassDefinition(ASTClassDefinition n)
         {
-            if (n.Name == "__global")
-                ReportError(n.Location, "The class name __global is reserved for internal compiler use.");
+            CheckForGlobalScope(n.Name, n.Location);
 
             TypeClass cls = new TypeClass(n.Name);
             _currentClass = cls;
@@ -104,8 +114,7 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
-            if (n.Name == "__global")
-                ReportError(n.Location, "The class name __global is reserved for internal compiler use.");
+            CheckForGlobalScope(n.Name, n.Location);
 
             ClassDescriptor prnt = (ClassDescriptor)_scopeMgr.GetType(n.Parent);
             
@@ -117,6 +126,17 @@ namespace CFlat.SemanticPasses
             if (!cls.IsClass) { ReportError(n.Location, "Could not find base type '{0}' for type '{1}'.", n.Parent, n.Name); } 
             n.Descriptor = _scopeMgr.AddClass(cls.ClassName, cls, prnt);
             n.Type = cls;
+        }
+        
+        /// <summary>
+        /// Checks if someone is redefining the global scope, which results in a compiler error.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="loc"></param>
+        private void CheckForGlobalScope(string name, LexLocation loc)
+        {
+            if (name == GlobalScopeName)
+                ReportError(loc, "The class name {0} is reserved for internal compiler use.", GlobalScopeName);
         }
     }
 }

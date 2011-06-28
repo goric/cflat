@@ -2,15 +2,9 @@ class program
 {
 	void main()
 	{
-		/*string start = "hell";
+		string start = "hell";
 		char last = '\u006f';
 		string total = start & last;
-		println(total);*/
-
-		char test = '\u006f';
-		if (test == '\u006f')
-			println("yay");
-		if (test != '\u006e')
-			println("yay");
+		println(total);
 	}
 }
