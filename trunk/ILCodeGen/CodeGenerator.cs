@@ -576,6 +576,10 @@ namespace ILCodeGen
         {
             _lastWalkedType = GetCilType(n);
         }
+        public override void VisitTypeChar(ASTTypeChar n)
+        {
+            _lastWalkedType = GetCilType(n);
+        }
         
         #endregion
 
