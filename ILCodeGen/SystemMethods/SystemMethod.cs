@@ -30,6 +30,11 @@ namespace ILCodeGen.SystemMethods
 
         public TypeFunction FuncInfo { get; protected set; }
 
+        public bool IsVoid()
+        {
+            return this.FuncInfo.ReturnType is TypeVoid;
+        }
+
         public abstract void Emit(ILGenerator gen, IEnumerable<Type> argumentTypes);        
     }
 }

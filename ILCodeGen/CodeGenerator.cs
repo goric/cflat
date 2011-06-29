@@ -350,6 +350,12 @@ namespace ILCodeGen
             {
                 SystemMethod method = SystemMethodManager.Lookup(n.Method);
                 method.Emit(_gen, types);
+                if (!method.IsVoid())
+                {
+                    Type returnType = GetCilType(method.FuncInfo.ReturnType);
+                    //not sure if this is needed: _lastWalkedType = returnType;
+                    _typesOnStack.Push(returnType);
+                }
             }
             else
             {
@@ -367,7 +373,6 @@ namespace ILCodeGen
         {
             _currentType = _mgr.CFlatTypes[_mgr.InheritanceMap[_currentType.Name]];
         }
-        
 
         public override void VisitIfThen(ASTIfThen n)
         {
