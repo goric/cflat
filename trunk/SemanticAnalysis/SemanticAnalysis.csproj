@@ -52,6 +52,7 @@
     <Compile Include="MethodDescriptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scope.cs" />
+    <Compile Include="TypeAnyArray.cs" />
     <Compile Include="TypeArray.cs" />
     <Compile Include="TypeBool.cs" />
     <Compile Include="TypeChar.cs" />

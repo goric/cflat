@@ -1,0 +1,34 @@
+class program
+{
+	void main()
+	{
+		/* 
+		This should print:
+		4
+		10
+		hello
+		Your character is: x
+		Length is 9
+		*/
+
+		int[] a = new int[4];
+		string[] b = new string[0..10];
+		println(alen(a));
+		println(alen(b));
+
+		string start = "hell";
+		char last = '\u006f';
+		string total = start & last;
+		println(total);
+
+		int location = 2;
+		string source = "sexypants";
+		char x = charAt(source, location);
+
+		string message = "Your character is: " & x;
+		println(message);
+
+		int length = slen(source);
+		println("Length is " & length);
+	}
+}

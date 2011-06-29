@@ -1,0 +1,64 @@
+class Cell
+{
+	char value;
+	Cell left;
+	Cell right;
+
+	Cell()
+	{
+		
+	}
+
+	bool HasLeft()
+	{
+		return isnull(left) == false;
+	}
+
+	bool HasRight()
+	{
+		return isnull(right) == false;
+	}
+
+	Cell GetLeft()
+	{
+		return left;
+	}
+
+	void SetLeft(Cell c)
+	{
+		left = c;
+	}
+
+	Cell GetRight()
+	{
+		return right;
+	}
+
+	void SetRight(Cell c)
+	{
+		right = c;
+	}
+
+	char GetValue()
+	{
+		return value;
+	}
+
+	void SetValue(char c)
+	{
+		value = c;
+	}
+}
+
+class Tape
+{
+	Cell current;
+}
+
+class program
+{
+	void main()
+	{
+		println("valid program...maybe?");
+	}
+}
