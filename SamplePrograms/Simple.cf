@@ -2,9 +2,21 @@ class program
 {
 	void main()
 	{
-		string start = "hell";
+		/*string start = "hell";
 		char last = '\u006f';
 		string total = start & last;
-		println(total);
+		println(total);*/
+
+		int location = 2;
+		string source = "sexypants";
+		char x = charAt(source, location);
+
+		string message = "Your character is: " & x;
+		println(message);
+
+		/*string source = "sexypants";
+		int length = slen(source);
+		string message = "Length is " & length;
+		println(message);*/
 	}
 }

@@ -17,7 +17,7 @@ namespace ILCodeGen.SystemMethods
 
         public override void Emit(ILGenerator gen, IEnumerable<Type> argumentTypes)
         {
-            throw new NotImplementedException();
+            gen.Emit(OpCodes.Call, typeof(String).GetMethod("get_Chars"));
         }
     }
 }
