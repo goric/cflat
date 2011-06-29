@@ -18,7 +18,7 @@ namespace ILCodeGen
     public class CodeGenerator : Visitor
     {
         protected string _assemblyName;
-        protected TypeBuilder _currentType;
+        protected TypeBuilder _currentTypeBuilder;
         protected AssemblyBuilder _asm;
         protected ModuleBuilder _mod;
         protected ILGenerator _gen;
@@ -135,7 +135,7 @@ namespace ILCodeGen
                     
                     MethodBuilder mb = tb.DefineMethod(decl.Name,
                         attr);
-
+                    
                     //Define method signature - once an invoke is run, you can no longer change method signatures
                     _tmpFormals = new List<ASTFormal>();
                     decl.Formals.Visit(this);
@@ -173,24 +173,24 @@ namespace ILCodeGen
         public override void VisitClassDefinition(ASTClassDefinition n)
         {       
             //gen type
-            //_currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
-            _currentType = _mgr.CFlatTypes[n.Name];
+            //_currentTypeBuilder = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
+            _currentTypeBuilder = _mgr.CFlatTypes[n.Name];
 
             n.Declarations.Visit(this);
 
-            //_currentType.CreateType();
+            //_currentTypeBuilder.CreateType();
                                
         }
 
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
             //TODO: need to get parent type
-            //_currentType = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
-            _currentType = _mgr.CFlatTypes[n.Name];
+            //_currentTypeBuilder = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
+            _currentTypeBuilder = _mgr.CFlatTypes[n.Name];
 
             n.Declarations.Visit(this);
 
-            //_currentType.CreateType();
+            //_currentTypeBuilder.CreateType();
 
         }
 
@@ -232,7 +232,7 @@ namespace ILCodeGen
         {
             n.Modifiers.Visit(this);
                         
-            MethodBuilder meth = _methods[_currentType.Name][n.Name];
+            MethodBuilder meth = _methods[_currentTypeBuilder.Name][n.Name];
             
             //meth.DefineParameter(0, ParameterAttributes.Retval, String.Empty);
             
@@ -267,7 +267,7 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Ret);
 
             //put this back?
-            _methods[_currentType.Name][n.Name] = meth;
+            _methods[_currentTypeBuilder.Name][n.Name] = meth;
         }
 
         public override void VisitDeclLocal(ASTDeclarationLocal n)
@@ -287,7 +287,9 @@ namespace ILCodeGen
         public override void VisitDeclField(ASTDeclarationField n)
         {
             //TODO: Check Modifier list
-            FieldBuilder fb = _currentType.DefineField(n.Name, _lastWalkedType, FieldAttributes.Public);
+            Type fieldType = GetCilType(n.Type);
+            //maybe set this to _lastWalkedType? Probably not, because it's not going on the stack or anything...
+            FieldBuilder fb = _currentTypeBuilder.DefineField(n.Name, fieldType, FieldAttributes.Public);
             
         }
         public override void VisitDeclConstructor(ASTDeclarationCtor n)
@@ -296,7 +298,7 @@ namespace ILCodeGen
            List<Type> formalTypes = new List<Type>();
            formalTypes.AddRange(_tmpFormals.ConvertAll<Type>(m => { return GetCilType(m.CFlatType); }));
 
-           ConstructorBuilder cb = _currentType.DefineConstructor(MethodAttributes.Public, CallingConventions.Any, formalTypes.ToArray());
+           ConstructorBuilder cb = _currentTypeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Any, formalTypes.ToArray());
          
             
         }
@@ -359,19 +361,19 @@ namespace ILCodeGen
             }
             else
             {
-                TypeBuilder b4 = _currentType;
+                TypeBuilder b4 = _currentTypeBuilder;
                 n.Object.Visit(this);
 
-                MethodInfo mi = _methods[_currentType.Name][n.Method];                           
+                MethodInfo mi = _methods[_currentTypeBuilder.Name][n.Method];                           
 
                 _gen.Emit(OpCodes.Call, mi);
-                _currentType = b4;
+                _currentTypeBuilder = b4;
             }
         }
 
         public override void VisitBase(ASTBase n)
         {
-            _currentType = _mgr.CFlatTypes[_mgr.InheritanceMap[_currentType.Name]];
+            _currentTypeBuilder = _mgr.CFlatTypes[_mgr.InheritanceMap[_currentTypeBuilder.Name]];
         }
 
         public override void VisitIfThen(ASTIfThen n)

@@ -36,8 +36,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SamplePrograms", "SamplePro
 		SamplePrograms\LinkedList.cf = SamplePrograms\LinkedList.cf
 		SamplePrograms\Necessary.cf = SamplePrograms\Necessary.cf
 		SamplePrograms\parseInt.cf = SamplePrograms\parseInt.cf
+		SamplePrograms\readFile.cf = SamplePrograms\readFile.cf
 		SamplePrograms\Readonly.cf = SamplePrograms\Readonly.cf
 		Rpg.cf = Rpg.cf
+		SamplePrograms\Simple.cf = SamplePrograms\Simple.cf
+		SamplePrograms\SystemMethods.cf = SamplePrograms\SystemMethods.cf
+		SamplePrograms\turingmachine.cf = SamplePrograms\turingmachine.cf
 		SamplePrograms\Undeclared.cf = SamplePrograms\Undeclared.cf
 	EndProjectSection
 EndProject

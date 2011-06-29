@@ -5,15 +5,8 @@ using System.Text;
 
 namespace SemanticAnalysis
 {
-    public class TypeArray : CFlatType
+    public class TypeArray : TypeAnyArray
     {
-        public override bool IsArray
-        {
-            get
-            {
-                return true;
-            }
-        }
         public override int Size
         {
             get
@@ -39,7 +32,7 @@ namespace SemanticAnalysis
             return this.BaseType.IsSupertype(checkType.BaseType) && checkType.BaseType.IsSupertype(this.BaseType);
         }
 
-        public virtual CFlatType BaseType { get { return _baseType; } set { /* do nothing */} }
+        public override CFlatType BaseType { get { return _baseType; } set { /* do nothing */} }
 
         public override Type CilType
         {
