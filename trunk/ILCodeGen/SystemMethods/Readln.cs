@@ -14,7 +14,7 @@ namespace ILCodeGen.SystemMethods
 
         }
 
-        public override void Emit(ILGenerator gen, IEnumerable<Type> argumentTypes)
+        public override void Emit(ILGenerator gen)
         {
             gen.Emit(OpCodes.Call, typeof(Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static,
                 null, System.Type.EmptyTypes, null));

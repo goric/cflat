@@ -18,180 +18,81 @@ namespace ILCodeGen
     public class CodeGenerator : Visitor
     {
         protected string _assemblyName;
-        protected TypeBuilder _currentTypeBuilder;
-        protected AssemblyBuilder _asm;
-        protected ModuleBuilder _mod;
+
+        //used for constant time lookup for the current class/method we're working on
+        protected TypeBuilderInfo _currentTypeBuilder;
+        protected BuilderInfo _currentMethodBuilder;
+
+        protected AssemblyBuilder _assemblyBuilder;
+        protected ModuleBuilder _moduleBuilder;
+        //each MethodBuilder or ConstructorBuilder will reuse this instance for generating IL
         protected ILGenerator _gen;
+
         protected Type _lastWalkedType;
+
+        /* all of these are getting replaced. */
+        
         protected string _lastWalkedIdentifier;
         protected Dictionary<string, int> _locals;
-        protected TypeManager _mgr;
+        protected TypeManager _typeManager;
         private Stack<Type> _typesOnStack;
-        private List<ASTFormal> _tmpFormals;
         private bool _isArrayAssign;
-        
-        //i heard you like dictionaries, so i put a dictionary in your dictionary so you can lookup values while you lookup values
-        private Dictionary<string, Dictionary<string, MethodBuilder>> _methods;
-
         private MethodAttributes _tmpAttr;
 
-        private const string MAIN_METHOD_NAME = "main";
-
-        public CodeGenerator(string assemblyName, TypeManager m)
-            : base()
+        public static string MainMethodName
         {
-            _mgr = m;
-            _assemblyName = assemblyName;
-            _locals = new Dictionary<string, int>();
-            _methods = new Dictionary<string, Dictionary<string, MethodBuilder>>(); ;
-            _typesOnStack = new Stack<Type>();
-            
-            
-            Init();
+            get { return "main"; }
         }
 
-        private void Init()
+        public CodeGenerator(string assemblyName)
+            : base()
         {
-            //Initialize assembly
-            _asm = AppDomain.CurrentDomain.DefineDynamicAssembly(
+            _assemblyName = assemblyName;
+            _locals = new Dictionary<string, int>();
+            _typesOnStack = new Stack<Type>();
+
+            InitAssembly();
+        }
+
+        /// <summary>
+        /// Sets up the resulting executable, AssemblyBuilder, and ModuleBuilder
+        /// </summary>
+        private void InitAssembly()
+        {
+            _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
                 new AssemblyName(_assemblyName),
                 AssemblyBuilderAccess.RunAndSave);
             //Create Module
             string exeName = _assemblyName + ".exe";
-            _mod = _asm.DefineDynamicModule(exeName, exeName);
+            _moduleBuilder = _assemblyBuilder.DefineDynamicModule(exeName, exeName);
 
-            DefineClasses();
-
-            DefineMethodStubs();
-
-            //DefineTypes();
+            _typeManager = new TypeManager(_moduleBuilder);
         }
 
         public void Generate(ASTNode n)
         {
+            //run two initial passes to collect classes, and all definitions
+            n.Visit(new ClassPass(_typeManager));
+            n.Visit(new DeclarationPass(_typeManager));
+            //run another pass to fill in all the details of methods
             n.Visit(this);
-
-            DefineTypes();
+            _typeManager.CreateAllTypes();            
         }
 
         #region Declare/Define
-        
-        private void DefineClasses()
-        {
-            foreach (string className in _mgr.InheritanceMap.Keys)
-            {
-                if (!_mgr.CFlatTypes.ContainsKey(className))
-                {
-                    if (!String.IsNullOrEmpty(_mgr.InheritanceMap[className]))
-                    {
-                        GetParent(className);
-                    }
-                    else
-                    {
-                        //TODO:Access Modifiers
-                        _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Class | TypeAttributes.Public));
-                    }
-                }
-            }
-        }
-
-        private void GetParent(string className)
-        {
-            //go back up inheritance tree - this will make sure that the parent is defined before the child class
-            if(_mgr.InheritanceMap.ContainsKey(_mgr.InheritanceMap[className]))
-            {
-                GetParent(_mgr.InheritanceMap[className]);
-            }
-
-            //add type - add parent if it is not null
-            if (String.IsNullOrEmpty(_mgr.InheritanceMap[className]))
-            {
-                if(!_mgr.CFlatTypes.ContainsKey(className))
-                    _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Class | TypeAttributes.Public));
-            }
-            else
-            {
-                if(!_mgr.CFlatTypes.ContainsKey(className))
-                    _mgr.CFlatTypes.Add(className, _mod.DefineType(className, TypeAttributes.Public | TypeAttributes.Class,
-                        _mgr.CFlatTypes[_mgr.InheritanceMap[className]]));
-            }
-        }
-
-        //This stubs out all the methods so you don't get odd invoke errors
-        //it should also let code like this compile --- public void a() { b(); } public void b() { a(); }
-        private void DefineMethodStubs()
-        {
-            foreach (TypeBuilder tb in _mgr.CFlatTypes.Values)
-            {
-                _methods.Add(tb.Name, new Dictionary<string, MethodBuilder>());
-
-                foreach(AbstractSyntaxTree.ASTDeclarationMethod decl in _mgr.MethodMap[tb.Name])
-                {
-                    //TODO:Add Access Modifiers
-                    MethodAttributes attr = MethodAttributes.Public |
-                        MethodAttributes.Static |
-                        MethodAttributes.HideBySig;
-
-                    
-                    MethodBuilder mb = tb.DefineMethod(decl.Name,
-                        attr);
-                    
-                    //Define method signature - once an invoke is run, you can no longer change method signatures
-                    _tmpFormals = new List<ASTFormal>();
-                    decl.Formals.Visit(this);
-
-                    decl.ReturnType.Visit(this);
-
-                    List<Type> formalTypes = new List<Type>();
-                    formalTypes.AddRange(_tmpFormals.ConvertAll<Type>(m => { return GetCilType(m.CFlatType); }));
-
-                    mb.SetParameters(formalTypes.ToArray());
-
-                    mb.SetReturnType(_lastWalkedType);
-                    
-                    _methods[tb.Name].Add(decl.Name, mb);
-
-                    //string prnt = _mgr.InheritanceMap[tb.Name];
-                    //if(!String.IsNullOrEmpty(prnt))
-                    //{
-                    //    if(_methods[prnt].ContainsKey(decl.Name))
-                    //        tb.DefineMethodOverride(mb, _methods[prnt][decl.Name]);
-                    //}
-                    //_methods[tb.Name][decl.Name].GetILGenerator().Emit(OpCodes.Nop);
-                }
-            }
-        }
-
-        public void DefineTypes()
-        {
-            foreach(TypeBuilder tb in _mgr.CFlatTypes.Values)
-            {
-                tb.CreateType();
-            }
-        }
 
         public override void VisitClassDefinition(ASTClassDefinition n)
-        {       
-            //gen type
-            //_currentTypeBuilder = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
-            _currentTypeBuilder = _mgr.CFlatTypes[n.Name];
-
-            n.Declarations.Visit(this);
-
-            //_currentTypeBuilder.CreateType();
-                               
+        {
+            _currentTypeBuilder = _typeManager.GetBuilderInfo(n.Name);
+            n.Declarations.Visit(this);                 
         }
 
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
-            //TODO: need to get parent type
-            //_currentTypeBuilder = _mod.DefineType(n.Name, TypeAttributes.Class | TypeAttributes.Public);
-            _currentTypeBuilder = _mgr.CFlatTypes[n.Name];
+            throw new NotImplementedException("Inheritance is not yet finished");
 
-            n.Declarations.Visit(this);
-
-            //_currentTypeBuilder.CreateType();
-
+            //_currentTypeBuilder = _typeManager.GetBuilder(n.Name);
+            //n.Declarations.Visit(this);
         }
 
         public override void VisitModifierList(ASTModifierList n)
@@ -222,86 +123,66 @@ namespace ILCodeGen
             
         }
 
-        public override void VisitFormal(ASTFormal n)
-        {
-            n.Type.Visit(this);
-            _tmpFormals.Add(n);
-        }
-
         public override void VisitDeclMethod(ASTDeclarationMethod n)
         {
             n.Modifiers.Visit(this);
-                        
-            MethodBuilder meth = _methods[_currentTypeBuilder.Name][n.Name];
-            
-            //meth.DefineParameter(0, ParameterAttributes.Retval, String.Empty);
-            
-            //set il generator to this method
-            _gen = meth.GetILGenerator();
 
+            MethodBuilderInfo methodInfo = _typeManager.GetMethodBuilderInfo(_currentTypeBuilder.Name, n.Name);
+            //store a reference so we can access locals, arguments, and stuff about the current method we're working on.
+            _currentMethodBuilder = methodInfo;
+            _gen = methodInfo.Builder.GetILGenerator();
             //is this the entry point
-            if (n.Name == MAIN_METHOD_NAME)
+            if (n.Name == MainMethodName)
             {
-                _asm.SetEntryPoint(meth);
-            }
-            
-            //reset attrs
-            _tmpAttr = 0;
-
-            //seems silly to visit this just to get count, but it's ok
-            _tmpFormals = new List<ASTFormal>();
-            n.Formals.Visit(this);         
-            
-            //put formals into local storage
-            foreach (ASTFormal f in _tmpFormals)
-            {
-                _gen.Emit(OpCodes.Ldarg, _tmpFormals.IndexOf(f));
-
-                LocalBuilder lb = _gen.DeclareLocal(GetCilType(f.CFlatType));
-                StoreLocal(f.Name, lb.LocalIndex);
+                _assemblyBuilder.SetEntryPoint(methodInfo.Builder);
             }
 
             n.Body.Visit(this);
-
-            //return
-            _gen.Emit(OpCodes.Ret);
-
-            //put this back?
-            _methods[_currentTypeBuilder.Name][n.Name] = meth;
+            //we need to explicitly put a return statement for voids
+            if (_typeManager.LookupCilType(n.ReturnType) == typeof(void))
+                _gen.Emit(OpCodes.Ret);
         }
 
         public override void VisitDeclLocal(ASTDeclarationLocal n)
         {
             //Get type
             n.Type.Visit(this);
-
-            LocalBuilder lb = _gen.DeclareLocal(_lastWalkedType);
-
-            //set value
-            if(n.InitialValue != null)
+            LocalBuilder builder = _gen.DeclareLocal(_lastWalkedType);
+            //keep track of the LocalBuilder
+            LocalBuilderInfo info = _currentMethodBuilder.AddLocal(n.ID, builder);
+            //set value if needed
+            if (n.InitialValue != null)
+            {
                 n.InitialValue.Visit(this);
-
-            StoreLocal(n.ID, lb.LocalIndex);
-            
+                //store it to the local
+                _gen.Emit(OpCodes.Stloc, info.Index);
+            }
         }
+
         public override void VisitDeclField(ASTDeclarationField n)
         {
-            //TODO: Check Modifier list
-            Type fieldType = GetCilType(n.Type);
-            //maybe set this to _lastWalkedType? Probably not, because it's not going on the stack or anything...
-            FieldBuilder fb = _currentTypeBuilder.DefineField(n.Name, fieldType, FieldAttributes.Public);
-            
+            //nothing to do here, already done in the DeclarationPass
         }
+
         public override void VisitDeclConstructor(ASTDeclarationCtor n)
         {
-           n.Formals.Visit(this);
-           List<Type> formalTypes = new List<Type>();
-           formalTypes.AddRange(_tmpFormals.ConvertAll<Type>(m => { return GetCilType(m.CFlatType); }));
-
-           ConstructorBuilder cb = _currentTypeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Any, formalTypes.ToArray());
-         
-            
+            //lookup base class for the current type builder
+            if (_currentTypeBuilder.Builder.BaseType is object)
+            {
+                _currentMethodBuilder = _currentTypeBuilder.ConstructorBuilder;
+                _gen = _currentTypeBuilder.ConstructorBuilder.Builder.GetILGenerator();
+                //invoke the constructor of object
+                ConstructorInfo baseCtor = typeof(object).GetConstructor(Type.EmptyTypes);
+                _gen.Emit(OpCodes.Ldarg_0); //this.
+                _gen.Emit(OpCodes.Call, baseCtor);
+                //visit the body of the constructor
+                n.Body.Visit(this);
+                _gen.Emit(OpCodes.Ret);
+            }
+            else
+                throw new NotImplementedException("Inheritance is totally not done yet.");
         }
+
         public override void VisitInstantiateArray (ASTInstantiateArray n)
         {
             //push upper
@@ -319,61 +200,44 @@ namespace ILCodeGen
         public override void VisitInstantiateClass(ASTInstantiateClass n)
         {
             n.Actuals.Visit(this);
-
-            TypeBuilder tb = _mgr.CFlatTypes[n.ClassName];
-
-            List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
-            types.Reverse();
-
-            //not sure this is right
-            _gen.Emit(OpCodes.Newobj, tb.GetConstructor(types.ToArray()));
-
+            var info = _typeManager.GetBuilderInfo(n.ClassName);
+            _gen.Emit(OpCodes.Newobj, info.ConstructorBuilder.Builder);
         }
 
         public override void VisitReturn(ASTReturn n)
         {
             n.ReturnValue.Visit(this);
-
             _gen.Emit(OpCodes.Ret);
         }
+
         #endregion
 
         #region control/invoke
 
         public override void VisitInvoke(ASTInvoke n)
         {
-            n.Actuals.Visit(this);
-
-            //get the arguments to the method in the correct order
-            List<Type> types = _typesOnStack.Take(n.Actuals.Length).ToList();
-            types.Reverse();
-
             if (SystemMethodManager.IsSystemMethod(n.Method))
             {
+                n.Actuals.Visit(this);
                 SystemMethod method = SystemMethodManager.Lookup(n.Method);
-                method.Emit(_gen, types);
-                if (!method.IsVoid())
-                {
-                    Type returnType = GetCilType(method.FuncInfo.ReturnType);
-                    //not sure if this is needed: _lastWalkedType = returnType;
-                    _typesOnStack.Push(returnType);
-                }
+                method.Emit(_gen);
             }
             else
             {
-                TypeBuilder b4 = _currentTypeBuilder;
+                //push who
                 n.Object.Visit(this);
-
-                MethodInfo mi = _methods[_currentTypeBuilder.Name][n.Method];                           
-
-                _gen.Emit(OpCodes.Call, mi);
-                _currentTypeBuilder = b4;
+                Type who = _lastWalkedType;
+                //push actuals
+                n.Actuals.Visit(this);
+                //find the method to execute on the given class
+                MethodBuilderInfo info = _typeManager.GetMethodBuilderInfo(who.Name, n.Method);
+                _gen.Emit(OpCodes.Callvirt, info.Builder);
             }
         }
 
         public override void VisitBase(ASTBase n)
         {
-            _currentTypeBuilder = _mgr.CFlatTypes[_mgr.InheritanceMap[_currentTypeBuilder.Name]];
+            throw new NotImplementedException();
         }
 
         public override void VisitIfThen(ASTIfThen n)
@@ -464,7 +328,7 @@ namespace ILCodeGen
             //loop label
             _gen.MarkLabel(loop);
 
-            //load value into temp variable - set type so GetCilType()
+            //load value into temp variable - set type so _typeManager.LookupCilType()
             //doesn't get confused
             n.TempVariable.CFlatType = new TypeInt();
             n.TempVariable.Visit(this);
@@ -522,43 +386,51 @@ namespace ILCodeGen
         #endregion        
 
         #region types
+
         public override void VisitTypeInt(ASTTypeInt n)
         {
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
+
         public override void VisitTypeBool(ASTTypeBool n)
         {
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
+
         public override void VisitTypeReal(ASTTypeReal n)
         {
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
+
         public override void VisitTypeString(ASTTypeString n)
         {
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
+
         public override void VisitTypeVoid(ASTTypeVoid n)
         {
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
+
         public override void VisitTypeName(ASTTypeClass n)
         {
-            //??
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
+
         public override void VisitTypeArray (ASTTypeArray n)
         {
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
+
         public override void VisitTypeChar(ASTTypeChar n)
         {
-            _lastWalkedType = GetCilType(n);
+            _lastWalkedType = _typeManager.LookupCilType(n);
         }
         
         #endregion
 
         #region constants/primitives
+
         public override void VisitInteger(ASTInteger n)
         {
             //load integer
@@ -594,21 +466,16 @@ namespace ILCodeGen
             _typesOnStack.Push(typeof(char));
             _lastWalkedType = typeof(char);
         }
+
         #endregion
 
         #region deref
-        public override void VisitIdentifier(ASTIdentifier n)
-        {
-            LoadLocal(n.ID);
-            var type = GetCilType(n.CFlatType);
-            _typesOnStack.Push(type);
-            _lastWalkedType = type;
-        }
+
         public override void VisitDerefArray (ASTDereferenceArray n)
         {
             LoadLocal(((ASTIdentifier)n.Array).ID);
             n.Index.Visit(this);
-            var type = GetCilType(n.CFlatType);
+            var type = _typeManager.LookupCilType(n.CFlatType);
             _typesOnStack.Push(type);
             _lastWalkedType = type;
             //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
@@ -628,6 +495,7 @@ namespace ILCodeGen
         #endregion
         
         #region Binary Operators
+
         public override void VisitAdd(ASTAdd n)
         {
             SetupOperands(n);
@@ -635,6 +503,7 @@ namespace ILCodeGen
             //pop 2 numbers, add, push result
             _gen.Emit(OpCodes.Add);
         }
+
         public override void VisitSub(ASTSubtract n)
         {
             SetupOperands(n);
@@ -751,16 +620,9 @@ namespace ILCodeGen
             n.Right.Visit(this);
             BoxIfNeeded(n.Right.CFlatType);
             
-            //get our parameter types
-            List<Type> types = _typesOnStack.Take(2).ToList();
-            types.Reverse();
-
-            // now call String.Concat
+            //now call String.Concat
             _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Concat", BindingFlags.Public | BindingFlags.Static,
-               null, types.ToArray(), null));
-
-            _lastWalkedType = n.CFlatType.CilType;
-            _typesOnStack.Push(n.CFlatType.CilType);
+               null, new Type[] { typeof(object), typeof(object) }, null));
         }
 
         private void BoxIfNeeded(CFlatType t)
@@ -772,6 +634,7 @@ namespace ILCodeGen
         #endregion
         
         #region unary operators
+
         public override void VisitNeg(ASTNegative n)
         {
             _gen.Emit(OpCodes.Ldc_I4_0);
@@ -825,6 +688,7 @@ namespace ILCodeGen
         #endregion
 
         #region relop
+
         public override void VisitSmaller(ASTSmaller n)
         {
             //put results on stack
@@ -893,7 +757,6 @@ namespace ILCodeGen
             {
                 _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Equals", BindingFlags.Public | BindingFlags.Static, null,
                     new Type[]{ typeof(string), typeof(string) }, null));
-                                
             }
             else
             {
@@ -905,6 +768,48 @@ namespace ILCodeGen
 
         #endregion
 
+        public override void VisitIdentifier(ASTIdentifier n)
+        {
+            if (n.IsLeftHandSide)
+            {
+
+            }
+            else
+            {
+                if (IsIdentifierLocal(n.ID))
+                {
+                    var info = _currentMethodBuilder.Locals[n.ID];
+                    _gen.Emit(OpCodes.Ldloc, info.Index);
+
+                    _lastWalkedType = info.Builder.LocalType;
+                }
+                else if (IsIdentifierField(n.ID))
+                {
+                    FieldBuilder field = _currentTypeBuilder.FieldMap[n.ID];
+                    _gen.Emit(OpCodes.Ldarg_0);
+                    _gen.Emit(OpCodes.Ldfld, field);
+
+                    _lastWalkedType = field.FieldType;
+                }
+                else if (IsIdentifierArgument(n.ID))
+                {
+                    ArgumentInfo info = _currentMethodBuilder.Arguments[n.ID];
+                    int index = info.Index;
+                    if (!_currentMethodBuilder.Method.IsStatic)
+                        index++;
+                    _gen.Emit(OpCodes.Ldarg, index);
+
+                    _lastWalkedType = info.CilType;
+                }
+            }
+        }
+
+        public override void VisitSelf(ASTSelf n)
+        {
+            _lastWalkedType = _currentTypeBuilder.Builder;
+            _gen.Emit(OpCodes.Ldarg_0);
+        }
+
         public override void VisitAssign(ASTAssign n)
         {
             //for arrays we need to visit the left side first, then the expression,
@@ -912,23 +817,55 @@ namespace ILCodeGen
             // and also emit a stelem command
             if (n.LValue is ASTDereferenceArray)
             {
-                _isArrayAssign = true;
+                throw new NotImplementedException("Assigning to an index of an array has yet to be refactored.");
+                /*_isArrayAssign = true;
                 n.LValue.Visit(this);
                 _isArrayAssign = false;
                 n.Expr.Visit(this);
                 _gen.Emit(OpCodes.Stelem_I4);
-                return;
+                return;*/
             }
-            //default behavior was just to push expr and lvalue onto the stack, but if we're assigning
-            // to an identifier we need to issue a stloc as well
-            if (n.LValue is ASTIdentifier)
+            else if (n.LValue is ASTIdentifier)
             {
-                n.Expr.Visit(this);
-                StoreLocal(((ASTIdentifier)n.LValue).ID, _locals[((ASTIdentifier)n.LValue).ID]);
-                return;
+                ASTIdentifier lvalue = (ASTIdentifier)n.LValue;
+                if (IsIdentifierLocal(lvalue.ID))
+                {
+                    LocalBuilderInfo localInfo = _currentMethodBuilder.Locals[lvalue.ID];
+                    //visit the expression, which will put the value on the stack
+                    n.Expr.Visit(this);
+                    //assign the local
+                    _gen.Emit(OpCodes.Stloc, localInfo.Index);
+                }
+                else if (IsIdentifierField(lvalue.ID))
+                {
+                    FieldBuilder field = _currentTypeBuilder.FieldMap[lvalue.ID];
+                    //push the "this" argument
+                    _gen.Emit(OpCodes.Ldarg_0);
+                    //visit the expression, which will put the return value on the stack
+                    n.Expr.Visit(this);
+                    _gen.Emit(OpCodes.Stfld, field);
+                }
+                else if (IsIdentifierArgument(lvalue.ID))
+                {
+                    //visit the expression
+                    n.Expr.Visit(this);
+                    //store it at the argument index
+                    _gen.Emit(OpCodes.Starg, _currentMethodBuilder.Arguments[lvalue.ID].Index);
+                }
+                else
+                    throw new Exception(String.Format("Identifier '{0}' is not a local, argument, or member variable of the current class.", lvalue.ID));
             }
-            n.Expr.Visit(this);
-            n.LValue.Visit(this);
+            else if (n.LValue is ASTDereferenceField)
+            {
+                ASTDereferenceField lvalue = (ASTDereferenceField)n.LValue;
+                lvalue.Object.Visit(this);
+                Type who = _lastWalkedType;
+                TypeBuilderInfo info = _typeManager.GetBuilderInfo(who.Name);
+                FieldBuilder field = info.FieldMap[lvalue.Field];
+                //visit right hand side
+                n.Expr.Visit(this);
+                _gen.Emit(OpCodes.Stfld, field);
+            }
         }
         
         public override void VisitStatementExpr(ASTStatementExpr n)
@@ -940,11 +877,10 @@ namespace ILCodeGen
         {
             n.Body.Visit(this);
         }
-
  
         public void WriteAssembly()
         {
-            _asm.Save(_assemblyName + ".exe");
+            _assemblyBuilder.Save(_assemblyName + ".exe");
         }
                 
         private void SetupOperands(ASTBinary n)
@@ -956,6 +892,22 @@ namespace ILCodeGen
             n.Right.Visit(this);
         }
 
+        private bool IsIdentifierLocal(string name)
+        {
+            return _currentMethodBuilder.Locals.ContainsKey(name);
+        }
+
+        private bool IsIdentifierField(string name)
+        {
+            return _currentTypeBuilder.FieldMap.ContainsKey(name);
+        }
+
+        private bool IsIdentifierArgument(string name)
+        {
+            return _currentMethodBuilder.Arguments.ContainsKey(name);
+        }
+
+        [Obsolete("Shit's gettin' refactored!")]
         private void StoreLocal(string id, int index)
         {
             if (_locals.ContainsKey(id))
@@ -967,6 +919,7 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Stloc, _locals[id]);
         }
 
+        [Obsolete("Shit's gettin' refactored!")]
         private void LoadLocal(string id)
         {
             if (_locals.ContainsKey(id))
@@ -976,19 +929,6 @@ namespace ILCodeGen
             }
             else //??
                 _lastWalkedIdentifier = "";
-        }
-
-        private Type GetCilType (ASTType n)
-        {
-            return GetCilType(n.Type);
-        }
-
-        private Type GetCilType (CFlatType t)
-        {
-            if (t is TypeClass)
-                return _mgr.CFlatTypes[(t as TypeClass).ClassName].GetType();
-            else
-                return t.CilType;
         }
     }
 }

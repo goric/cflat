@@ -1,16 +1,28 @@
 class A
 {
+	int value;
+
+	A(int x)
+	{
+		value = x;
+	} 
+
 	void Stuff()
 	{
-		println("A.Stuff()");
+		println("A.Stuff() says: " & value);
 	}
+
+	void Nothing(int x, string y) { }
 }
 
 class program
 {
 	void main()
 	{
-		A a = new A();
+		A a = new A(666);
+		a.Stuff();
+
+		a.value = 123;
 		a.Stuff();
 	}
 }

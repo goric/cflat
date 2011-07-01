@@ -35,6 +35,6 @@ namespace ILCodeGen.SystemMethods
             return this.FuncInfo.ReturnType is TypeVoid;
         }
 
-        public abstract void Emit(ILGenerator gen, IEnumerable<Type> argumentTypes);        
+        public abstract void Emit(ILGenerator gen);        
     }
 }

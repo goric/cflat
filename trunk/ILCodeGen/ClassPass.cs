@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using AbstractSyntaxTree;
 
 namespace ILCodeGen
 {
     /// <summary>
-    /// This class collects all types and builds an inheritance hierarchy
+    /// This class collects all types and creates the TypeBuilders
     /// </summary>
-    public class ClassPass : AbstractSyntaxTree.Visitor
+    public class ClassPass : Visitor
     {
         protected TypeManager _mgr;
 
@@ -17,14 +15,14 @@ namespace ILCodeGen
             _mgr = m;
         }
 
-        public override void VisitClassDefinition(AbstractSyntaxTree.ASTClassDefinition n)
+        public override void VisitClassDefinition(ASTClassDefinition n)
         {
-            _mgr.InheritanceMap.Add(n.Name, "");
+            _mgr.AddClass(n);
         }
 
-        public override void VisitSubClassDefinition(AbstractSyntaxTree.ASTSubClassDefinition n)
+        public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
-            _mgr.InheritanceMap.Add(n.Name, n.Parent);
+            _mgr.AddSubClass(n);
         }
 
         public void Run(AbstractSyntaxTree.ASTNode n)
