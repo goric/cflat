@@ -46,20 +46,9 @@ namespace CFlat
             if (SemanticPasses.SemanticDriver.Analyze(root))
             {
                 Console.WriteLine("Hooray, no errors found in the semantic passes.");
-
-                //I fail at string processing but w/e
-                TypeManager tm = new TypeManager();
-
-                ClassPass cp = new ClassPass(tm);
-                cp.Run(root);
-
-                MethodPass mp = new MethodPass(tm);
-                mp.Run(root);
-
-                CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""), tm);
-
+                //start the code generation
+                CodeGenerator cg = new CodeGenerator(sourceFile.Substring(sourceFile.LastIndexOf("\\") + 1).Replace(".cf", ""));
                 cg.Generate(root);
-
                 cg.WriteAssembly();
             }
             else
@@ -69,8 +58,6 @@ namespace CFlat
                 Console.ReadKey();
 #endif
             }
-
-
         }
 
         private static void PrintUsage ()

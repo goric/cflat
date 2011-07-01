@@ -262,6 +262,7 @@ namespace CFlat.SemanticPasses
         /// <param name="n"></param>
         public override void VisitAssign(ASTAssign n)
         {
+            n.LValue.IsLeftHandSide = true; //this is needed when we generate the IL.
             CFlatType lhs = CheckSubTree(n.LValue);
             CFlatType rhs = CheckSubTree(n.Expr);
 

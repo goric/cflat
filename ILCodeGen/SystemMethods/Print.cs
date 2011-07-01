@@ -15,10 +15,10 @@ namespace ILCodeGen.SystemMethods
 
         }
 
-        public override void Emit(ILGenerator gen, IEnumerable<Type> argumentTypes)
+        public override void Emit(ILGenerator gen)
         {
             gen.Emit(OpCodes.Call, typeof(Console).GetMethod("Write",
-                BindingFlags.Public | BindingFlags.Static, null, argumentTypes.ToArray(), null));
+                BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof(object) }, null));
         }
     }
 }

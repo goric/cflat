@@ -16,10 +16,10 @@ namespace ILCodeGen.SystemMethods
 
         }
 
-        public override void Emit(ILGenerator gen, IEnumerable<Type> argumentTypes)
+        public override void Emit(ILGenerator gen)
         {
             gen.Emit(OpCodes.Call, typeof(Int32).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static,
-                null, argumentTypes.ToArray(), null));
+                null, new Type[] { typeof(string) }, null));
         }
     }
 }

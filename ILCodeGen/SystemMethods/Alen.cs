@@ -15,7 +15,7 @@ namespace ILCodeGen.SystemMethods
 
         }
 
-        public override void Emit(ILGenerator gen, IEnumerable<Type> argumentTypes)
+        public override void Emit(ILGenerator gen)
         {
             gen.Emit(OpCodes.Ldlen);
         }

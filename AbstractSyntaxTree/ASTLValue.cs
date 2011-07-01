@@ -10,5 +10,7 @@ namespace AbstractSyntaxTree
     public abstract class ASTLValue : ASTExpression
     {
         public Descriptor Descriptor { get; set; }
+
+        public bool IsLeftHandSide { get; set; }
     }
 }
