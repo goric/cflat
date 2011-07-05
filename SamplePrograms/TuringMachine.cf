@@ -4,9 +4,9 @@ class Cell
 	Cell left;
 	Cell right;
 
-	Cell()
+	Cell(char c)
 	{
-		
+		value = c;
 	}
 
 	bool HasLeft()
@@ -18,47 +18,104 @@ class Cell
 	{
 		return isnull(right) == false;
 	}
-
-	Cell GetLeft()
-	{
-		return left;
-	}
-
-	void SetLeft(Cell c)
-	{
-		left = c;
-	}
-
-	Cell GetRight()
-	{
-		return right;
-	}
-
-	void SetRight(Cell c)
-	{
-		right = c;
-	}
-
-	char GetValue()
-	{
-		return value;
-	}
-
-	void SetValue(char c)
-	{
-		value = c;
-	}
 }
 
 class Tape
 {
+	Cell head;
 	Cell current;
+	char blank;
+
+	Tape(char b)
+	{
+		head = new Cell(b);
+		current = head;
+		blank = b;
+	}
+
+	void MoveLeft()
+	{
+		if (current.HasLeft())
+		{
+			current = current.left;
+		}
+		else
+		{
+			Cell temp = new Cell(blank);
+			current.left = temp;
+			current = temp;
+		}
+	}
+
+	void MoveRight()
+	{
+		if (current.HasRight())
+		{
+			current = current.right;
+		}
+		else
+		{
+			Cell temp = new Cell(blank);
+			current.right = temp;
+			current = temp;
+		}
+	}
+
+	void Write(char c)
+	{
+		current.value = c;
+	}
+
+	void Init(string contents)
+	{
+		int length = slen(contents);
+		for (int i = 0; i < length; i++)
+		{
+			char c = charAt(contents, i);
+			Write(c);
+			MoveLeft();
+		}
+		/* reset the tape to the beginning */
+		current = head;
+	}
 }
+
+class Machine
+{
+	Tape tape;
+	int initial; /* initial state number */
+	int final; /* accepting state number */
+	char[] alphabet;
+	char blank;
+
+	Machine()
+	{
+		
+	}
+}	
 
 class program
 {
-	void main()
+	void main(string[] args)
 	{
-		println("valid program...maybe?");
+		string input = args[0];
+		println("Input file: " & input);
+
+		Cell c = new Cell('\u005f');
+		println("Cell's value is: " & c.value);
+
+		Cell right = new Cell('\u0061');
+		c.right = right;
+
+		if (c.HasRight())
+		{
+			println("correct");
+		}
+		else
+		{
+			println("incorrect");
+		}
+
+		println("c.right.value = " & c.right.value);
 	}
 }

@@ -6,6 +6,7 @@ class A
 	A(int x)
 	{
 		value = x;
+		numbers = new int[10];
 	} 
 
 	void Stuff()
@@ -14,11 +15,6 @@ class A
 	}
 
 	void Nothing(int x, string y) { }
-
-	/*void Assign(int index, int value)
-	{
-		numbers[index] = value;
-	}*/
 }
 
 class program
@@ -31,7 +27,8 @@ class program
 		a.value = 123;
 		a.Stuff();
 
-		int x = a.value;
-		println("value is " & x);
+		a.numbers[0] = 100;
+		int first = a.numbers[0];
+		println("a.numbers[0] = " & first);
 	}
 }
