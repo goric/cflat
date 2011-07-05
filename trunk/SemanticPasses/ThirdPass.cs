@@ -498,7 +498,7 @@ namespace CFlat.SemanticPasses
                     {
                         //hooray, the code is valid
                         MethodDescriptor ctorDescriptor = (MethodDescriptor)_scopeMgr.Find(n.ClassName, p => p is MethodDescriptor, func.Scope);
-                        _lastSeenType = func;
+                        _lastSeenType = desc.Type;
                         n.ClassDescriptor = desc;
                         n.Descriptor = ctorDescriptor;
                     }
@@ -843,6 +843,9 @@ namespace CFlat.SemanticPasses
             if (expr is ASTIdentifier)
             {
                 ASTIdentifier identifier = (ASTIdentifier)expr;
+                //need to set a flag so that the code generator can store back the result
+                identifier.IsLeftHandSide = true;
+
                 CFlatType t = CheckSubTree(identifier);
                 if (t.IsNumeric)
                 {

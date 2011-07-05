@@ -27,6 +27,7 @@ namespace ILCodeGen
         protected ILGenerator _gen;
 
         protected Type _lastWalkedType;
+        protected string _lastWalkedIdentifier;
 
         protected TypeManager _typeManager;
 
@@ -67,7 +68,7 @@ namespace ILCodeGen
             n.Visit(new DeclarationPass(_typeManager));
             //run another pass to fill in all the details of methods
             n.Visit(this);
-            _typeManager.CreateAllTypes();            
+            _typeManager.CreateAllTypes();
         }
 
         #region Declare/Define
@@ -75,7 +76,7 @@ namespace ILCodeGen
         public override void VisitClassDefinition(ASTClassDefinition n)
         {
             _currentTypeBuilder = _typeManager.GetBuilderInfo(n.Name);
-            n.Declarations.Visit(this);                 
+            n.Declarations.Visit(this);
         }
 
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
@@ -86,7 +87,7 @@ namespace ILCodeGen
         public override void VisitModifierList(ASTModifierList n)
         {
             if (!n.IsEmpty)
-                throw new NotImplementedException("Everything is public for now, except for the main, which gets marked static automatically.");            
+                throw new NotImplementedException("Everything is public for now, except for the main, which gets marked static automatically.");
         }
 
         public override void VisitDeclMethod(ASTDeclarationMethod n)
@@ -347,8 +348,8 @@ namespace ILCodeGen
             _gen.MarkLabel(exit);
         }
 
-        
-        #endregion        
+
+        #endregion
 
         #region types
 
@@ -382,7 +383,7 @@ namespace ILCodeGen
             _lastWalkedType = _typeManager.LookupCilType(n);
         }
 
-        public override void VisitTypeArray (ASTTypeArray n)
+        public override void VisitTypeArray(ASTTypeArray n)
         {
             _lastWalkedType = _typeManager.LookupCilType(n);
         }
@@ -391,7 +392,7 @@ namespace ILCodeGen
         {
             _lastWalkedType = _typeManager.LookupCilType(n);
         }
-        
+
         #endregion
 
         #region constants/primitives
@@ -406,7 +407,7 @@ namespace ILCodeGen
         public override void VisitString(ASTString n)
         {
             //push string on stack, we need to trim off the two "s that our grammar adds
-            string escaped = n.Value.Substring(1, n.Value.Length - 2); 
+            string escaped = n.Value.Substring(1, n.Value.Length - 2);
             _gen.Emit(OpCodes.Ldstr, escaped);
             _lastWalkedType = typeof(string);
         }
@@ -432,13 +433,13 @@ namespace ILCodeGen
         }
 
         #endregion
-        
+
         #region Binary Operators
 
         public override void VisitAdd(ASTAdd n)
         {
             SetupOperands(n);
-           
+
             //pop 2 numbers, add, push result
             _gen.Emit(OpCodes.Add);
         }
@@ -492,14 +493,14 @@ namespace ILCodeGen
             throw new NotImplementedException();
         }
 
-        public override void VisitConcatenate (ASTConcatenate n)
+        public override void VisitConcatenate(ASTConcatenate n)
         {
             //push left and right
             n.Left.Visit(this);
             BoxIfNeeded(n.Left.CFlatType);
             n.Right.Visit(this);
             BoxIfNeeded(n.Right.CFlatType);
-            
+
             //now call String.Concat
             _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Concat", BindingFlags.Public | BindingFlags.Static,
                null, new Type[] { typeof(object), typeof(object) }, null));
@@ -512,7 +513,7 @@ namespace ILCodeGen
         }
 
         #endregion
-        
+
         #region unary operators
 
         public override void VisitNeg(ASTNegative n)
@@ -536,12 +537,24 @@ namespace ILCodeGen
 
         public override void VisitIncrement(ASTIncrement n)
         {
-            throw new NotImplementedException();
+            ApplyIncrementDecrement(n.Expression, OpCodes.Add);
         }
 
         public override void VisitDecrement(ASTDecrement n)
         {
-            throw new NotImplementedException();
+            ApplyIncrementDecrement(n.Expression, OpCodes.Sub);
+        }
+
+        private void ApplyIncrementDecrement(ASTExpression exp, OpCode op)
+        {
+            exp.Visit(this);
+            //visit the identifier again, as the right hand side of an assignment so we emit the OpCodes for loading onto the stack
+            new ASTIdentifier(null, _lastWalkedIdentifier).Visit(this);
+
+            _gen.Emit(OpCodes.Ldc_I4_1);
+            _gen.Emit(op);
+            //store this back to the location
+            ApplyAssignmentCallback();
         }
 
         #endregion
@@ -553,7 +566,7 @@ namespace ILCodeGen
             //put results on stack
             SetupOperands(n);
 
-            _gen.Emit(OpCodes.Clt);                        
+            _gen.Emit(OpCodes.Clt);
         }
 
         public override void VisitGreater(ASTGreater n)
@@ -570,7 +583,7 @@ namespace ILCodeGen
             if (_lastWalkedType == typeof(String))
             {
                 _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Equals", BindingFlags.Public | BindingFlags.Static, null,
-                    new Type[]{ typeof(string), typeof(string) }, null));
+                    new Type[] { typeof(string), typeof(string) }, null));
 
             }
             else
@@ -615,13 +628,13 @@ namespace ILCodeGen
             if (_lastWalkedType == typeof(String))
             {
                 _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Equals", BindingFlags.Public | BindingFlags.Static, null,
-                    new Type[]{ typeof(string), typeof(string) }, null));
+                    new Type[] { typeof(string), typeof(string) }, null));
             }
             else
             {
                 _gen.Emit(OpCodes.Ceq);
             }
-                        
+
             _gen.Emit(OpCodes.Not);
         }
 
@@ -629,6 +642,7 @@ namespace ILCodeGen
 
         public override void VisitIdentifier(ASTIdentifier n)
         {
+            _lastWalkedIdentifier = n.ID;
             //yeah this gets a bit messy, but I kinda do need to check all 3 possibilities where an identifier could
             //be declared (we're not doing globals in the language).
             if (n.IsLeftHandSide)
@@ -719,13 +733,9 @@ namespace ILCodeGen
             /* Our action here depends on whether or not we visited a local variable, member variable, or argument,
              * so when we visit the LValue, that method will specify a callback with the correct IL output after we
              * visit the right hand side. */
-            if (_assignmentCallback != null)
-            {
-                _assignmentCallback(_gen);
-                _assignmentCallback = null;
-            }
+            ApplyAssignmentCallback();
         }
-        
+
         public override void VisitStatementExpr(ASTStatementExpr n)
         {
             n.Expression.Visit(this);
@@ -735,12 +745,12 @@ namespace ILCodeGen
         {
             n.Body.Visit(this);
         }
- 
+
         public void WriteAssembly()
         {
             _assemblyBuilder.Save(_assemblyName + ".exe");
         }
-                
+
         private void SetupOperands(ASTBinary n)
         {
             //push L
@@ -748,6 +758,19 @@ namespace ILCodeGen
 
             //push R
             n.Right.Visit(this);
+        }
+
+        /// <summary>
+        /// When an identifer is the left hand side of an assignment, our actions later in the Visit step
+        /// depend on the scope of the identifer. This method checks if we have a callback, and executes it.
+        /// </summary>
+        private void ApplyAssignmentCallback()
+        {
+            if (_assignmentCallback != null)
+            {
+                _assignmentCallback(_gen);
+                _assignmentCallback = null;
+            }
         }
 
         private bool IsIdentifierLocal(string name)
