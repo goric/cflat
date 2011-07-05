@@ -401,6 +401,7 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Ldc_I4, n.Value);
             _lastWalkedType = typeof(int);
         }
+
         public override void VisitString(ASTString n)
         {
             //push string on stack, we need to trim off the two "s that our grammar adds
@@ -408,18 +409,21 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Ldstr, escaped);
             _lastWalkedType = typeof(string);
         }
+
         public override void VisitBoolean(ASTBoolean n)
         {
-            //assume 1 == true?
+            //1 == true
             if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
             _lastWalkedType = typeof(int);
         }
+
         public override void VisitReal(ASTReal n)
         {
             //push real on stack
             _gen.Emit(OpCodes.Ldc_R4, n.Value);
             _lastWalkedType = typeof(double);
         }
+
         public override void VisitChar(ASTChar n)
         {
             _gen.Emit(OpCodes.Ldc_I4_S, n.Val);
@@ -432,22 +436,7 @@ namespace ILCodeGen
 
         public override void VisitDerefArray (ASTDereferenceArray n)
         {
-            LoadLocal(((ASTIdentifier)n.Array).ID);
-            n.Index.Visit(this);
-            var type = _typeManager.LookupCilType(n.CFlatType);
-            _lastWalkedType = type;
-            //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
-            if (!_isArrayAssign)
-            {
-                if (_lastWalkedType == typeof(int))
-                    _gen.Emit(OpCodes.Ldelem_I4);
-                if (_lastWalkedType == typeof(double))
-                    _gen.Emit(OpCodes.Ldelem_R4);
-                if (_lastWalkedType == typeof(bool))
-                    _gen.Emit(OpCodes.Ldelem_I4);
-                if (_lastWalkedType == typeof(string))
-                    _gen.Emit(OpCodes.Ldelem, typeof(string));
-            }
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -614,33 +603,13 @@ namespace ILCodeGen
 
         public override void VisitIncrement(ASTIncrement n)
         {
-            //get current value - should set the _lastWalked identifier
-            n.Expression.Visit(this);
-            
-            //put 1 on stack
-            _gen.Emit(OpCodes.Ldc_I4_1);
-
-            //add 1
-            _gen.Emit(OpCodes.Add);
-            
-            //store back in mem....
-            _gen.Emit(OpCodes.Stloc, _locals[_lastWalkedIdentifier]);
+            throw new NotImplementedException();
             
         }
 
         public override void VisitDecrement(ASTDecrement n)
         {
-            //get current value
-            n.Expression.Visit(this);
-
-            //put 1 on stack
-            _gen.Emit(OpCodes.Ldc_I4_1);
-
-            //sub 1
-            _gen.Emit(OpCodes.Sub);
-
-            //store back in mem....
-            _gen.Emit(OpCodes.Stloc, _locals[_lastWalkedIdentifier]);
+            throw new NotImplementedException();
             
         }
         #endregion
@@ -868,25 +837,13 @@ namespace ILCodeGen
         [Obsolete("Shit's gettin' refactored!")]
         private void StoreLocal(string id, int index)
         {
-            if (_locals.ContainsKey(id))
-                _locals[id] = index;
-            else
-                _locals.Add(id, index);
-
-            //store local here
-            _gen.Emit(OpCodes.Stloc, _locals[id]);
+            
         }
 
         [Obsolete("Shit's gettin' refactored!")]
         private void LoadLocal(string id)
         {
-            if (_locals.ContainsKey(id))
-            {
-                _gen.Emit(OpCodes.Ldloc, _locals[id]);
-                _lastWalkedIdentifier = id;
-            }
-            else //??
-                _lastWalkedIdentifier = "";
+            
         }
     }
 }
