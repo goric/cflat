@@ -32,6 +32,9 @@ namespace ILCodeGen
 
         protected TypeManager _typeManager;
 
+        //used for assignment nodes, cause they're kinda hard!
+        Action<ILGenerator> _assignmentCallback;
+
         public static string MainMethodName
         {
             get { return "main"; }
@@ -429,15 +432,6 @@ namespace ILCodeGen
         }
 
         #endregion
-
-        #region deref
-
-        public override void VisitDerefArray (ASTDereferenceArray n)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
         
         #region Binary Operators
 
@@ -602,13 +596,11 @@ namespace ILCodeGen
         public override void VisitIncrement(ASTIncrement n)
         {
             throw new NotImplementedException();
-            
         }
 
         public override void VisitDecrement(ASTDecrement n)
         {
             throw new NotImplementedException();
-            
         }
         #endregion
 
@@ -697,7 +689,24 @@ namespace ILCodeGen
         {
             if (n.IsLeftHandSide)
             {
-
+                if (IsIdentifierLocal(n.ID))
+                {
+                    LocalBuilderInfo localInfo = _currentMethodBuilder.Locals[n.ID];
+                    _assignmentCallback = gen => gen.Emit(OpCodes.Stloc, localInfo.Index);
+                }
+                else if (IsIdentifierField(n.ID))
+                {
+                    FieldBuilder field = _currentTypeBuilder.FieldMap[n.ID];
+                    //push the "this" argument
+                    _gen.Emit(OpCodes.Ldarg_0);
+                    _assignmentCallback = gen => gen.Emit(OpCodes.Stfld, field);
+                }
+                else if (IsIdentifierArgument(n.ID))
+                {
+                    _assignmentCallback = gen => gen.Emit(OpCodes.Starg, _currentMethodBuilder.Arguments[n.ID].Index);
+                }
+                else
+                    throw new Exception(String.Format("Identifier '{0}' is not a local, argument, or member variable of the current class.", n.ID));
             }
             else
             {
@@ -729,6 +738,30 @@ namespace ILCodeGen
             }
         }
 
+        public override void VisitDerefField(ASTDereferenceField n)
+        {
+            //visit the identifier
+            n.Object.Visit(this);
+            TypeBuilderInfo info = _typeManager.GetBuilderInfo(_lastWalkedType.Name);
+            FieldBuilder field = info.FieldMap[n.Field];
+            //see what we need to do after visiting the identifier
+            if (!n.IsLeftHandSide)
+                _gen.Emit(OpCodes.Ldfld, field);
+            else
+                _assignmentCallback = gen => gen.Emit(OpCodes.Stfld, field); //set what needs to happen at the end of the assignment
+        }
+
+        public override void VisitDerefArray(ASTDereferenceArray n)
+        {
+            n.Array.Visit(this);
+            n.Index.Visit(this);
+
+            if (n.IsLeftHandSide)
+                _assignmentCallback = gen => gen.Emit(n.CFlatType.StoreElementOpCode);
+            else
+                _gen.Emit(n.CFlatType.LoadElementOpCode);
+        }
+
         public override void VisitSelf(ASTSelf n)
         {
             _lastWalkedType = _currentTypeBuilder.Builder;
@@ -737,59 +770,15 @@ namespace ILCodeGen
 
         public override void VisitAssign(ASTAssign n)
         {
-            //for arrays we need to visit the left side first, then the expression,
-            // making sure not to emit a ldelem for the LHS array dereference,
-            // and also emit a stelem command
-            if (n.LValue is ASTDereferenceArray)
+            n.LValue.Visit(this);
+            n.Expr.Visit(this);
+            /* Our action here depends on whether or not we visited a local variable, member variable, or argument,
+             * so when we visit the LValue, that method will specify a callback with the correct IL output after we
+             * visit the right hand side. */
+            if (_assignmentCallback != null)
             {
-                throw new NotImplementedException("Assigning to an index of an array has yet to be refactored.");
-                /*_isArrayAssign = true;
-                n.LValue.Visit(this);
-                _isArrayAssign = false;
-                n.Expr.Visit(this);
-                _gen.Emit(OpCodes.Stelem_I4);
-                return;*/
-            }
-            else if (n.LValue is ASTIdentifier)
-            {
-                ASTIdentifier lvalue = (ASTIdentifier)n.LValue;
-                if (IsIdentifierLocal(lvalue.ID))
-                {
-                    LocalBuilderInfo localInfo = _currentMethodBuilder.Locals[lvalue.ID];
-                    //visit the expression, which will put the value on the stack
-                    n.Expr.Visit(this);
-                    //assign the local
-                    _gen.Emit(OpCodes.Stloc, localInfo.Index);
-                }
-                else if (IsIdentifierField(lvalue.ID))
-                {
-                    FieldBuilder field = _currentTypeBuilder.FieldMap[lvalue.ID];
-                    //push the "this" argument
-                    _gen.Emit(OpCodes.Ldarg_0);
-                    //visit the expression, which will put the return value on the stack
-                    n.Expr.Visit(this);
-                    _gen.Emit(OpCodes.Stfld, field);
-                }
-                else if (IsIdentifierArgument(lvalue.ID))
-                {
-                    //visit the expression
-                    n.Expr.Visit(this);
-                    //store it at the argument index
-                    _gen.Emit(OpCodes.Starg, _currentMethodBuilder.Arguments[lvalue.ID].Index);
-                }
-                else
-                    throw new Exception(String.Format("Identifier '{0}' is not a local, argument, or member variable of the current class.", lvalue.ID));
-            }
-            else if (n.LValue is ASTDereferenceField)
-            {
-                ASTDereferenceField lvalue = (ASTDereferenceField)n.LValue;
-                lvalue.Object.Visit(this);
-                Type who = _lastWalkedType;
-                TypeBuilderInfo info = _typeManager.GetBuilderInfo(who.Name);
-                FieldBuilder field = info.FieldMap[lvalue.Field];
-                //visit right hand side
-                n.Expr.Visit(this);
-                _gen.Emit(OpCodes.Stfld, field);
+                _assignmentCallback(_gen);
+                _assignmentCallback = null;
             }
         }
         

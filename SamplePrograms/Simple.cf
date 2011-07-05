@@ -14,6 +14,11 @@ class A
 	}
 
 	void Nothing(int x, string y) { }
+
+	/*void Assign(int index, int value)
+	{
+		numbers[index] = value;
+	}*/
 }
 
 class program
@@ -25,5 +30,8 @@ class program
 
 		a.value = 123;
 		a.Stuff();
+
+		int x = a.value;
+		println("value is " & x);
 	}
 }

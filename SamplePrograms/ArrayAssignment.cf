@@ -1,0 +1,45 @@
+class A
+{
+	int[] numbers;
+
+	A()
+	{
+		numbers = new int[10];
+	}
+
+	void Assign(int index, int value)
+	{
+		numbers[index] = value;
+	}
+
+	void Print(int index)
+	{
+		println("Index: " & index);
+		int x = numbers[index];
+		println("Value: " & x);
+	}
+
+	void Local(int value)
+	{
+		int[] temp = new int[1];
+		temp[0] = value;
+		int x = temp[0];
+		println("Local variable temp[0] = " & x);
+	}
+}
+
+class program
+{
+	void main()
+	{
+		A a = new A();
+
+		a.Assign(0, 100);
+		a.Print(0);
+
+		a.Assign(5, 105);
+		a.Print(5);
+
+		a.Local(666);
+	}
+}
