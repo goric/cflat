@@ -42,9 +42,14 @@ namespace SemanticAnalysis
             get { return true; }
         }
 
-        public override OpCode LoadElementOpCode()
+        public override OpCode LoadElementOpCode
         {
-            return OpCodes.Ldelem_I4;
+            get { return OpCodes.Ldelem_I4; }
+        }
+
+        public override OpCode StoreElementOpCode
+        {
+            get { return OpCodes.Stelem_I4; }
         }
     }
 }

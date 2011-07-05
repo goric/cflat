@@ -47,9 +47,14 @@ namespace SemanticAnalysis
             return t.IsSupertype(this);
         }
 
-        public virtual OpCode LoadElementOpCode()
+        public virtual OpCode LoadElementOpCode
         {
-            return OpCodes.Ldelem_Ref;
+            get { return OpCodes.Ldelem_Ref; }
+        }
+
+        public virtual OpCode StoreElementOpCode
+        {
+            get { return OpCodes.Stelem_Ref; }
         }
     }
 }
