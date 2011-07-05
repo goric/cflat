@@ -1,19 +1,17 @@
 ﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using AbstractSyntaxTree;
-using System.Reflection.Emit;
 using System.Reflection;
-using SemanticAnalysis;
+using System.Reflection.Emit;
+using AbstractSyntaxTree;
 using ILCodeGen.SystemMethods;
+using SemanticAnalysis;
 
 namespace ILCodeGen
 {
     /// <summary>
-    /// This class generates CIL by walking a syntax tree.  This assumes that semantic checking has already
-    /// been done.  
+    /// This class generates CIL by walking a syntax tree. This assumes that semantic checking has already
+    /// been done. We're going to make 3 passes for the code generation too, because we need to "stub out"
+    /// all of the types and methods in order to get instances of TypeBuilder and MethodBuilder while we
+    /// generate IL.
     /// </summary>
     public class CodeGenerator : Visitor
     {
@@ -25,7 +23,7 @@ namespace ILCodeGen
 
         protected AssemblyBuilder _assemblyBuilder;
         protected ModuleBuilder _moduleBuilder;
-        //each MethodBuilder or ConstructorBuilder will reuse this instance for generating IL
+        //each MethodBuilder or ConstructorBuilder will reuse this pointer for generating IL
         protected ILGenerator _gen;
 
         protected Type _lastWalkedType;
@@ -151,7 +149,7 @@ namespace ILCodeGen
                 throw new NotImplementedException("Inheritance is totally not done yet.");
         }
 
-        public override void VisitInstantiateArray (ASTInstantiateArray n)
+        public override void VisitInstantiateArray(ASTInstantiateArray n)
         {
             //push number of elements
             n.Upper.Visit(this);
@@ -278,6 +276,8 @@ namespace ILCodeGen
 
         public override void VisitForIn(ASTForIn n)
         {
+            throw new NotImplementedException();
+            /*
             //define labels
             Label loop = _gen.DefineLabel();
             Label exit = _gen.DefineLabel();
@@ -319,7 +319,7 @@ namespace ILCodeGen
             _gen.Emit(OpCodes.Br, loop);
 
             //break label
-            _gen.MarkLabel(exit);
+            _gen.MarkLabel(exit);*/
         }
 
         public override void VisitWhile(ASTWhile n)
@@ -489,66 +489,7 @@ namespace ILCodeGen
 
         public override void VisitExponent(ASTExponent n)
         {
-            string TEMP_NM = "xp_temp";
-            string TOP_NM = "xp_top";
-            string LOOP_NM = "xp_loop";
-            string RES_NM = "xp_res";
-
-            n.Left.Visit(this);
-            
-            LocalBuilder lb = _gen.DeclareLocal(typeof(int));
-            StoreLocal(TEMP_NM, lb.LocalIndex);
-
-            n.Right.Visit(this);
-            LocalBuilder lb2 = _gen.DeclareLocal(typeof(int));
-            StoreLocal(TOP_NM, lb2.LocalIndex);
-
-            LocalBuilder lb3 = _gen.DeclareLocal(typeof(int));
-            _gen.Emit(OpCodes.Ldc_I4_1);
-            StoreLocal(LOOP_NM, lb3.LocalIndex);
-
-            LocalBuilder resBuilder = _gen.DeclareLocal(typeof(int));
-            LoadLocal(TEMP_NM);
-            StoreLocal(RES_NM, resBuilder.LocalIndex);
-
-            //define labels
-            Label loop = _gen.DefineLabel();
-            Label exit = _gen.DefineLabel();
-            
-            //loop label
-            _gen.MarkLabel(loop);
-
-            //check loop
-            LoadLocal(LOOP_NM);
-            LoadLocal(TOP_NM);
-            _gen.Emit(OpCodes.Bge, exit);
-
-            //load temp and result
-            LoadLocal(RES_NM);
-            LoadLocal(TEMP_NM);
-
-            //multiply
-            _gen.Emit(OpCodes.Mul);
-
-            //store result
-            StoreLocal(RES_NM, resBuilder.LocalIndex);
-
-            //load loop var
-            LoadLocal(LOOP_NM);
-            //add 1
-            _gen.Emit(OpCodes.Ldc_I4_1);
-            _gen.Emit(OpCodes.Add);
-
-            //update loop var
-            StoreLocal(LOOP_NM, lb3.LocalIndex);
-
-            //unconditional loop branch
-            _gen.Emit(OpCodes.Br, loop);
-
-            //break label
-            _gen.MarkLabel(exit);
-
-            LoadLocal(RES_NM);
+            throw new NotImplementedException();
         }
 
         public override void VisitConcatenate (ASTConcatenate n)
@@ -602,6 +543,7 @@ namespace ILCodeGen
         {
             throw new NotImplementedException();
         }
+
         #endregion
 
         #region relop
@@ -687,6 +629,8 @@ namespace ILCodeGen
 
         public override void VisitIdentifier(ASTIdentifier n)
         {
+            //yeah this gets a bit messy, but I kinda do need to check all 3 possibilities where an identifier could
+            //be declared (we're not doing globals in the language).
             if (n.IsLeftHandSide)
             {
                 if (IsIdentifierLocal(n.ID))
@@ -819,18 +763,6 @@ namespace ILCodeGen
         private bool IsIdentifierArgument(string name)
         {
             return _currentMethodBuilder.Arguments.ContainsKey(name);
-        }
-
-        [Obsolete("Shit's gettin' refactored!")]
-        private void StoreLocal(string id, int index)
-        {
-            
-        }
-
-        [Obsolete("Shit's gettin' refactored!")]
-        private void LoadLocal(string id)
-        {
-            
         }
     }
 }
