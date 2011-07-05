@@ -4,12 +4,9 @@ class forLoop
 	{
 		int x = 0;
 
-		/*for(int i = 0; i < 10; i++)
+		for(int i = 0; i < 10; i++)
 			x++;
 
-		println(x & " should be 10");*/
-
-		x++;
-		println("should be 1: " & x);
+		println(x & " should be 10");
 	}
 }
