@@ -30,14 +30,7 @@ namespace ILCodeGen
 
         protected Type _lastWalkedType;
 
-        /* all of these are getting replaced. */
-        
-        protected string _lastWalkedIdentifier;
-        protected Dictionary<string, int> _locals;
         protected TypeManager _typeManager;
-        private Stack<Type> _typesOnStack;
-        private bool _isArrayAssign;
-        private MethodAttributes _tmpAttr;
 
         public static string MainMethodName
         {
@@ -48,9 +41,6 @@ namespace ILCodeGen
             : base()
         {
             _assemblyName = assemblyName;
-            _locals = new Dictionary<string, int>();
-            _typesOnStack = new Stack<Type>();
-
             InitAssembly();
         }
 
@@ -90,37 +80,11 @@ namespace ILCodeGen
         public override void VisitSubClassDefinition(ASTSubClassDefinition n)
         {
             throw new NotImplementedException("Inheritance is not yet finished");
-
-            //_currentTypeBuilder = _typeManager.GetBuilder(n.Name);
-            //n.Declarations.Visit(this);
         }
 
         public override void VisitModifierList(ASTModifierList n)
         {
-            //bitwise OR what we have with the next modifier in the list
-            //handled by this switch statement...
-            switch (n.Modifier)
-            {
-                case "public":
-                    _tmpAttr |= MethodAttributes.Public;
-                    break;
-                case "static":
-                    _tmpAttr |= MethodAttributes.Static;
-                    break;
-                case "private":
-                    _tmpAttr |= MethodAttributes.Private;
-                    break;
-                case "final":
-                    _tmpAttr |= MethodAttributes.Final;
-                    break;
-                case "abstract":
-                    _tmpAttr |= MethodAttributes.Abstract;
-                    break;
-                default:
-                    _tmpAttr |= MethodAttributes.Public | MethodAttributes.Static;
-                    break;
-            }
-            
+            throw new NotImplementedException("Everything is public for now, except for the main, which gets marked static automatically.");            
         }
 
         public override void VisitDeclMethod(ASTDeclarationMethod n)
@@ -435,7 +399,6 @@ namespace ILCodeGen
         {
             //load integer
             _gen.Emit(OpCodes.Ldc_I4, n.Value);
-            _typesOnStack.Push(typeof(int));
             _lastWalkedType = typeof(int);
         }
         public override void VisitString(ASTString n)
@@ -443,27 +406,23 @@ namespace ILCodeGen
             //push string on stack, we need to trim off the two "s that our grammar adds
             string escaped = n.Value.Substring(1, n.Value.Length - 2); 
             _gen.Emit(OpCodes.Ldstr, escaped);
-            _typesOnStack.Push(typeof(string));
             _lastWalkedType = typeof(string);
         }
         public override void VisitBoolean(ASTBoolean n)
         {
             //assume 1 == true?
             if (n.Val) _gen.Emit(OpCodes.Ldc_I4_1); else _gen.Emit(OpCodes.Ldc_I4_0);
-            _typesOnStack.Push(typeof(int));
             _lastWalkedType = typeof(int);
         }
         public override void VisitReal(ASTReal n)
         {
             //push real on stack
             _gen.Emit(OpCodes.Ldc_R4, n.Value);
-            _typesOnStack.Push(typeof(double));
             _lastWalkedType = typeof(double);
         }
         public override void VisitChar(ASTChar n)
         {
             _gen.Emit(OpCodes.Ldc_I4_S, n.Val);
-            _typesOnStack.Push(typeof(char));
             _lastWalkedType = typeof(char);
         }
 
@@ -476,7 +435,6 @@ namespace ILCodeGen
             LoadLocal(((ASTIdentifier)n.Array).ID);
             n.Index.Visit(this);
             var type = _typeManager.LookupCilType(n.CFlatType);
-            _typesOnStack.Push(type);
             _lastWalkedType = type;
             //bit of a hack, we need to gen a ldelem on derefences except when its an assignment
             if (!_isArrayAssign)
