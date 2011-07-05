@@ -84,7 +84,8 @@ namespace ILCodeGen
 
         public override void VisitModifierList(ASTModifierList n)
         {
-            throw new NotImplementedException("Everything is public for now, except for the main, which gets marked static automatically.");            
+            if (!n.IsEmpty)
+                throw new NotImplementedException("Everything is public for now, except for the main, which gets marked static automatically.");            
         }
 
         public override void VisitDeclMethod(ASTDeclarationMethod n)

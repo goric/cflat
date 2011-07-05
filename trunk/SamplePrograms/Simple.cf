@@ -1,6 +1,7 @@
 class A
 {
 	int value;
+	int[] numbers;
 
 	A(int x)
 	{
