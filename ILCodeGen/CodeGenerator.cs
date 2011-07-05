@@ -150,12 +150,9 @@ namespace ILCodeGen
 
         public override void VisitInstantiateArray (ASTInstantiateArray n)
         {
-            //push upper
+            //push number of elements
             n.Upper.Visit(this);
-            
-            //get the type and push newarr [type]
-            n.Type.Visit(this);
-            _gen.Emit(OpCodes.Newarr, _lastWalkedType);
+            _gen.Emit(OpCodes.Newarr, _typeManager.LookupCilType(n.Type));
         }
 
         /// <summary>
