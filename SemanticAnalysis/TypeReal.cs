@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection.Emit;
 
 namespace SemanticAnalysis
 {
@@ -30,6 +31,16 @@ namespace SemanticAnalysis
         public override Type CilType
         {
             get { return typeof(double); }
+        }
+
+        public override bool NeedsBoxing
+        {
+            get { return true; }
+        }
+
+        public override OpCode LoadElementOpCode()
+        {
+            return OpCodes.Ldelem_R4;
         }
     }
 }

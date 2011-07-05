@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection.Emit;
 
 namespace SemanticAnalysis
 {
@@ -44,6 +45,11 @@ namespace SemanticAnalysis
         public bool IsSubtypeOf(CFlatType t)
         {
             return t.IsSupertype(this);
+        }
+
+        public virtual OpCode LoadElementOpCode()
+        {
+            return OpCodes.Ldelem_Ref;
         }
     }
 }

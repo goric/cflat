@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection.Emit;
 
 namespace SemanticAnalysis
 {
@@ -39,6 +40,11 @@ namespace SemanticAnalysis
         public override bool NeedsBoxing
         {
             get { return true; }
+        }
+
+        public override OpCode LoadElementOpCode()
+        {
+            return OpCodes.Ldelem_I4;
         }
     }
 }
