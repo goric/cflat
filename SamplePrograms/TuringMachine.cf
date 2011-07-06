@@ -66,6 +66,11 @@ class Tape
 		current.value = c;
 	}
 
+	char Read()
+	{
+		return current.value;
+	}
+
 	void Init(string contents)
 	{
 		int length = slen(contents);
@@ -254,17 +259,26 @@ class TransitionParser
 	}
 }
 
+class Move
+{
+	bool hasMove;
+	Transition transition;
+	Move() { }
+}
+
 class Machine
 {
 	Tape tape;
 	int initial; /* initial state number */
 	int final; /* accepting state number */
+	int currentState;
 	char[] tapeAlphabet;
 	char[] inputAlphabet;
 	char blank;
 	int stateCount;
 	/* all of the transitions in the machine */
 	Transition[] transitions;
+	int transitionCount;
 
 	/* Characters that correspond to the actions in a transition */
 	char LEFT;
@@ -304,12 +318,12 @@ class Machine
 				lineIndex++;
 			}
 		}
-		int transitionCount = lineIndex - 6;
+		transitionCount = lineIndex - 6;
 		/* loop through the lines again, after we have the number of transitions (it's needed to initialize the array) */
-		ReadTransitions(lines, transitionCount, totalLines);
+		ReadTransitions(lines, totalLines);
 	}
 
-	void ReadTransitions(string[] lines, int transitionCount, int totalLines)
+	void ReadTransitions(string[] lines, int totalLines)
 	{
 		transitions = new Transition[transitionCount];
 		/* build a set of characters for the Transition parser */
@@ -340,7 +354,14 @@ class Machine
 	void HandleTransition(string line, int index, char[] validActions)
 	{
 		TransitionParser parser = new TransitionParser(line, validActions);
-		transitions[index] = parser.Parse();
+		Transition t = parser.Parse();
+
+		/* make sure the state numbers are within bounds */
+		CheckBound(t.currentState);
+		CheckBound(t.targetState);
+
+		/* valid, add to the array */
+		transitions[index] = t;
 	}
 
 	void HandleLine(string line, int index)
@@ -386,6 +407,7 @@ class Machine
 		}
 	}
 
+	/* Copies each char in a string to a char array. */
 	char[] ToCharArray(string source)
 	{
 		int l = slen(source);
@@ -397,6 +419,7 @@ class Machine
 		return result;
 	}
 
+	/* Used for debugging. */
 	void PrintCharArray(char[] a)
 	{
 		string s = "";
@@ -408,9 +431,84 @@ class Machine
 		println(s);
 	}
 
+	/* Checks if the given state number is within the number of states in the machine, zero based. */
+	void CheckBound(int state)
+	{
+		if (state >= stateCount)
+		{
+			die("Invalid transition. State number " & state & " is out of range.");
+		}
+	}
+
 	void Run(string input)
 	{
+		tape.Init(input);
+		currentState = initial;
+
+		/* Begin processing */
+		bool done = false;
+		while (done == false)
+		{
+			Move m = FindMove();
+			if (m.hasMove)
+			{
+				ApplyTransition(m.transition);
+				if (m.transition.action == HALT)
+				{
+					done = true;
+				}
+			}
+			else
+			{
+				done = true;
+			}
+		}
 		
+		/* We're done looping, check if we accept or reject! */
+		if (currentState == final)
+		{
+			println("Accept!");
+		}
+		else
+		{
+			println("Reject.");
+		}
+	}
+
+	/* Returns whether or not we have a valid transition in the machine */
+	Move FindMove()
+	{
+		char symbol = tape.Read();
+		for (int i = 0; i < transitionCount; i++)
+		{
+			Transition t = transitions[i];
+			if ((t.currentState == currentState) && (t.currentSymbol == symbol))
+			{
+				Move found = new Move();
+				found.hasMove = true;
+				found.transition = t;
+				return found;
+			}
+		}
+		/* not found, return an empty move object */
+		Move none = new Move();
+		none.hasMove = false;
+		return none;
+	}
+
+	/* Changes the state, input symbol in the current cell, and moves the tape head if needed. */
+	void ApplyTransition(Transition t)
+	{
+		currentState = t.targetState;
+		tape.Write(t.targetSymbol);
+		if (t.action == LEFT)
+		{
+			tape.MoveLeft();
+		}
+		else if (t.action == RIGHT)
+		{
+			tape.MoveRight();
+		}
 	}
 
 	void Debug()
@@ -423,8 +521,10 @@ class Machine
 		PrintCharArray(inputAlphabet);
 		println("Initial state: " & initial);
 		println("Final state: " & final);
+
 		println("Tape Contents:");
 		tape.Debug();
+
 		int l = alen(transitions);
 		println("Transitions, count = " & l);
 		for (int i = 0; i < l; i++)
@@ -447,7 +547,6 @@ class program
 		}
 
 		Machine tm = new Machine(args[0]);
-		tm.Debug();
 		tm.Run(args[1]);
 
 

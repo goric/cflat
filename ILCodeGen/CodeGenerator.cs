@@ -699,6 +699,9 @@ namespace ILCodeGen
             n.Object.Visit(this);
             TypeBuilderInfo info = _typeManager.GetBuilderInfo(_lastWalkedType.Name);
             FieldBuilder field = info.FieldMap[n.Field];
+            //store the type that we're dereferencing
+            _lastWalkedType = field.FieldType;
+
             //see what we need to do after visiting the identifier
             if (!n.IsLeftHandSide)
                 _gen.Emit(OpCodes.Ldfld, field);
