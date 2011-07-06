@@ -8,5 +8,17 @@ class forLoop
 			x++;
 
 		println(x & " should be 10");
+
+		bool done = false;
+		int y = 0;
+		while (done == false)
+		{
+			y++;
+			if (y == 10)
+			{
+				done = true;
+			}
+		}
+		println(y & " should be 10");
 	}
 }

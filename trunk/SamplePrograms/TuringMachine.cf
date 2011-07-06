@@ -73,10 +73,66 @@ class Tape
 		{
 			char c = charAt(contents, i);
 			Write(c);
-			MoveLeft();
+			MoveRight();
 		}
 		/* reset the tape to the beginning */
 		current = head;
+	}
+
+	/* Prints out the tape contents from left most to right. */
+	void Debug()
+	{
+		int cellNumber = 0;
+		Cell temp = head;
+		bool done = false;
+
+		/* find the left-most cell */
+		while (done == false)
+		{
+			if (temp.HasLeft())
+			{
+				cellNumber--;
+				temp = temp.left;
+			}
+			else
+			{
+				done = true;
+			}
+		}
+
+		/* loop through all cells again */
+		done = false;
+		while (done == false)
+		{
+			println(cellNumber & ": " & temp.value);
+			if (temp.HasRight())
+			{
+				cellNumber++;
+				temp = temp.right;
+			}
+			else
+			{
+				done = true;
+			}
+		}
+	}
+}
+
+class Transition
+{
+	int currentState;
+	char currentSymbol;
+	int targetState;
+	char targetSymbol;
+	char action;
+	
+	Transition(int cState, char cSymbol, int tState, char tSymbol, char a)
+	{
+		currentState = cState;
+		currentSymbol = cSymbol;
+		targetState = tState;
+		targetSymbol = tSymbol;
+		action = a;
 	}
 }
 
@@ -98,7 +154,11 @@ class program
 {
 	void main(string[] args)
 	{
-		string input = args[0];
+		Tape t = new Tape('\u005f');
+		t.Init("Will loves Cindy!!");
+		t.Debug();
+
+		/*string input = args[0];
 		println("Input file: " & input);
 
 		Cell c = new Cell('\u005f');
@@ -116,6 +176,6 @@ class program
 			println("incorrect");
 		}
 
-		println("c.right.value = " & c.right.value);
+		println("c.right.value = " & c.right.value);*/
 	}
 }
