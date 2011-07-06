@@ -526,8 +526,9 @@ namespace ILCodeGen
             //evaluate expression
             n.Expression.Visit(this);
 
-            //negate it
-            _gen.Emit(OpCodes.Not);
+            //compare it with 0 to negate
+            _gen.Emit(OpCodes.Ldc_I4_0);
+            _gen.Emit(OpCodes.Ceq);
         }
 
         public override void VisitIncrement(ASTIncrement n)
@@ -629,8 +630,9 @@ namespace ILCodeGen
             {
                 _gen.Emit(OpCodes.Ceq);
             }
-
-            _gen.Emit(OpCodes.Not);
+            //compare it with 0 to negate
+            _gen.Emit(OpCodes.Ldc_I4_0);
+            _gen.Emit(OpCodes.Ceq);
         }
 
         #endregion
