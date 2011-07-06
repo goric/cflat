@@ -1,0 +1,37 @@
+# A line beginning with a pound (#) indicates a comment.
+# The Turing Machine file format will include all of the following information on consecutive lines of a file:
+# Line 0) The number of states in the machine. States are zero based. Example: For 10 states, numbered 0 - 9: 10
+# Line 1) The tape alphabet, all characters consecutively, without duplicates. Example: For the language {a, b}: ab
+# Line 2) The blank symbol, single character. Example: _
+# Line 3) The input symbols, all characters consecutively. Example: For the language {a, b, x, |}: abx|
+# Line 4) The initial state number. Example: 0
+# Line 5) The final state number. Example: 8
+# All lines > 5 will be transition functions of the form (state,symbol) -> (state,symbol) action
+9
+01|
+_
+01|x_
+1
+0
+(1,1) -> (3,x) R
+(1,0) -> (2,x) R
+(1,|) -> (8,|) R
+(2,0) -> (2,0) R
+(2,1) -> (2,1) R
+(2,|) -> (4,|) R
+(3,0) -> (3,0) R
+(3,1) -> (3,1) R
+(3,|) -> (5,|) R
+(4,x) -> (4,x) R 
+(4,0) -> (6,x) L 
+(5,x) -> (5,x) R
+(5,1) -> (6,x) L
+(6,0) -> (6,0) L
+(6,1) -> (6,1) L
+(6,x) -> (6,x) L
+(6,|) -> (7,|) L
+(7,0) -> (7,0) L
+(7,1) -> (7,1) L
+(7,x) -> (1,x) R
+(8,x) -> (8,x) R
+(8,_) -> (0,_) H

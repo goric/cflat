@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SamplePrograms", "SamplePro
 		SamplePrograms\AccessModifiers.cf = SamplePrograms\AccessModifiers.cf
 		SamplePrograms\Arith.cf = SamplePrograms\Arith.cf
 		SamplePrograms\Classes.cf = SamplePrograms\Classes.cf
+		SamplePrograms\Die.cf = SamplePrograms\Die.cf
 		SamplePrograms\ForLoops.cf = SamplePrograms\ForLoops.cf
 		SamplePrograms\Functions.cf = SamplePrograms\Functions.cf
 		SamplePrograms\GuessingGame-Int.cf = SamplePrograms\GuessingGame-Int.cf

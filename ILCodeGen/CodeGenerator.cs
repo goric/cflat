@@ -518,12 +518,7 @@ namespace ILCodeGen
 
         public override void VisitNeg(ASTNegative n)
         {
-            _gen.Emit(OpCodes.Ldc_I4_0);
-
-            n.Expression.Visit(this);
-
-            _gen.Emit(OpCodes.Sub);
-
+            throw new NotImplementedException();
         }
 
         public override void VisitNot(ASTNot n)

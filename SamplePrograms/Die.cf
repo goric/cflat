@@ -1,0 +1,9 @@
+class program
+{
+	void main()
+	{
+		println("hello");
+		die("this should exit the application");
+		println("world");
+	}
+}
