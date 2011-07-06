@@ -35,6 +35,11 @@ namespace ILCodeGen.SystemMethods
             return this.FuncInfo.ReturnType is TypeVoid;
         }
 
+        public virtual bool IsExitStatement
+        {
+            get { return false; }
+        }
+
         public abstract void Emit(ILGenerator gen);        
     }
 }

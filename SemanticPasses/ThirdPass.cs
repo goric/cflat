@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using AbstractSyntaxTree;
 using SemanticAnalysis;
+using ILCodeGen.SystemMethods;
 
 using QUT.Gppg;
 
@@ -13,11 +14,12 @@ namespace CFlat.SemanticPasses
     {
         private TypeFunction _currentMethod;
         private bool _skipNextBlockScope;
+        private List<SystemMethod> _systemMethods;
 
         public ThirdPass(ASTNode treeNode, ScopeManager mgr)
             : base(treeNode, mgr)
         {
-
+            _systemMethods = SystemMethodManager.Methods().ToList();
         }
 
         new public string PassName()
@@ -555,6 +557,10 @@ namespace CFlat.SemanticPasses
                         n.CFlatType = method.ReturnType;
 
                         _lastSeenType = method.ReturnType;
+
+                        //check if we're processing an exit instruction, and if so, this counts as a return for the current block.
+                        if (IsExitMethod(n))
+                            _currentMethod.RegisterReturnStatement();
                     }
                     else
                     {
@@ -999,6 +1005,18 @@ namespace CFlat.SemanticPasses
         private bool IsValidAssignment(CFlatType lhs, CFlatType rhs)
         {
             return ((lhs.IsNumeric && rhs.IsNumeric) || rhs.IsSupertype(lhs));
+        }
+
+        /// <summary>
+        /// Returns whether or not the invoked method "counts" as a return statement.
+        /// This is equivalent to C# where if a method that has a return value throws an exception, its decided
+        /// to return control properly.
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        private bool IsExitMethod(ASTInvoke n)
+        {
+            return _systemMethods.Any(m => m.Name == n.Method && m.IsExitStatement);
         }
 
         #endregion
