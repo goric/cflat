@@ -134,6 +134,124 @@ class Transition
 		targetSymbol = tSymbol;
 		action = a;
 	}
+
+	void Debug()
+	{
+		println("(" & currentState & "," & currentSymbol & ") -> (" & targetState & "," & targetSymbol & ") " & action);
+	}
+}
+
+class TransitionParser
+{
+	char LPAREN;
+	char RPAREN;
+	char SPACE;
+	char COMMA;
+	char HYPHEN;
+	char GT;
+	int index;
+	string line;
+	char[] actions;
+	int maxIndex;
+
+	TransitionParser(string l, char[] a)
+	{
+		LPAREN = '\u0028';
+		RPAREN = '\u0029';
+		SPACE = '\u0020';
+		COMMA = '\u002c';
+		HYPHEN = '\u002d';
+		GT = '\u003e';
+		line = l;
+		actions = a;
+		maxIndex = slen(line) - 1;
+	}
+
+	/* Parses a line of the form: (state,symbol) -> (state,symbol) action */
+	Transition Parse()
+	{
+		Consume(LPAREN);
+		string currState = ReadUntil(COMMA);
+		Consume(COMMA);
+		char currSymbol = Take();
+		/* There's no real need for the extra symbols here, other than human readability. */
+		Consume(RPAREN);
+		Consume(SPACE);
+		Consume(HYPHEN);
+		Consume(GT);
+		Consume(SPACE);
+		Consume(LPAREN);
+		string targetState = ReadUntil(COMMA);
+		Consume(COMMA);
+		char targetSymbol = Take();
+		Consume(RPAREN);
+		Consume(SPACE);
+		char action = Take();
+
+		/* Make sure the action is valid */
+		if (!IsValidAction(action))
+		{
+			die("Invalid transition action. Got: " & action);
+		}
+
+		/* We have the primitives to make a transition, so return it! */
+		Transition t = new Transition(parseInt(currState), currSymbol, parseInt(targetState), targetSymbol, action);
+		return t;
+	}
+
+	/* Advances the index if the current character matches the input */
+	void Consume(char c)
+	{
+		char current = Take();
+		if (current == c)
+		{
+			index++;
+		}
+		else
+		{
+			die("Invalid transition. Expected: " & c & " Got: " & current);
+		}
+	}
+
+	/* Checks string bounds, and returns the current character and advances the index if everything's ok. Otherwise, this will exit the application. */
+	char Take()
+	{
+		if (index > maxIndex)
+		{
+			die("Invalid transition. Unexpected end of line.");
+		}
+		char result = charAt(line, index);
+		index++;
+		return result;
+	}
+
+	/* Concats a string of the characters and stops at the given symbol */
+	string ReadUntil(char stop)
+	{
+		string result = "";
+		char current = Take();
+		while (current != stop)
+		{
+			result = result & current;
+			index++;
+			current = Take();
+		}
+		return result;
+	}
+
+	/* Makes sure the action matches the set of valid actions passed in */
+	bool IsValidAction(char a)
+	{
+		int l = alen(actions);
+		for (int i = 0; i < l; i++)
+		{
+			if (actions[i] == a)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
 class Machine
@@ -144,7 +262,9 @@ class Machine
 	char[] tapeAlphabet;
 	char[] inputAlphabet;
 	char blank;
-	int numStates;
+	int stateCount;
+	/* all of the transitions in the machine */
+	Transition[] transitions;
 
 	/* Characters that correspond to the actions in a transition */
 	char LEFT;
@@ -184,6 +304,43 @@ class Machine
 				lineIndex++;
 			}
 		}
+		int transitionCount = lineIndex - 6;
+		/* loop through the lines again, after we have the number of transitions (it's needed to initialize the array) */
+		ReadTransitions(lines, transitionCount, totalLines);
+	}
+
+	void ReadTransitions(string[] lines, int transitionCount, int totalLines)
+	{
+		transitions = new Transition[transitionCount];
+		/* build a set of characters for the Transition parser */
+		char[] validActions = new char[3];
+		validActions[0] = LEFT;
+		validActions[1] = RIGHT;
+		validActions[2] = HALT;
+		/* loop through the text file again */
+		int lineIndex = 0;
+		int transitionIndex = 0;
+		for (int i = 0; i < totalLines; i++)
+		{
+			/* exclude comments */
+			string currentLine = lines[i];
+			if (lineIndex > 5)
+			{
+				HandleTransition(currentLine, transitionIndex, validActions);
+				transitionIndex++;
+			}
+			char first = charAt(currentLine, 0);
+			if (first != COMMENT)
+			{
+				lineIndex++;
+			}
+		}
+	}
+
+	void HandleTransition(string line, int index, char[] validActions)
+	{
+		TransitionParser parser = new TransitionParser(line, validActions);
+		transitions[index] = parser.Parse();
 	}
 
 	void HandleLine(string line, int index)
@@ -192,7 +349,7 @@ class Machine
 		if (index == 0)
 		{
 			/* the number of states in the machine */
-			numStates = parseInt(line);
+			stateCount = parseInt(line);
 		}
 		else if (index == 1)
 		{
@@ -213,7 +370,7 @@ class Machine
 		{
 			/* initial state */
 			initial = parseInt(line);
-			if (initial >= numStates)
+			if (initial >= stateCount)
 			{
 				die("Input state is not valid. States are zero based, and must be less than the total number of states - 1.");
 			}
@@ -222,14 +379,10 @@ class Machine
 		{
 			/* accepting state */
 			final = parseInt(line);
-			if (final >= numStates)
+			if (final >= stateCount)
 			{
 				die("Final state is not valid. States are zero based, and must be less than the total number of states - 1.");
 			}
-		}
-		else
-		{
-
 		}
 	}
 
@@ -262,7 +415,7 @@ class Machine
 
 	void Debug()
 	{
-		println("Number of states: " & numStates);
+		println("Number of states: " & stateCount);
 		println("Tape Alphabet:");
 		PrintCharArray(tapeAlphabet);
 		println("Blank character: " & blank);
@@ -287,7 +440,7 @@ class program
 		}
 
 		Machine tm = new Machine(args[0]);
-		tm.Debug();
+		/*tm.Debug();*/
 		tm.Run(args[1]);
 
 

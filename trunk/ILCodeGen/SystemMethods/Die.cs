@@ -21,6 +21,10 @@ namespace ILCodeGen.SystemMethods
                 BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof(string) }, null));
             gen.Emit(OpCodes.Ldc_I4_1);
             gen.Emit(OpCodes.Call, typeof(Environment).GetMethod("Exit"));
+            //This is a bit of a hack here, Environment.Exit doesn't count for return statements,
+            //so I'm going to add an exception that never gets thrown. Yeah, this is lame.
+            gen.Emit(OpCodes.Newobj, typeof(Exception).GetConstructor(Type.EmptyTypes));
+            gen.Emit(OpCodes.Throw);
         }
 
         public override bool IsExitStatement
