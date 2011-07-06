@@ -22,5 +22,10 @@ namespace ILCodeGen.SystemMethods
             gen.Emit(OpCodes.Ldc_I4_1);
             gen.Emit(OpCodes.Call, typeof(Environment).GetMethod("Exit"));
         }
+
+        public override bool IsExitStatement
+        {
+            get { return true; }
+        }
     }
 }
