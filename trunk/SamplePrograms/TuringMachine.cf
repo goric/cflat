@@ -141,12 +141,137 @@ class Machine
 	Tape tape;
 	int initial; /* initial state number */
 	int final; /* accepting state number */
-	char[] alphabet;
+	char[] tapeAlphabet;
+	char[] inputAlphabet;
 	char blank;
+	int numStates;
 
-	Machine()
+	/* Characters that correspond to the actions in a transition */
+	char LEFT;
+	char RIGHT;
+	char HALT;
+	char COMMENT;
+
+	Machine(string filePath)
+	{
+		/* Set the characters for L, R, and H */
+		LEFT = '\u004c';
+		RIGHT = '\u0052';
+		HALT = '\u0048';
+		COMMENT = '\u0023';
+
+		/* Parse the input file */
+		Parse(filePath);
+
+		/* more initialization */
+		tape = new Tape(blank);
+	}
+
+	void Parse(string filePath)
+	{
+		string[] lines = readFile(filePath);
+		int totalLines = alen(lines);
+		int lineIndex = 0;
+		for (int i = 0; i < totalLines; i++)
+		{
+			/* check for a comment in the input file */
+			string currentLine = lines[i];
+			char first = charAt(currentLine, 0);
+			if (first != COMMENT)
+			{
+				/* process each line of the file */
+				HandleLine(currentLine, lineIndex);
+				lineIndex++;
+			}
+		}
+	}
+
+	void HandleLine(string line, int index)
+	{
+		/*println(index & ": " & line);*/
+		if (index == 0)
+		{
+			/* the number of states in the machine */
+			numStates = parseInt(line);
+		}
+		else if (index == 1)
+		{
+			/* the tape alphabet */
+			tapeAlphabet = ToCharArray(line);
+		}
+		else if (index == 2)
+		{
+			/* the blank symbol */
+			blank = charAt(line, 0);
+		}
+		else if (index == 3)
+		{
+			/* the input alphabet */
+			inputAlphabet = ToCharArray(line);
+		}
+		else if (index == 4)
+		{
+			/* initial state */
+			initial = parseInt(line);
+			if (initial >= numStates)
+			{
+				die("Input state is not valid. States are zero based, and must be less than the total number of states - 1.");
+			}
+		}
+		else if (index == 5)
+		{
+			/* accepting state */
+			final = parseInt(line);
+			if (final >= numStates)
+			{
+				die("Final state is not valid. States are zero based, and must be less than the total number of states - 1.");
+			}
+		}
+		else
+		{
+
+		}
+	}
+
+	char[] ToCharArray(string source)
+	{
+		int l = slen(source);
+		char[] result = new char[l];
+		for (int i = 0; i < l; i++)
+		{
+			result[i] = charAt(source, i);
+		}
+		return result;
+	}
+
+	void PrintCharArray(char[] a)
+	{
+		string s = "";
+		int l = alen(a);
+		for (int i = 0; i < l; i++)
+		{
+			s = s & a[i];
+		}
+		println(s);
+	}
+
+	void Run(string input)
 	{
 		
+	}
+
+	void Debug()
+	{
+		println("Number of states: " & numStates);
+		println("Tape Alphabet:");
+		PrintCharArray(tapeAlphabet);
+		println("Blank character: " & blank);
+		println("Input Alphabet:");
+		PrintCharArray(inputAlphabet);
+		println("Initial state: " & initial);
+		println("Final state: " & final);
+		println("Tape Contents:");
+		tape.Debug();
 	}
 }	
 
@@ -154,9 +279,21 @@ class program
 {
 	void main(string[] args)
 	{
-		Tape t = new Tape('\u005f');
+		/* command line input should be [file path] [turing machine input] */
+		int argLength = alen(args);
+		if (argLength != 2)
+		{
+			die("Usage: turingmachine.exe [file path] [input]");
+		}
+
+		Machine tm = new Machine(args[0]);
+		tm.Debug();
+		tm.Run(args[1]);
+
+
+		/*Tape t = new Tape('\u005f');
 		t.Init("Will loves Cindy!!");
-		t.Debug();
+		t.Debug();*/
 
 		/*string input = args[0];
 		println("Input file: " & input);

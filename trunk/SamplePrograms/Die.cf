@@ -2,8 +2,14 @@ class program
 {
 	void main()
 	{
-		println("hello");
-		die("this should exit the application");
-		println("world");
+		char c = '\u005c';
+		if (c != '\u0051')
+		{
+			println("correct 4");
+		}
+		else
+		{
+			die("incorrect 4");
+		}
 	}
 }
