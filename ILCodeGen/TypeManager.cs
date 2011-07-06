@@ -101,6 +101,10 @@ namespace ILCodeGen
                 string name = (type as TypeClass).ClassName;
                 return TypeBuilderMap[name].Builder;
             }
+            else if (type is TypeArray)
+            {
+                return LookupCilType(type.BaseType).MakeArrayType();
+            }
             else
                 return type.CilType;
         }
