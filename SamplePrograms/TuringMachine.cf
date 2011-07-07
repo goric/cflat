@@ -446,10 +446,13 @@ class Machine
 	{
 		tape.Init(input);
 		/* debugging */
+		println("Initial tape contents:");
 		tape.Debug();
-		currentState = initial;
 
 		/* Begin processing */
+		currentState = initial;
+		println("Running...");
+
 		bool done = false;
 		while (done == false)
 		{
@@ -558,30 +561,5 @@ class program
 
 		Machine tm = new Machine(args[0]);
 		tm.Run(args[1]);
-
-
-		/*Tape t = new Tape('\u005f');
-		t.Init("Will loves Cindy!!");
-		t.Debug();*/
-
-		/*string input = args[0];
-		println("Input file: " & input);
-
-		Cell c = new Cell('\u005f');
-		println("Cell's value is: " & c.value);
-
-		Cell right = new Cell('\u0061');
-		c.right = right;
-
-		if (c.HasRight())
-		{
-			println("correct");
-		}
-		else
-		{
-			println("incorrect");
-		}
-
-		println("c.right.value = " & c.right.value);*/
 	}
 }
