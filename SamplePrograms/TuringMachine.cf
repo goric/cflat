@@ -42,6 +42,7 @@ class Tape
 		else
 		{
 			Cell temp = new Cell(blank);
+			temp.right = current;
 			current.left = temp;
 			current = temp;
 		}
@@ -56,6 +57,7 @@ class Tape
 		else
 		{
 			Cell temp = new Cell(blank);
+			temp.left = current;
 			current.right = temp;
 			current = temp;
 		}
@@ -443,12 +445,16 @@ class Machine
 	void Run(string input)
 	{
 		tape.Init(input);
+		/* debugging */
+		tape.Debug();
 		currentState = initial;
 
 		/* Begin processing */
 		bool done = false;
 		while (done == false)
 		{
+			/* debugging */
+			println("Current: (" & currentState & "," & tape.Read() & ")");
 			Move m = FindMove();
 			if (m.hasMove)
 			{
@@ -499,6 +505,10 @@ class Machine
 	/* Changes the state, input symbol in the current cell, and moves the tape head if needed. */
 	void ApplyTransition(Transition t)
 	{
+		/* debugging */
+		print("Applying Transition: ");
+		t.Debug();
+
 		currentState = t.targetState;
 		tape.Write(t.targetSymbol);
 		if (t.action == LEFT)

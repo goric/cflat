@@ -154,7 +154,9 @@ namespace ILCodeGen
         {
             //push number of elements
             n.Upper.Visit(this);
-            _gen.Emit(OpCodes.Newarr, _typeManager.LookupCilType(n.Type));
+            Type elementType = _typeManager.LookupCilType(n.Type);
+            _gen.Emit(OpCodes.Newarr, elementType);
+            _lastWalkedType = elementType.MakeArrayType();
         }
 
         /// <summary>
@@ -166,6 +168,7 @@ namespace ILCodeGen
             n.Actuals.Visit(this);
             var info = _typeManager.GetBuilderInfo(n.ClassName);
             _gen.Emit(OpCodes.Newobj, info.ConstructorBuilder.Builder);
+            _lastWalkedType = info.Builder;
         }
 
         public override void VisitReturn(ASTReturn n)
@@ -185,6 +188,8 @@ namespace ILCodeGen
                 n.Actuals.Visit(this);
                 SystemMethod method = SystemMethodManager.Lookup(n.Method);
                 method.Emit(_gen);
+                //store the return type so we can invoke methods and stuff on it.
+                _lastWalkedType = _typeManager.LookupCilType(method.FuncInfo.ReturnType);
             }
             else
             {
@@ -196,6 +201,8 @@ namespace ILCodeGen
                 //find the method to execute on the given class
                 MethodBuilderInfo info = _typeManager.GetMethodBuilderInfo(who.Name, n.Method);
                 _gen.Emit(OpCodes.Callvirt, info.Builder);
+                //store the return type of the method
+                _lastWalkedType = info.Builder.ReturnType;
             }
         }
 
@@ -479,13 +486,15 @@ namespace ILCodeGen
         public override void VisitAnd(ASTAnd n)
         {
             SetupOperands(n);
-
             _gen.Emit(OpCodes.And);
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitOr(ASTOr n)
         {
             SetupOperands(n);
+            _gen.Emit(OpCodes.Or);
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitExponent(ASTExponent n)
@@ -504,6 +513,8 @@ namespace ILCodeGen
             //now call String.Concat
             _gen.Emit(OpCodes.Call, typeof(String).GetMethod("Concat", BindingFlags.Public | BindingFlags.Static,
                null, new Type[] { typeof(object), typeof(object) }, null));
+
+            _lastWalkedType = typeof(string);
         }
 
         private void BoxIfNeeded(CFlatType t)
@@ -529,6 +540,8 @@ namespace ILCodeGen
             //compare it with 0 to negate
             _gen.Emit(OpCodes.Ldc_I4_0);
             _gen.Emit(OpCodes.Ceq);
+
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitIncrement(ASTIncrement n)
@@ -563,6 +576,8 @@ namespace ILCodeGen
             SetupOperands(n);
 
             _gen.Emit(OpCodes.Clt);
+
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitGreater(ASTGreater n)
@@ -570,6 +585,8 @@ namespace ILCodeGen
             SetupOperands(n);
 
             _gen.Emit(OpCodes.Cgt);
+
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitEqual(ASTEqual n)
@@ -586,6 +603,8 @@ namespace ILCodeGen
             {
                 _gen.Emit(OpCodes.Ceq);
             }
+
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitSmallerEqual(ASTSmallerEqual n)
@@ -600,6 +619,8 @@ namespace ILCodeGen
 
             //or them
             _gen.Emit(OpCodes.Or);
+
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitGreaterEqual(ASTGreaterEqual n)
@@ -614,6 +635,8 @@ namespace ILCodeGen
 
             //or them
             _gen.Emit(OpCodes.Or);
+
+            _lastWalkedType = typeof(bool);
         }
 
         public override void VisitNotEqual(ASTNotEqual n)
@@ -633,6 +656,8 @@ namespace ILCodeGen
             //compare it with 0 to negate
             _gen.Emit(OpCodes.Ldc_I4_0);
             _gen.Emit(OpCodes.Ceq);
+
+            _lastWalkedType = typeof(bool);
         }
 
         #endregion
@@ -713,6 +738,8 @@ namespace ILCodeGen
         {
             n.Array.Visit(this);
             n.Index.Visit(this);
+            //store the type of the array elements
+            _lastWalkedType = _typeManager.LookupCilType(n.CFlatType);
 
             if (n.IsLeftHandSide)
                 _assignmentCallback = gen => gen.Emit(n.CFlatType.StoreElementOpCode);
