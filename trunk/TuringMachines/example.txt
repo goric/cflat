@@ -8,7 +8,7 @@
 # Line 5) The final state number. Example: 8
 # All lines > 5 will be transition functions of the form (state,symbol) -> (state,symbol) action
 #
-# This Turing Machine accepts { w#w | w in {0, 1}* }
+# This Turing Machine decides { w#w | w in {0, 1}* }
 9
 01#x_
 _
