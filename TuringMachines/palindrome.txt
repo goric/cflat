@@ -1,4 +1,4 @@
-# This Turing Machine accepts { w | w in {0, 1}* and w is a palindrome }
+# This Turing Machine decides { w | w in {0, 1}* and w is a palindrome }
 8
 01x_
 _
